@@ -11,7 +11,7 @@ function Test-CurrentRol () {
 		if ($scriptPath -match '^irm http(s)?://') {
   
       Write-Host "Ejecutando Archivo_Remoto"
-			$command = "-Command `"irm https://raw.githubusercontent.com/DiegoEli/testScript.ps1 | iex`""
+			$command = "-Command `"irm https://raw.githubusercontent.com/DiegoEli/test-script/main/testScript.ps1 | iex`""
 		} 
     else {
   
