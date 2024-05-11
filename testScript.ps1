@@ -25,6 +25,7 @@ function Test-CurrentRol () {
 		Start-Process -FilePath "wt.exe" -ArgumentList "pwsh $command" -Verb RunAs
 		#exit
 	}
+ 	exit
 }
 
 Clear-Host
