@@ -25,7 +25,7 @@ function Test-CurrentRol () {
 		Start-Process -FilePath "wt.exe" -ArgumentList "pwsh $command" -Verb RunAs
 		#exit
   		#Exit-PSSession
-    		Exit-PSHostProcess
+    		#Exit-PSHostProcess
 	}
  	#exit
 }
@@ -33,6 +33,7 @@ function Test-CurrentRol () {
 Clear-Host
 
 Test-CurrentRol
+exit
 "Test...`nElevo el proceso??"
 
 Get-AppxProvisionedPackage -Online | Format-Table
