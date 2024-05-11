@@ -23,7 +23,7 @@ function Test-CurrentRol () {
 
 		Write-Host "Type Argument -> {$command}"
 		Start-Process -FilePath "wt.exe" -ArgumentList "pwsh $command" -Verb RunAs
-		exit
+		#exit
 	}
 }
 
