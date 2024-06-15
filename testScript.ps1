@@ -1,8 +1,7 @@
 
 # Policy Execution Enable
-#Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted
-#Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-#Set-ExecutionPolicy RemoteSigned
+#Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process
+#Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser
 
 #****************************************************
 #	ABOUT_SCRIPT
@@ -10,8 +9,7 @@
 
 # Show script info
 $WPName = "WinPerf"
-$WPVersion = "v1.49.0"
-# RUTA TEMPORAL
+$WPVersion = "v1.50.3"
 $repositoryPath = "https://raw.githubusercontent.com/DiegoEli/test-script/main/testScript.ps1"
 # RUTA ORIGINAL
 # $repositoryPath = "https://raw.githubusercontent.com/DiegoEli/test-script/main/WinPerf.ps1"
@@ -21,7 +19,7 @@ $repositoryPath = "https://raw.githubusercontent.com/DiegoEli/test-script/main/t
 	Author  : Diego Mendoza(JuanPerez)
 	Github  : https://raw.githubusercontent.com/DiegoEli/test-script/main/WinPerf.ps1
 	Name    : WinPerf
-	Version : 1.49.0
+	Version : 1.50.3
 
 .PARAMETER [Aliases]
     irm = Invoke-RestMethod
@@ -79,6 +77,7 @@ $repositoryPath = "https://raw.githubusercontent.com/DiegoEli/test-script/main/t
 	https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-7.4
 	https://learn.microsoft.com/en-us/dotnet/api/system.security.principal.windowsbuiltinrole?view=net-8.0
 
+	https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies?view=powershell-7.4
 	https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/fsutil-behavior
 	https://learn.microsoft.com/en-us/powershell/module/mmagent/enable-mmagent?view=windowsserver2022-ps
 	https://learn.microsoft.com/en-us/powershell/module/defender/set-mppreference?view=windowsserver2022-ps
@@ -149,6 +148,20 @@ function Invoke-Confirmation {
 	} 
 	else {
 		Invoke-Confirmation $operation
+	}
+}
+
+function Test-WinVersion {
+	param (
+		[scriptblock]$Operation,
+		[int]$OSNumber
+	)
+
+	# $WinOSVersion = (Get-ComputerInfo).OsName
+	$WinOSVersion = (Get-WmiObject -Class Win32_OperatingSystem).Caption
+	
+	if ($WinOSVersion -match "Microsoft Windows $OSNumber") {
+		& $Operation
 	}
 }
 
@@ -278,14 +291,18 @@ $privacyFnList = [ordered]@{
 
 function Set_Privacy_Security () {
 
-	Write-Host "Do you want to Remove [" -NoNewline
-	Write-Host "Folder Gallery" -ForegroundColor Cyan -NoNewline; "]?"
+	Test-WinVersion -Operation {
 
-	Invoke-Confirmation {
-		Remove_Gallery
-	}
-	Write-Host ""
+		Write-Host "Do you want to Remove [" -NoNewline
+		Write-Host "Folder Gallery" -ForegroundColor Cyan -NoNewline; "]?"
+	
+		Invoke-Confirmation {
+			Remove_Gallery
+		}
+		Write-Host ""
 
+	} -OSNumber 11;
+	
 	foreach ($privacyFn in $privacyFnList.Keys) {
 		$privacyFnName = $privacyFnList[$privacyFn]
 
@@ -1063,6 +1080,14 @@ function Set_Scheduled_Task () {
 	}
 }
 
+function Install_Module_Appx {
+
+	Write-Host "PS Module Appx`n--------------"
+	InstallModule "Appx"
+	ActivateModule "Appx"
+	Write-Host ""
+}
+
 #function Remove AppxPackage
 #Get-AppxPackage | Select Name, PackageFullName | Format-List
 function RemoveUserAppx ($appxName) {
@@ -1137,6 +1162,7 @@ $userPackageList = [ordered]@{
 }
 
 function Remove_User_Appx () {
+
 	Write-Host "REMOVE USER APPX`n----------------"
 	foreach ($appxName in $userPackageList.Keys) {
 		$appxId = $userPackageList[$appxName]
@@ -1393,6 +1419,8 @@ $wingetList = [ordered]@{
 	"Python 3.12"                 = "Python.Python.3.12"
 	# "Rustup: toolchain"           = "Rustlang.Rustup"
 	"Rust (MSVC)"                 = "Rustlang.Rust.MSVC"                   # (v1.78.0)
+	"7-Zip"                       = "7zip.7zip"
+	"WinRAR"                      = "RARLab.WinRAR"
 	"Box Desktop"                 = "Box.Box"
 	"MEGA Desktop"                = "Mega.MEGASync"
 	"Google Drive"                = "Google.GoogleDrive"
@@ -1602,7 +1630,11 @@ function Download_Tools () {
 	}
 }
 
-function Get-StatusValue ($trimString) {
+function Get-StatusValue {
+	param (
+		[string]$trimString
+	)
+	
 	if ($trimString -match "DisableDeleteNotify = 1") {
 		return 1
 	} 
@@ -1965,7 +1997,7 @@ function Test_FileContent {
 
 	if (!($fileContent -match [regex]::escape($valueToCompare))) {
 
-		Write-Host "String not found, Adding..." -ForegroundColor Yellow
+		Write-Host "String not found, Adding" -ForegroundColor Yellow
 		& $addContent $valueToAdd
 	}
 }
@@ -2032,7 +2064,14 @@ function Install_Prompt_Shell {
 	# Instalar Oh-My-Posh en la terminal
 	InstallApp "JanDeDobbeleer.OhMyPosh" winget
 	Write-Host ""
-	
+
+	# $themeName = Get-PoshTheme
+	$initPrompt = 'oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH\' + $themeName + '.omp.json"'
+	$null = Invoke-Expression $initPrompt
+
+	# Iniciar Oh-My-Posh en la terminal
+	Write-Host "App [JanDeDobbeleer.OhMyPosh] Initializing...`n$initPrompt`n"
+
 	$env:POSH_THEMES_PATH_TEMP = $env:POSH_THEMES_PATH -replace '\\', '/'
 	# $themeName = 'stelbent.minimal'
 	$loadPrompt = "load(io.popen('oh-my-posh.exe --config=`"$env:POSH_THEMES_PATH_TEMP/$themeName.omp.json`" --init --shell cmd'):read(`"*a`"))()"
@@ -2499,6 +2538,7 @@ function Invoke-MainMenu () {
 		}
 		3 {
 			Clear-Host
+			Test-WinVersion -Operation { Install_Module_Appx } -OSNumber 10;
 			Invoke-SubMenu3
 			Break
 		}
@@ -2551,6 +2591,23 @@ function Invoke-MainMenu () {
 #	MAIN_FUNCTION
 #****************************************************
 
+function Get-CommandType {
+	param (
+		[string]$scriptPath
+	)
+
+	if ($scriptPath -match "^C:\.*") {
+			
+		Write-Host " -Ejecutando Archivo_Local"
+		return "-File `"$scriptPath`""
+	} 
+	else {
+		
+		Write-Host " -Ejecutando Archivo_Remoto"
+		return "-Command `"irm $repositoryPath | iex`""
+	}
+}
+
 # Test Rol Admin
 function Test-CurrentRol {
 	$userCurrent = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent())
@@ -2559,20 +2616,12 @@ function Test-CurrentRol {
 	$adminCondition = $userCurrent.IsInRole($roleCurrent)
 	if (!$adminCondition) {
 
-		Write-Host " -The script requires to run as Administrator..." -ForegroundColor Yellow
+		Write-Host " -The script requires to run as Administrator" -ForegroundColor Yellow
+
 		$scriptPath = $PSCommandPath
-		if ($scriptPath -match "^C:\.*" ) {
-			
-			Write-Host " -Ejecutando Archivo_Local"
-			$command = "-File `"$scriptPath`""
-		} 
-		else {
-			
-			Write-Host " -Ejecutando Archivo_Remoto"
-			$command = "-Command `"irm $repositoryPath | iex`""
-		}
-		
+		$command = Get-CommandType $scriptPath
 		Write-Host " -Type Argument -> {$command}"
+		
 		Start-Process -FilePath "wt.exe" -ArgumentList "pwsh $command" -Verb RunAs
 		Start-Sleep -Milliseconds 3000
 		exit
@@ -2593,7 +2642,7 @@ function Test-WingetVersion {
 		
 		if (!$wingetCondition) {
 
-			Write-Host " -Installing the package manager Winget..." -ForegroundColor Yellow
+			Write-Host " -Installing the package manager Winget" -ForegroundColor Yellow
 			Invoke-WebRequest -Uri $packageUrl -OutFile $packageFile
 			Add-AppxPackage -Path $packageFile
 		}
@@ -2613,7 +2662,7 @@ function Test-ChocoVersion {
 
 		if (!$chocoCondition) {
 
-			Write-Host " -Installing the package manager Chocolatey..." -ForegroundColor Yellow
+			Write-Host " -Installing the package manager Chocolatey" -ForegroundColor Yellow
 			InstallApp $chocoPackage winget
 		}
 	}
@@ -2627,7 +2676,7 @@ function Test-ChocoFeature {
 	$featureCondition = $featureList -match $featureCurrent
 	if (!$featureCondition) {
 
-		Write-Host " -Enabling feature allowGlobalConfirmation..." -ForegroundColor Yellow
+		Write-Host " -Enabling feature allowGlobalConfirmation" -ForegroundColor Yellow
 		choco feature enable -n allowGlobalConfirmation
 	}
 }
@@ -2658,4 +2707,5 @@ Invoke-MainMenu
 Start-Sleep -Milliseconds 3000
 
 # Policy Execution Restart
-#Set-ExecutionPolicy -Scope Process -ExecutionPolicy Undefined
+#Set-ExecutionPolicy -ExecutionPolicy Undefined -Scope CurrentUser
+#Set-ExecutionPolicy -ExecutionPolicy Undefined -Scope Process
