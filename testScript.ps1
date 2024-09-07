@@ -1,7 +1,7 @@
 
 # Policy Execution Enable
-#Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process
-#Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser
+#Set-ExecutionPolicy -ExecutionPolicy "Unrestricted" -Scope "Process" -Force
+#Set-ExecutionPolicy -ExecutionPolicy "Unrestricted" -Scope "CurrentUser" -Force
 
 #****************************************************
 #	ABOUT_SCRIPT
@@ -9,9 +9,8 @@
 
 # Show script info
 $WPName = "WinPerf"
-$WPVersion = "v1.50.3"
+$WPVersion = "v1.50.5"
 $repositoryPath = "https://raw.githubusercontent.com/DiegoEli/test-script/main/testScript.ps1"
-# RUTA ORIGINAL
 # $repositoryPath = "https://raw.githubusercontent.com/DiegoEli/test-script/main/WinPerf.ps1"
 
 <#
@@ -30,24 +29,7 @@ $repositoryPath = "https://raw.githubusercontent.com/DiegoEli/test-script/main/t
 	-------------
     Since GitHub:
     irm https://raw.githubusercontent.com/DiegoEli/test-script/main/WinPerf.ps1 | iex
-
-	-------------
-    Since GitLab:
-    irm https://gitlab.com/DiegoEli/test-script/-/raw/main/WinPerf.ps1?ref_type=heads | iex
-
-.FUNCTIONALITY
-	# Skip LockScreen
-	$path_1 = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows'
-	$item = 'Personalization'
-
-	New-Item -Path $path_1 -Name $item -Force
-
-	$path_2 = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization'
-	$property = 'NoLockScreen'
-	$value = 1
-
-	New-ItemProperty -Path $path_2 -Name $property -Value $value -PropertyType DWORD -Force
-
+	
 .FUNCTIONALITY
 	# Customizar Folder in FileExplorer
 	$path_1 = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer'
@@ -132,7 +114,28 @@ function Test_Property {
 	}
 }
 
-# Mensaje de confirmacion global
+# function Set Option Status
+function Set_OptionStatus {
+	param (
+		[string]$path,
+		[string]$property,
+		[string]$value
+	)
+
+	$currentValue = (Get-ItemProperty -Path $path).$property
+
+	if ($currentValue -ne $value) {
+
+		"Setting value [$property], Changing..."
+		Set-ItemProperty -Path $path -Name $property -Value $value -Force
+	} 
+	else {
+		"Value [$property] remains Changed"
+	}
+}
+
+<# function Deprecated
+#Mensaje de confirmacion global
 function Invoke-Confirmation {
 	param (
 		[scriptblock]$operation
@@ -148,6 +151,23 @@ function Invoke-Confirmation {
 	} 
 	else {
 		Invoke-Confirmation $operation
+	}
+}
+#>
+function Add-AppSelection ($valueName) {
+
+	$opt = Read-Host "[Y] Yes [N] No";
+
+	if ($opt -eq "y") {
+		Write-Host "Add selection to List!"
+		return $valueName
+	} 
+	elseif ($opt -eq "n") {
+		Write-Host "Operation cancelled." -ForegroundColor Red
+		return $null
+	} 
+	else {
+		Add-AppSelection $valueName
 	}
 }
 
@@ -166,18 +186,20 @@ function Test-WinVersion {
 }
 
 # Modification 1.0: Remove Folder Gallery
-function Remove_Gallery {
-	$pathGallery = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Desktop\NameSpace_41040327'
+function Remove_GalleryIcon {
+	$pathFolder = 'HKCU:\Software\Classes\CLSID'
 	$item = '{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}'
 
-	if (Test-Path -Path "$pathGallery\$item") {
+	Test_Item $pathFolder $item
 
-		"Removing Folder [Gallery] from File Explorer."
-		Remove-Item -Path "$pathGallery\$item" -Force
-	}
-	else {
-		"Error removing Folder [Gallery], Key not found."
-	}
+	$pathProperty = "HKCU:\Software\Classes\CLSID\$item"
+	$property = 'System.IsPinnedToNamespaceTree'
+	$value = 0
+
+	Test_Property $pathProperty $property
+	
+	# Change value option
+	Set_OptionStatus $pathProperty $property $value
 }
 
 # Modification 1.1: Show CortanaResults in Windows Search
@@ -187,21 +209,14 @@ function Disable_CortanaResults {
 
 	Test_Item $pathFolder $item
 
-	$pathProperty = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Search'
+	$pathProperty = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\$item"
 	$property = 'AllowCortana'
-	$allCortana = (Get-ItemProperty -Path $pathProperty).$property
 	$value = 0
 
 	Test_Property $pathProperty $property
-		
-	if ($allCortana -ne $value) {
 
-		"Setting feature [$property] to Disabled."
-		Set-ItemProperty -Path $pathProperty -Name $property -Value $value -Force
-	} 
-	else {
-		"Feature [$property] has already been Disabled."
-	}
+	# Change value option
+	Set_OptionStatus $pathProperty $property $value
 }
 
 # Modification 1.2: Show WebResults in Windows Search
@@ -209,44 +224,44 @@ function Disable_WebResults {
 	$pathWebResults = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search'
 	$property1 = 'BingSearchEnabled'
 	$property2 = 'CortanaConsent'
-	$BingSearch = (Get-ItemProperty -Path $pathWebResults).$property1
-	$CortanaSearch = (Get-ItemProperty -Path $pathWebResults).$property2
 	$value = 0
 
 	Test_Property $pathWebResults $property1
 	Test_Property $pathWebResults $property2
 
-	if (($BingSearch -ne $value) -or ($CortanaSearch -ne $value)) {
+	# Change value option
+	Set_OptionStatus $pathWebResults $property1 $value
+	Set_OptionStatus $pathWebResults $property2 $value
+}
 
-		"Setting feature [$property1] to Disabled."
-		Set-ItemProperty -Path $pathWebResults -Name $property1 -Value $value -Force
-		
-		"Setting feature [$property2] to Disabled."
-		Set-ItemProperty -Path $pathWebResults -Name $property2 -Value $value -Force
-	} 
-	else {
-		"Feature [$property1] has already been Disabled."
-		"Feature [$property2] has already been Disabled."
-	}
+function Disable_PersonalizeAds {
+	$pathFolder = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows'
+	$item = 'AdvertisingInfo'
+
+	Test_Item $pathFolder $item
+
+	$pathProperty = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\$item"
+	$property = 'DisabledByGroupPolicy'
+	$value = 1
+
+	Test_Property $pathProperty $property
+
+	# Change value option
+	Set_OptionStatus $pathProperty $property $value
 }
 
 # Modification 1.3: DiagnosticData
 function Disable_DiagnosticData {
-	$pathTelemetry = 'HKLM:\Software\Policies\Microsoft\Windows\DataCollection'
+	$pathTelemetry1 = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection'
+	$pathTelemetry2 = 'HKLM:\Software\Policies\Microsoft\Windows\DataCollection'
 	$property = 'AllowTelemetry'
-	$telemetry = (Get-ItemProperty -Path $pathTelemetry).$property
 	$value = 0
 
-	Test_Property $pathTelemetry $property
+	Test_Property $pathTelemetry2 $property
 
-	if ($telemetry -ne $value) {
-
-		"Setting option [$property] to Disabled."
-		Set-ItemProperty -Path $pathTelemetry -Name $property -Value $value -Force
-	} 
-	else {
-		"Option [$property] has already been Disabled."
-	}
+	# Change value option
+	Set_OptionStatus $pathTelemetry1 $property $value
+	Set_OptionStatus $pathTelemetry2 $property $value
 }
 
 # Modification
@@ -255,121 +270,95 @@ function Disable_ActivityHistory {
 	$property1 = 'EnableActivityFeed'
 	$property2 = 'PublishUserActivities'
 	$property3 = 'UploadUserActivities'
-    $EnableActFeed = (Get-ItemProperty -Path $pathActivityHistory).$property1
-    $PublishUserAct = (Get-ItemProperty -Path $pathActivityHistory).$property2
-    $UploadUserAct = (Get-ItemProperty -Path $pathActivityHistory).$property3
 	$value = 0
 	
 	Test_Property $pathActivityHistory $property1
 	Test_Property $pathActivityHistory $property2
 	Test_Property $pathActivityHistory $property3
 
-    if (($EnableActFeed -ne $value) -or ($PublishUserAct -ne $value) -or ($UploadUserAct -ne $value)) {
-		
-		"Setting option [$property1] to Disabled."
-		Set-ItemProperty -Path $pathActivityHistory -Name $property1 -Value $value -Force
-
-		"Setting option [$property2] to Disabled."
-		Set-ItemProperty -Path $pathActivityHistory -Name $property2 -Value $value -Force
-
-		"Setting option [$property3] to Disabled."
-		Set-ItemProperty -Path $pathActivityHistory -Name $property3 -Value $value -Force
-    }
-    else {
-		"Option [$property1] has already been Disabled."
-		"Option [$property2] has already been Disabled."
-		"Option [$property3] has already been Disabled."
-    }
+	# Change value option
+	Set_OptionStatus $pathActivityHistory $property1 $value
+	Set_OptionStatus $pathActivityHistory $property2 $value
+	Set_OptionStatus $pathActivityHistory $property3 $value
 }
 
 $privacyFnList = [ordered]@{
-	"Cortana Results"  = "Disable_CortanaResults"
-	"Web Results"      = "Disable_WebResults"
-	"Diagnostic Data"  = "Disable_DiagnosticData"
-	"Activity History" = "Disable_ActivityHistory"
+	"Remove Gallery Folder"    = "Remove_GalleryIcon"
+	"Disable Cortana Results"  = "Disable_CortanaResults"
+	"Disable Web Results"      = "Disable_WebResults"
+	"Disable Personalize Ads"  = "Disable_PersonalizeAds"
+	"Disable Diagnostic Data"  = "Disable_DiagnosticData"
+	"Disable Activity History" = "Disable_ActivityHistory"
 }
 
 function Set_Privacy_Security () {
 
-	Test-WinVersion -Operation {
-
-		Write-Host "Do you want to Remove [" -NoNewline
-		Write-Host "Folder Gallery" -ForegroundColor Cyan -NoNewline; "]?"
-	
-		Invoke-Confirmation {
-			Remove_Gallery
-		}
-		Write-Host ""
-
-	} -OSNumber 11;
-	
+	$ListToChanged = @()
 	foreach ($privacyFn in $privacyFnList.Keys) {
-		$privacyFnName = $privacyFnList[$privacyFn]
 
-		Write-Host "Do you want to Disable [" -NoNewline
+		Write-Host "Do you want to Apply [" -NoNewline
 		Write-Host $privacyFn -ForegroundColor Cyan -NoNewline; "]?"
 
-		Invoke-Confirmation {
-			& $privacyFnName
+		$selectedApp = Add-AppSelection $privacyFnList[$privacyFn]
+		if ($selectedApp) {
+			$ListToChanged += $selectedApp
 		}
 		Write-Host ""
 	}
+	
+	"*******************************"
+	"SETTING SELECTED PRIVACY TWEAKS"
+	"*******************************"
+	foreach ($operation in $ListToChanged) {
+		& $operation
+	}
+	Write-Host ""
 }
 
 # Modification 1.4: Update Type in Windows
 function Set_UpdateType {
 	$pathFolder = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows'
 	$item1 = 'WindowsUpdate'
-	$pathSubFolder = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate'
+	$pathSubFolder = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\$item1"
 	$item2 = 'AU'
 	
 	Test_Item $pathFolder $item1
 	Test_Item $pathSubFolder $item2
 	
-	$pathUpdateType = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU'
+	$pathUpdateType = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\$item1\$item2"
 	$property1 = 'AUOptions'
 	$property2 = 'NoAutoUpdate'
-	$AUOptions = (Get-ItemProperty -Path $pathUpdateType).$property1
-	$valueAUO = 2 #$valueNAU = 2; status = Notificar
-	$NoAutoUpdate = (Get-ItemProperty -Path $pathUpdateType).$property2
-	$valueNAU = 0 #$valueNAU = 1; status = Disabled
+	$valueAUO = 2 #$valueAUO = 2 ; status = Notificar
+	$valueNAU = 1 #$valueNAU = 1 ; status = Disabled
 
 	Test_Property $pathUpdateType $property1
 	Test_Property $pathUpdateType $property2
 
-	if (($AUOptions -ne $valueAUO) -or ($NoAutoUpdate -ne $valueNAU)) {
-
-		"Setting Group Policy [$property1] to Manual."
-		Set-ItemProperty -Path $pathUpdateType -Name $property1 -Value $valueAUO -Force
-		
-		"Setting Group Policy [$property2] to Enabled."
-		Set-ItemProperty -Path $pathUpdateType -Name $property2 -Value $valueNAU -Force
-	} 
-	else {
-		"Group Policy [$property1] has already been Manual."
-		"Group Policy [$property2] has already been Enabled."
-	}
+	# Change value option
+	Set_OptionStatus $pathUpdateType $property1 $valueAUO
+	Set_OptionStatus $pathUpdateType $property2 $valueNAU
 }
 
 # Modification
 function Set_PreliminaryUpdates {
 	$pathPreliminary = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate'
 	$property = 'ManagePreviewBuildsPolicyValue'
-	$preliminary = (Get-ItemProperty -Path $pathPreliminary).$property
 	$value = 1
 
 	Test_Property $pathPreliminary $property
 
-	if ($preliminary -ne $value) {
-
-		"Setting Group Policy [$property] to Disabled."
-		Set-ItemProperty -Path $pathPreliminary -Name $property -Value $value -Force
-	} 
-	else {
-		"Group Policy [$property] has already been Disabled."
-	}
+	# Change value option
+	Set_OptionStatus $pathPreliminary $property $value
 }
 
+function Set_GetLatestUpdates {
+	$latestUpdatesPath = 'HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings'
+	$property = 'IsContinuousInnovationOptedIn'
+	$value = 0
+
+	# Change value option
+	Set_OptionStatus $latestUpdatesPath $property $value
+}
 # Modification
 function Set_UpdateOtherProduct {
 	$MUSM = New-Object -ComObject "Microsoft.Update.ServiceManager"
@@ -392,17 +381,10 @@ function Set_DownloadsOtherPCs {
 	$HKU = "Registry::HKEY_USERS"
 	$pathDownloadsPC = "$HKU\S-1-5-20\Software\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Settings"
 	$property = 'DownloadMode'
-	$downloadsPC = (Get-ItemProperty -Path $pathDownloadsPC).$property
 	$value = 0
 
-	if ($downloadsPC -ne $value) {
-
-		"Setting option [$property] to Disabled."
-		Set-ItemProperty -Path $pathDownloadsPC -Name $property -Value $value -Force
-	} 
-	else {
-		"Option [$property] has already been Disabled."
-	}
+	# Change value option
+	Set_OptionStatus $pathDownloadsPC $property $value
 }
 
 # Modification
@@ -412,26 +394,20 @@ function Set_LimitBandwidthUpdates {
 
 	Test_Item $folderPath $item
 
-	$bandwidthPath = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Psched'
+	$bandwidthPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\$item"
 	$property = 'NonBestEffortLimit'
-	$bandwidth = (Get-ItemProperty -Path $bandwidthPath).$property
 	$value = 0
 
 	Test_Property $bandwidthPath $property
 
-	if ($bandwidth -ne $value) {
-
-		"Setting Group Policy [$property] to Disabled."
-		Set-ItemProperty -Path $bandwidthPath -Name $property -Value $value -Force
-	} 
-	else {
-		"Group Policy [$property] has already been Disabled."
-	}
+	# Change value option
+	Set_OptionStatus $bandwidthPath $property $value
 }
 
 $updateFnList = [ordered]@{
 	"Automatic Updates"          = "Set_UpdateType"
 	"Preliminary Updates"        = "Set_PreliminaryUpdates"
+	"Get the latest Updates"     = "Set_GetLatestUpdates"
 	"Updates for other products" = "Set_UpdateOtherProduct"
 	"Downloads from other PCs"   = "Set_DownloadsOtherPCs"
 	"Limit reservable bandwidth" = "Set_LimitBandwidthUpdates"
@@ -439,197 +415,146 @@ $updateFnList = [ordered]@{
 
 function Set_Update_Behavior () {
 
+	$ListToChanged = @()
 	foreach ($updateFn in $updateFnList.Keys) {
-		$updateFnName = $updateFnList[$updateFn]
 
 		Write-Host "Do you want to Disable [" -NoNewline
 		Write-Host $updateFn -ForegroundColor Cyan -NoNewline; "]?"
 
-		Invoke-Confirmation {
-			& $updateFnName
+		$selectedApp = Add-AppSelection $updateFnList[$updateFn]
+		if ($selectedApp) {
+			$ListToChanged += $selectedApp
 		}
 		Write-Host ""
 	}
+
+	"********************************"
+	"SETTING SELECTED UPDATE BEHAVIOR"
+	"********************************"
+	foreach ($operation in $ListToChanged) {
+		& $operation
+	}
+	Write-Host ""
 }
 
-# function Test Status Color
+<# function Deprecated
+# Test Status Color
 function Test_StatusColor {
 	param (
 		[string]$status
 	)
-
 	$color = ($status -eq '[OFF]') ? $('Red') : $('Cyan')
 	Write-Host $status -ForegroundColor $color
 }
-
-# function Set Option Status
-function Set_OptionStatus {
-	param (
-		[string]$path,
-		[string]$property,
-		[string]$value
-	)
-
-	$currentValue = (Get-ItemProperty -Path $path).$property
-
-	if ($currentValue -ne $value) {
-
-		"Option [`$property] has been `$status, Cambiando..."
-		# Set-ItemProperty -Path $path -Name $property -Value $value -Force
-	} 
-	else {
-		"Option [`$property] remains `$status, Ya fue cambiado"
-	}
-}
+#>
 
 # Modification 2.1: Configure netplwiz in Windows
-function Set_Opt_Netplwiz {
+function Opt_Netplwiz {
 	$pathNetplwiz = 'HKLM:\Software\Microsoft\Windows NT\CurrentVersion\PasswordLess\Device'
 	$property = 'DevicePasswordLessBuildVersion'
-	$netplwiz = (Get-ItemProperty -Path $pathNetplwiz).$property
 	$value = 0
-
-	$status = ($netplwiz -ne $value) ? $('[OFF]') : $('[ON]')
-
-	Write-Host "[+] Netplwiz                  " -NoNewline
-	Test_StatusColor $status
-	Set_OptionStatus $pathNetplwiz $property $value
+	
+	Write-Host "[+] Netplwiz                  "
 	#"Netplwiz has been Enabled"
+	Set_OptionStatus $pathNetplwiz $property $value
 }
 
 # Modification 2.2: Configure fastStartup in Windows
-function Set_Opt_FastStartup {
+function Opt_FastStartup {
 	$pathFastStartup = 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power'
 	$property = 'HiberbootEnabled'
-	$fastStartup = (Get-ItemProperty -Path $pathFastStartup).$property
 	$value = 0
 
-	$status = ($fastStartup -ne $value) ? $('[ON]') : $('[OFF]')
-
-	Write-Host "[+] Fast Startup              " -NoNewline
-	Test_StatusColor $status
-	Set_OptionStatus $pathFastStartup $property $value
+	Write-Host "[+] Fast Startup              "
 	#"FastStartup has been Disabled"
+	Set_OptionStatus $pathFastStartup $property $value
 }
 
 # Modification 1: StorageSense in Windows(revisar si existe)
-function Set_Opt_StorageSense {
+function Opt_StorageSense {
 	$pathStorageSense = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy'
 	$property = '01'
-	$storageSense = (Get-ItemProperty -Path $pathStorageSense).$property
 	$value = 0
 
-	$status = ($storageSense -ne $value) ? $('[ON]') : $('[OFF]')
-
-	Write-Host "[+] Storage Sense             " -NoNewline
-	Test_StatusColor $status
-	Set_OptionStatus $pathStorageSense $property $value
+	Write-Host "[+] Storage Sense             "
 	#"StorageSense has been Disabled"
+	Set_OptionStatus $pathStorageSense $property $value
 }
 
 # Modification 1: Snap in Windows
-function Set_Opt_SnapSuggest {
+function Opt_SnapSuggest {
 	$pathSnapSuggest = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
 	$property = 'SnapAssist'
-	$snapSuggest = (Get-ItemProperty -Path $pathSnapSuggest).$property
 	$value = 0
 
-	$status = ($snapSuggest -ne $value) ? $('[ON]') : $('[OFF]')
-
-	Write-Host "[+] Suggest Next Snap         " -NoNewline
-	Test_StatusColor $status
-	Set_OptionStatus $pathSnapSuggest $property $value
+	Write-Host "[+] Suggest Next Snap         "
 	#"SnapSuggest has been Disabled"
+	Set_OptionStatus $pathSnapSuggest $property $value
 }
 
 # Modification 1: Show file extensions
-function Set_Opt_ShowFileExtensions {
-    $pathFileExt = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+function Opt_ShowFileExtensions {
+	$pathFileExt = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
 	$property = 'HideFileExt'
-    $fileExt = (Get-ItemProperty -Path $pathFileExt).$property
 	$value = 0
 
-	$status = ($fileExt -ne $value) ? $('[OFF]') : $('[ON]')
-
-	Write-Host "[+] Show File Extensions      " -NoNewline
-	Test_StatusColor $status
-	Set_OptionStatus $pathFileExt $property $value
+	Write-Host "[+] Show File Extensions      "
 	#"Show FileExtensions has been Enabled"
+	Set_OptionStatus $pathFileExt $property $value
 }
 
 # Modification: Show hidden files and folders
-function Set_Opt_ShowHiddenFiFo {
-    $pathHiddenFiFo = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+function Opt_ShowHiddenFiFo {
+	$pathHiddenFiFo = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
 	$property = 'Hidden'
-    $hiddenFiFo = (Get-ItemProperty -Path $pathHiddenFiFo).$property
 	$value = 1
 
-	$status = ($hiddenFiFo -ne $value) ? $('[OFF]') : $('[ON]')
-
-	Write-Host "[+] Show Hidden FilesFolders  " -NoNewline
-	Test_StatusColor $status
-	Set_OptionStatus $pathHiddenFiFo $property $value
+	Write-Host "[+] Show Hidden FilesFolders  "
 	#"Show HiddenFilesFolders has been Enabled"
+	Set_OptionStatus $pathHiddenFiFo $property $value
 }
 
 # Modification
-function Set_Opt_ShowSyncProvider {
-    $pathSyncProvider = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+function Opt_ShowSyncProvider {
+	$pathSyncProvider = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
 	$property = 'ShowSyncProviderNotifications'
-    $syncProvider = (Get-ItemProperty -Path $pathSyncProvider).$property
 	$value = 0
 
-	$status = ($syncProvider -ne $value) ? $('[ON]') : $('[OFF]')
-	
-	Write-Host "[+] Show Sync Provider        " -NoNewline
-	Test_StatusColor $status
-	Set_OptionStatus $pathSyncProvider $property $value
+	Write-Host "[+] Show Sync Provider        "
 	#"Show SyncProvider has been Disabled"
+	Set_OptionStatus $pathSyncProvider $property $value
 }
 
 # Modification 2.0: End Task in Windows
-function Set_Opt_ShowEndTask {
-    $pathEndTask = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings'
+function Opt_ShowEndTask {
+	$pathEndTask = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings'
 	$property = 'TaskbarEndTask'
-    $endTask = (Get-ItemProperty -Path $pathEndTask).$property
 	$value = 1
 
-	$status = ($endTask -ne $value) ? $('[OFF]') : $('[ON]')
-
-	Write-Host "[+] Enable End Task           " -NoNewline
-	Test_StatusColor $status
+	Write-Host "[+] Enable End Task           "
 	#"Show EndTask has been Enabled"
 	Set_OptionStatus $pathEndTask $property $value
 }
 
 # Modification 0: Command Sudo in Windows
-function Set_Opt_SudoCommand {
-	$sudoCommandPath = '---'
-	$property = '---'
-	$sudoCommand = (Get-ItemProperty -Path $sudoCommandPath).$property
-	$value = #
+function Opt_SudoCommand {
+	$sudoCommandPath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Sudo'
+	$property = 'Enabled'
+	$value = 3
 
-	$status = ($sudoCommand -ne $value) ? $('[OFF]') : $('[ON]')
-
-	Write-Host "[+] Enable Sudo Command       " -NoNewline
-	Test_StatusColor $status; "[No disponible... :v]"
+	Write-Host "[+] Enable Sudo Command       "
+	# Option change value
 	Set_OptionStatus $sudoCommandPath $property $value
-
 }
 
 # Modification 0: Verificar el modo oscuro
-function Set_Opt_DarkMode {
+function Opt_DarkMode {
 	$pathDarkModeAll = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize'
 	$property1 = 'AppsUseLightTheme'
 	$property2 = 'SystemUsesLightTheme'
-	$darkModeApps = (Get-ItemProperty -Path $pathDarkModeAll).$property1
-	$darkModeSystem = (Get-ItemProperty -Path $pathDarkModeAll).$property2
 	$value = 0
-
-	$status = (($darkModeApps -ne $value) -or ($darkModeSystem -ne $value)) ? $('[OFF]') : $('[ON]')
-
-	Write-Host "[+] Dark Mode                 " -NoNewline
-	Test_StatusColor $status
+	
+	Write-Host "[+] Dark Mode                 "
 	# "ThemeDark Apps has been Enabled"
 	Set_OptionStatus $pathDarkModeAll $property1 $value
 	# "ThemeDark System has been Enabled"
@@ -637,17 +562,13 @@ function Set_Opt_DarkMode {
 }
 
 # Modification: Get fun facts, tips, tricks...
-function Set_Opt_GetTipsTricks {
-    $pathTipsTricks = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager'
+function Opt_GetTipsTricks {
+	$pathTipsTricks = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager'
 	$property1 = 'RotatingLockScreenOverlayEnabled'
 	$property2 = 'SubscribedContent-338387Enabled'
-    $tipsTricks = (Get-ItemProperty -Path $pathTipsTricks).$property1
 	$value = 0
-
-	$status = (($tipsTricks -ne $value) -or ($tipsTricks -ne $value)) ? $('[ON]') : $('[OFF]')
-
-	Write-Host "[+] Get Facts, Tips, Tricks   " -NoNewline
-	Test_StatusColor $status
+	
+	Write-Host "[+] Get Facts, Tips, Tricks   "
 	#"Facts, Tips & Tricks has been Disabled"
 	Set_OptionStatus $pathTipsTricks $property1 $value
 	#"Facts, Tips & Tricks has been Disabled"
@@ -655,212 +576,168 @@ function Set_Opt_GetTipsTricks {
 }
 
 # Modification: Show the lock ...
-function Set_Opt_ShowSignInScreen {
-    $pathSignInScreen = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\SystemProtectedUserData\S-1-5-21-3918609171-3129487852-610721345-1001\AnyoneRead\LockScreen'
+function Opt_ShowSignInScreen {
+	$pathSignInScreen = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\SystemProtectedUserData\S-1-5-21-3918609171-3129487852-610721345-1001\AnyoneRead\LockScreen'
 	$property = 'HideLogonBackgroundImage'
-    $signInScreen = (Get-ItemProperty -Path $pathSignInScreen).$property
 	$value = 0
 
-	$status = ($signInScreen -ne $value) ? $('[OFF]') : $('[ON]')
-
-	Write-Host "[+] Show Sign-In Screen       " -NoNewline
-	Test_StatusColor $status
+	Write-Host "[+] Show Sign-In Screen       "
 	#"ShowSignInScreen has been Enabled"
 	Set_OptionStatus $pathSignInScreen $property $value
 }
 
 # Modification
-function Set_Opt_ShowItemSearch {
+function Opt_ShowItemSearch {
 	$pathItemSearch = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Search'
 	$property = 'SearchboxTaskbarMode'
-	$itemSearch = (Get-ItemProperty -Path $pathItemSearch).$property
 	$value = 0
 
-	$status = ($itemSearch -ne $value) ? $('[ON]') : $('[OFF]')
-	
-	Write-Host "[+] Show Item Search          " -NoNewline
-	Test_StatusColor $status
+	Write-Host "[+] Show Item Search          "
 	#"Show Item Search has been Disabled"
 	Set_OptionStatus $pathItemSearch $property $value
 }
 
 # Modification
-function Set_Opt_ShowItemTaskView {
+function Opt_ShowItemTaskView {
 	$pathItemTaskView = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
 	$property = 'ShowTaskViewButton'
-	$itemTaskView = (Get-ItemProperty -Path $pathItemTaskView).$property
 	$value = 0
-
-	$status = ($itemTaskView -ne $value) ? $('[ON]') : $('[OFF]')
-
-	Write-Host "[+] Show Item TaskView        " -NoNewline
-	Test_StatusColor $status
+	
+	Write-Host "[+] Show Item TaskView        "
 	#"Show Item TaskView has been Disabled"
 	Set_OptionStatus $pathItemTaskView $property $value
 }
 
 # Modification 2.0: Hide Taskbar in Windows
-function Set_Opt_HideTaskbar {
+function Opt_HideTaskbar {
 	$pathHideTaskbar = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3'
 	$property = 'Settings'
 	$hideTaskbar = (Get-ItemProperty -Path $pathHideTaskbar).$property
 	$value = 0x7A
 
-	$status = ($hideTaskbar[8] -ne $value) ? $('[ON]') : $('[OFF]')
-
-	Write-Host "[+] Hide Taskbar              " -NoNewline
-	Test_StatusColor $status
+	Write-Host "[+] Hide Taskbar              "
 	#"HideTaskbar has been Disabled"
-	$hideTaskbar[8] = $value
-	Set_OptionStatus $pathHideTaskbar $property $hideTaskbar
-}
-
-function Test_Set_Opt_HideTaskbar {
-	Write-Host ""
-	$pathHideTaskbar = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StuckRects3'
-	$property = 'Settings'
-	$hideTaskbar = (Get-ItemProperty -Path $pathHideTaskbar).$property
-	$value = 0x7A
-
-	$status = ($hideTaskbar[8] -ne $value) ? $('[ON]') : $('[OFF]')
-
-	Write-Host "[+] Hide Taskbar              " -NoNewline
-	Test_StatusColor $status
-	
-	if ($hideTaskbar[8] -ne 0x7A) {
+	if ($hideTaskbar[8] -ne $value) {
 
 		$hideTaskbar[8] = $value
-		"Option [`$property] has been `$status, Cambiando..."
-		# Set-ItemProperty -Path $pathHideTaskbar -Name $property -Value $hideTaskbar -Force
+		"Option [$property] has been Changing..."
+		Set-ItemProperty -Path $pathHideTaskbar -Name $property -Value $hideTaskbar -Force
 	}
 	else {
-		"Option [`$property] remains `$status, Ya fue cambiado"
+		"Option [$property] remains Changed"
 	}
-	Write-Host ""
 }
 
-function Set_Opt_ShowDesktop {
+function Opt_ShowDesktop {
 	$pathDesktop = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
 	$property = 'TaskbarSd'
-	$desktop = (Get-ItemProperty -Path $pathDesktop).$property
 	$value = 1
 
-	$status = ($desktop -ne $value) ? $('[OFF]') : $('[ON]')
-
-	Write-Host "[+] Option Show the Desktop   " -NoNewline
-	Test_StatusColor $status
+	Write-Host "[+] Option Show the Desktop   "
 	#"ShowDesktop has been Enabled"
 	Set_OptionStatus $pathDesktop $property $value
 }
 
 # Modification 2.0: ShowSeconds in SystemClock
-function Set_Opt_ShowSeconds {
-    $pathSecondsClock = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+function Opt_ShowSeconds {
+	$pathSecondsClock = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
 	$property = 'ShowSecondsInSystemClock'
-    $secondsClock = (Get-ItemProperty -Path $pathSecondsClock).$property
 	$value = 1
 
 	Test_Property $pathSecondsClock $property
-	$status = ($secondsClock -ne $value) ? $('[OFF]') : $('[ON]')
 
-	Write-Host "[+] Show Seconds in Clock     " -NoNewline
-	Test_StatusColor $status
+	Write-Host "[+] Show Seconds in Clock     "
 	#"ShowSeconds has been Enabled"
 	Set_OptionStatus $pathSecondsClock $property $value
 }
 
 # Modification 0: Game Bar in Windows
-function Set_Opt_GameBar {
+function Opt_GameBar {
 	$pathGameBar = 'HKCU:\Software\Microsoft\GameBar'
 	$property = 'UseNexusForGameBarEnabled'
-	$gameBar = (Get-ItemProperty -Path $pathGameBar).$property
 	$value = 0
 
-	$status = ($gameBar -ne $value) ? $('[ON]') : $('[OFF]')
-
-	Write-Host "[+] Game Bar                  " -NoNewline
-	Test_StatusColor $status
-	Set_OptionStatus $pathGameBar $property $value
+	Write-Host "[+] Game Bar                  "
 	#"GameBar has been Disabled"
+	Set_OptionStatus $pathGameBar $property $value
 }
 
 # Modification 0: Game Mode in Windows
-function Set_opt_GameMode {
+function Opt_GameMode {
 	$pathGameMode = 'HKCU:\Software\Microsoft\GameBar'
 	$property = 'AutoGameModeEnabled'
-	$gameMode = (Get-ItemProperty -Path $pathGameMode).$property
 	$value = 0
 
-	$status = ($gameMode -ne $value) ? $('[ON]') : $('[OFF]')
-
-	Write-Host "[+] Game Mode                 " -NoNewline
-	Test_StatusColor $status
-	Set_OptionStatus $pathGameMode $property $value
+	Write-Host "[+] Game Mode                 "
 	#"GameMode has been Disabled"
+	Set_OptionStatus $pathGameMode $property $value
 }
 
 # Modification 0:
-function Set_Opt_TransparencyEffects {
-    $pathTransparency = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize'
+function Opt_TransparencyEffects {
+	$pathTransparency = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize'
 	$property = 'EnableTransparency'
-    $transparency = (Get-ItemProperty -Path $pathTransparency),$property
 	$value = 0
 
-	$status = ($transparency -ne $value) ? $('[ON]') : $('[OFF]')
-
-	Write-Host "[+] Transparency Effects      " -NoNewline
-	Test_StatusColor $status
-	Set_OptionStatus $pathTransparency $property $value
+	Write-Host "[+] Transparency Effects      "
 	# "Transparency has been Disabled"
+	Set_OptionStatus $pathTransparency $property $value
 }
 
 # Modification
-function Set_Opt_AlwaysShowScrollbars {
+function Opt_AlwaysShowScrollbars {
 	$pathShowScrollbars = 'HKCU:\Control Panel\Accessibility'
 	$property = 'DynamicScrollbars'
-	$showScrollbars = (Get-ItemProperty -Path $pathShowScrollbars).$property
 	$value = 0
 
-	$status = ($showScrollbars -ne $value) ? $('[OFF]') : $('[ON]')
-
-	Write-Host "[+] Always Show Scrollbars    " -NoNewline
-	Test_StatusColor $status
-	Set_OptionStatus $pathShowScrollbars $property $value
+	Write-Host "[+] Always Show Scrollbars    "
 	#"ShowScrollbars has been Enabled"
+	Set_OptionStatus $pathShowScrollbars $property $value
 	Write-Host ""
 }
 
-<#
-function Set_Opt_DeviceEncryption () {
-    #rest of the code...
+# Disables Bitlocker Auto Encryption on Windows(REVISAR)
+function Opt_DeviceEncryption {
+	$path1 = 'HKLM:\SYSTEM\CurrentControlSet\Control\BitLocker'
+	$path2 = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\EnhancedStorageDevices'
+	$property1 = 'PreventDeviceEncryption'
+	$property2 = 'TCGSecurityActivationDisabled'
+	$value = 1
+	
+	Test_Property $path1 $property1
+
+	#"Bitlocker has been Disabled"
+	Set_OptionStatus $path1 $property1 $value
+	Set_OptionStatus $path2 $property2 $value
 }
-#>
 
 function Set_Default_Option () {
-	Set_Opt_Netplwiz
-	Set_Opt_FastStartup
-	Set_Opt_StorageSense
-	Set_Opt_SnapSuggest
-	Set_Opt_ShowFileExtensions
-	Set_Opt_ShowHiddenFiFo
-	Set_Opt_ShowSyncProvider
-	Set_Opt_ShowEndTask
-	# Set_Opt_SudoCommand
-	Set_Opt_DarkMode
-	Set_Opt_TransparencyEffects
-	Set_Opt_GetTipsTricks
-	Set_Opt_ShowSignInScreen
-	Set_Opt_ShowItemSearch
-	Set_Opt_ShowItemTaskView
-	Set_Opt_HideTaskbar
 
-	Test_Set_Opt_HideTaskbar
-
-	Set_Opt_ShowDesktop
-	Set_Opt_ShowSeconds
-	Set_Opt_GameBar
-	Set_opt_GameMode
-	Set_Opt_AlwaysShowScrollbars
+	"***************************"
+	"SETTING SELECTED PREFERENCE"
+	"***************************"
+	Opt_Netplwiz
+	Opt_FastStartup
+	Opt_StorageSense
+	# Opt_DeviceEncryption
+	Opt_SnapSuggest
+	Opt_ShowFileExtensions
+	Opt_ShowHiddenFiFo
+	Opt_ShowSyncProvider
+	Opt_ShowEndTask
+	# Opt_SudoCommand
+	Opt_DarkMode
+	Opt_TransparencyEffects
+	Opt_GetTipsTricks
+	Opt_ShowSignInScreen
+	Opt_ShowItemSearch
+	Opt_ShowItemTaskView
+	Opt_HideTaskbar
+	Opt_ShowDesktop
+	Opt_ShowSeconds
+	Opt_GameBar
+	Opt_GameMode
+	Opt_AlwaysShowScrollbars
 }
 
 #function Show InfoService
@@ -868,42 +745,41 @@ function InfoService ($service, $serviceName) {
 	if ($service) {
         return [PSCustomObject]@{
 			"Service Found....." = $serviceName
-            "Service Name......" = $service.DisplayName
-            "Startup Type......" = $service.StartType
-            "Status Type......." = $service.Status
-        }
+			"Service Name......" = $service.DisplayName
+			"Startup Type......" = $service.StartType
+			"Status Type......." = $service.Status
+		}
     } else {
         return [PSCustomObject]@{
-            "Service not Found." = $serviceName
-            "Service Name......" = "Unknown"
-            "Startup Type......" = "Unknown"
-            "Status Type......." = "Unknown"
-        }
+			"Service not Found." = $serviceName
+			"Service Name......" = "Unknown"
+			"Startup Type......" = "Unknown"
+			"Status Type......." = "Unknown"
+		}
     }
 }
 
 #function Set Service
 function ServiceConfig ($serviceName, $startupType) {
-    $service = Get-Service -Name $serviceName -ErrorAction SilentlyContinue
-
-    InfoService $service $serviceName | Format-List
-
-	$Cmd1 = "Set-Service -Name '$serviceName' -StartupType $startupType"
-	$Cmd2 = "Stop-Service -Name '$serviceName'"
-    if ($service) {
-
-		"[*] Setting service [$serviceName] to $startupType."
+	$service = Get-Service -Name $serviceName -ErrorAction SilentlyContinue
+	
+	$Cmd1 = "Set-Service -Name `"$serviceName`" -StartupType $startupType"
+	$Cmd2 = "Stop-Service -Name `"$serviceName`""
+	if ($service) {
+		
+		Write-Host "[*] Setting service [$serviceName] to $startupType."
+		Write-Host "[*] Stopping service [$serviceName]." -NoNewline
+		InfoService $service $serviceName | Format-List
+		
 		Invoke-Expression $Cmd1
-
-		"[*] Stopping service [$serviceName]."
 		Invoke-Expression $Cmd2
-    } 
-    else {
-		"[-] Error setting service [$serviceName] to $startupType, Service not found."
-		"[-] Error stopping service [$serviceName], Service not found."
+	} 
+	else {
+		Write-Host "[-] Error setting service [$serviceName] to $startupType, Service not found."
+		Write-Host "[-] Error stopping service [$serviceName], Service not found." -NoNewline
+		InfoService $service $serviceName | Format-List
 		# "Cannot find path 'HKCU:\Software\Microsoft' because it does not exist."
-    }
-	Write-Host ""
+	}
 }
 
 #Get-Service | Sort-Object Status, DisplayName | Format-Table -GroupBy Status -Property Status, Name, DisplayName
@@ -958,14 +834,15 @@ $servicesDisList = @(
 )
 
 $servicesManList = @(
-    "lfsvc",                          #Servicio de geolocalización
-    "MicrosoftEdgeElevationService",  #Microsoft Edge Elevation Service (MicrosoftEdgeElevationService)
-    "edgeupdate",                     #Microsoft Edge Update Service (edgeupdate)
-    "edgeupdatem",                    #Microsoft Edge Update Service (edgeupdatem)
-    "wuauserv"                        #Windows Update
+	"lfsvc",                          #Servicio de geolocalización
+	"MicrosoftEdgeElevationService",  #Microsoft Edge Elevation Service (MicrosoftEdgeElevationService)
+	"edgeupdate",                     #Microsoft Edge Update Service (edgeupdate)
+	"edgeupdatem",                    #Microsoft Edge Update Service (edgeupdatem)
+	"wuauserv"                        #Windows Update
 )
 
 function Set_Service_Startup () {
+	
 	Write-Host "SET SERVICES`n------------"
 	foreach ($serviceName in $servicesDisList) {
 		ServiceConfig $serviceName Disabled
@@ -977,14 +854,14 @@ function Set_Service_Startup () {
 }
 
 function InfoTask ($task, $taskName) {
-    if ($task) {
+	if ($task) {
 		return [PSCustomObject]@{
 			"Task Found....." = $taskName
 			"Task Path......" = $task.TaskPath
 			"Task URI......." = $task.URI
 			"State Type....." = $task.State
 		}
-    } else {
+	} else {
 		return [PSCustomObject]@{
 			"Task not Found." = $taskName
 			"Task Path......" = "Unknown"
@@ -995,85 +872,106 @@ function InfoTask ($task, $taskName) {
 }
 
 function TaskConfig ($taskPath, $taskName, $stateType) {
-    $task = Get-ScheduledTask -TaskPath $taskPath -TaskName $taskName
-
-    InfoTask $task $taskName | Format-List
-
+	$task = Get-ScheduledTask -TaskPath $taskPath -TaskName $taskName
+	
 	$newState = $stateType.Substring(0, $stateType.Length - 1)
-	$Cmd = "$newState-ScheduledTask -TaskPath '$taskPath' -TaskName '$taskName'"
-    if ($task) {
+	$Cmd = "$newState-ScheduledTask -TaskPath `"$taskPath`" -TaskName `"$taskName`""
+	if ($task) {
+		
+		Write-Host "[*] Setting task [$taskName] to $stateType." -NoNewline
+		InfoTask $task $taskName | Format-List
 
-		"[*] Setting task [$taskName] to $stateType."
 		$null = Invoke-Expression $Cmd
 	}
 	else {
-		"[-] Error setting task [$taskName] to $stateType, Task not found."
+		Write-Host "[-] Error setting task [$taskName] to $stateType, Task not found." -NoNewline
+		InfoTask $task $taskName | Format-List
 		# "Cannot find path 'HKCU:\Software\Microsoftkkkk' because it does not exist."
 	}
-	Write-Host ""
 }
 
 $tasksDisList = @(
-    @{ 
-		Path = "\" 
-		Name = "MicrosoftEdgeUpdateTaskMachineCore" 
+	@{ 
+		Path = "\"
+		Name = "MicrosoftEdgeUpdateTaskMachineCore"
 	},
 	@{ 
-		Path = "\" 
-		Name = "MicrosoftEdgeUpdateTaskMachineUA" 
-	},
-	@{ 
-		Path = "\Microsoft\Windows\Application Experience\" 
-		Name = "Microsoft Compatibility Appraiser" 
-	},
-	@{ 
-		Path = "\Microsoft\Windows\Application Experience\" 
-		Name = "StartupAppTask" 
-	},
-	@{ 
-		Path = "\Microsoft\Windows\Customer Experience Improvement Program\" 
-		Name = "Consolidator" 
-	},
-	@{ 
-		Path = "\Microsoft\Windows\Customer Experience Improvement Program\" 
-		Name = "UsbCeip" 
-	},
-    @{ 
-		Path = "\Microsoft\Windows\Maps\" 
-		Name = "MapsUpdateTask" 
-	},
-	@{ 
-		Path = "\Microsoft\Windows\Windows Defender\" 
-		Name = "Windows Defender Verification" 
-	},
-	@{ 
-		Path = "\Microsoft\Windows\WindowsUpdate\" 
-		Name = "Scheduled Start" 
-	},
-    @{ 
-		Path = "\Microsoft\XblGameSave\" 
-		Name = "XblGameSaveTask" 
+		Path = "\"
+		Name = "MicrosoftEdgeUpdateTaskMachineUA"
 	},
 	@{
-		Path = "\Microsoft\Office\" 
-		Name = "Office Performance Monitor" 
+		Path = "\Microsoft\Windows\Application Experience\"
+		Name = "MareBackup"
+	},
+	@{ 
+		Path = "\Microsoft\Windows\Application Experience\"
+		Name = "Microsoft Compatibility Appraiser"
 	},
 	@{
-		Path = "\Microsoft\Office\" 
-		Name = "Office Feature Updates Logon" 
+		Path = "\Microsoft\Windows\Application Experience\"
+		Name = "PcaPatchDbTask"
+	},
+	@{ 
+		Path = "\Microsoft\Windows\Application Experience\"
+		Name = "StartupAppTask"
+	},
+	@{ 
+		Path = "\Microsoft\Windows\Customer Experience Improvement Program\"
+		Name = "Consolidator"
+	},
+	@{ 
+		Path = "\Microsoft\Windows\Customer Experience Improvement Program\"
+		Name = "UsbCeip"
 	},
 	@{
-		Path = "\Microsoft\Office\" 
-		Name = "Office Feature Updates" 
+		Path = "\Microsoft\Windows\DiskDiagnostic\"
+		Name = "Microsoft-Windows-DiskDiagnosticDataCollector"
 	},
 	@{
-		Path = "\Microsoft\Office\" 
-		Name = "Office Automatic Updates 2.0" 
+		Path = "\Microsoft\Windows\Feedback\Siuf\"
+		Name = "DmClient"
+	},
+	@{
+		Path = "\Microsoft\Windows\Feedback\Siuf\"
+		Name = "DmClientOnScenarioDownload"
+	},
+	@{ 
+		Path = "\Microsoft\Windows\Maps\"
+		Name = "MapsUpdateTask"
+	},
+	@{ 
+		Path = "\Microsoft\Windows\Windows Defender\"
+		Name = "Windows Defender Verification"
+	},
+	@{ 
+		Path = "\Microsoft\Windows\WindowsUpdate\"
+		Name = "Scheduled Start"
+	},
+	@{ 
+		Path = "\Microsoft\XblGameSave\"
+		Name = "XblGameSaveTask"
+	},
+	@{
+		Path = "\Microsoft\Office\"
+		Name = "Office Performance Monitor"
+	},
+	@{
+		Path = "\Microsoft\Office\"
+		Name = "Office Feature Updates Logon"
+	},
+	@{
+		Path = "\Microsoft\Office\"
+		Name = "Office Feature Updates"
+	},
+	@{
+		Path = "\Microsoft\Office\"
+		Name = "Office Automatic Updates 2.0"
 	}
 )
 
 # Modifcate 4.0: Task Sheduler
 function Set_Scheduled_Task () {
+
 	Write-Host "SET SCHEDULED TASKS`n-------------------"
 	foreach ($task in $tasksDisList) {
 		TaskConfig $task.Path $task.Name Disabled
@@ -1092,16 +990,17 @@ function Install_Module_Appx {
 #Get-AppxPackage | Select Name, PackageFullName | Format-List
 function RemoveUserAppx ($appxName) {
 	$appx = Get-AppxPackage | Where-Object { $_.Name -like "*$appxName*" }
-	
-	$appx | Format-List Name, Version, Architecture, ResourceId, PackageFullName, Status
-    if ($appx) {
 
-		"Removing userAppx [$appxName] from the current user account."
+	if ($appx) {
+		
+		Write-Host "Removing userAppx [$appxName] from the current user account." -NoNewline
+		$appx | Format-List Name, Version, Architecture, ResourceId, PackageFullName, Status
+
 		"$($appx.PackageFullName)" | Remove-AppxPackage
-    } 
-    else {
-        "Error removing userAppx [$appxName], Appx not found."
-    }
+	} 
+	else {
+		Write-Host "Error removing userAppx [$appxName], Appx not found."
+	}
 }
 
 # HideApps 4.1: Blotware in Windows
@@ -1117,7 +1016,8 @@ $userPackageList = [ordered]@{
 	"HEIF Image Extension"    = "Microsoft.HEIFImageExtension"
 	"HEVC Video Extension"    = "Microsoft.HEVCVideoExtension"
 	"Paint 3D"                = "Microsoft.Microsoft3DViewer"
-    # "Microsoft Edge"          = "Microsoft.MicrosoftEdge.Stable"        #QUITARLO ROMPE COSAS
+    "Microsoft Edge"          = "Microsoft.MicrosoftEdge.Stable"        #QUITARLO ROMPE COSAS
+	"Microsoft Edge Tools"    = "Microsoft.MicrosoftEdgeDevToolsClient"
     "Microsoft 365 (PWA)"     = "Microsoft.MicrosoftOfficeHub"
     "Solitaire Collection"    = "Microsoft.MicrosoftSolitaireCollection"
     "Microsoft Sticky Notes"  = "Microsoft.MicrosoftStickyNotes"
@@ -1155,6 +1055,8 @@ $userPackageList = [ordered]@{
     "Microsoft Family Safety" = "MicrosoftCorporationII.MicrosoftFamily"
     "Quick Assist"            = "MicrosoftCorporationII.QuickAssist"
     "Widgets"                 = "MicrosoftWindows.Client.WebExperience"
+	# "Spotlight"               = "MicrosoftWindows.LKG.DesktopSpotlight" #REVISAR
+	"Microsoft Teams"         = "MSTeams"
     "Spotify Music"           = "SpotifyAB.SpotifyMusic"
 
     #"linkedin"               = "linkedin_searchId"                       #BUSCAR ID COMPLETO
@@ -1164,17 +1066,26 @@ $userPackageList = [ordered]@{
 function Remove_User_Appx () {
 
 	Write-Host "REMOVE USER APPX`n----------------"
-	foreach ($appxName in $userPackageList.Keys) {
-		$appxId = $userPackageList[$appxName]
+	$ListToRemoveU = @()
+	foreach ($appx in $userPackageList.Keys) {
 
 		Write-Host "Remove AppxUser [" -NoNewline
-		Write-Host $appxName -ForegroundColor Cyan -NoNewline; "]?"
+		Write-Host $appx -ForegroundColor Cyan -NoNewline; "]?"
 
-		Invoke-Confirmation {
-			RemoveUserAppx $appxId
+		$selectedApp = Add-AppSelection $userPackageList[$appx]
+		if ($selectedApp) {
+			$ListToRemoveU += $selectedApp
 		}
 		Write-Host ""
 	}
+
+	"****************************"
+	"REMOVING SELECTED APPXS USER"
+	"****************************"
+	foreach ($appxId in $ListToRemoveU) {
+		RemoveUserAppx $appxId
+	}
+	Write-Host ""
 }
 
 # Uninstall 5.0: ProvisionedAppxPackages list
@@ -1198,16 +1109,17 @@ function Get-PackageFullName ($packageName){
 function RemoveProAppx ($appxName) {
 	$appx = Get-AppxProvisionedPackage -Online | Where-Object { $_.DisplayName -like "*$appxName*" }
 
-	$appx | Format-List
 	if ($appx) {
+		
+		Write-Host "Removing provisionedAppx [$appxName] from Windows image." -NoNewline
+		$appx | Format-List
 
-        "Removing provisionedAppx [$appxName] from Windows image."
-        DISM /Online /Remove-ProvisionedAppxPackage /PackageName:"$($appx.PackageName)"
+		$null = DISM /Online /Remove-ProvisionedAppxPackage /PackageName:"$($appx.PackageName)"
 		# "$($appx.PackageName)" | Remove-AppxProvisionedPackage -Online
-    } 
+	} 
 	else {
-        "Error removing provisionedAppx [$appxName], Appx not found."
-    }
+		Write-Host "Error removing provisionedAppx [$appxName], Appx not found."
+	}
 }
 
 # Uninstall 5.0: Blotware in Windows
@@ -1216,6 +1128,7 @@ $provPackageList = [ordered]@{
 	"Microsoft Clipchamp"     = "Clipchamp.Clipchamp"
     "Cortana"                 = "Microsoft.549981C3F5F10"
     "Microsoft News"          = "Microsoft.BingNews"
+	"Bing Search (Edge)"      = "Microsoft.BingSearch"
     "MSN Weather"             = "Microsoft.BingWeather"
     "Xbox App"                = "Microsoft.GamingApp"
     "Get Help"                = "Microsoft.GetHelp"
@@ -1223,7 +1136,8 @@ $provPackageList = [ordered]@{
 	"HEIF Image Extension"    = "Microsoft.HEIFImageExtension"
 	"HEVC Video Extension"    = "Microsoft.HEVCVideoExtension"
 	"Paint 3D"                = "Microsoft.Microsoft3DViewer"
-    #"Microsoft Edge"          = "Microsoft.MicrosoftEdge.Stable"         #QUITARLO ROMPE COSAS
+    "Microsoft Edge"          = "Microsoft.MicrosoftEdge.Stable"         #QUITARLO ROMPE COSAS
+	"Microsoft Edge Tools"    = "Microsoft.MicrosoftEdgeDevToolsClient"
     "Microsoft 365 (PWA)"     = "Microsoft.MicrosoftOfficeHub"
     "Solitaire Collection"    = "Microsoft.MicrosoftSolitaireCollection"
     "Microsoft Sticky Notes"  = "Microsoft.MicrosoftStickyNotes"
@@ -1250,9 +1164,11 @@ $provPackageList = [ordered]@{
 	"Mail and Calendar"       = "microsoft.windowscommunicationsapps"
     "Feedback Hub"            = "Microsoft.WindowsFeedbackHub"
     "Windows Maps"            = "Microsoft.WindowsMaps"
+	"Windows Meet Now (Icon)" = "Microsoft.WindowsMeetNow"
 	"Windows Notepad"         = "Microsoft.WindowsNotepad"
 	"Windows Sound Recorder"  = "Microsoft.WindowsSoundRecorder"
     "Xbox TCUI"               = "Microsoft.Xbox.TCUI"
+    "Xbox App (OLD)"          = "Microsoft.XboxApp"
     "Xbox Game Overlay"       = "Microsoft.XboxGameOverlay"
     "Game Bar"                = "Microsoft.XboxGamingOverlay"
     "Xbox Provider"           = "Microsoft.XboxIdentityProvider"
@@ -1263,24 +1179,35 @@ $provPackageList = [ordered]@{
     "Microsoft Family Safety" = "MicrosoftCorporationII.MicrosoftFamily"
     "Quick Assist"            = "MicrosoftCorporationII.QuickAssist"
     "Widgets"                 = "MicrosoftWindows.Client.WebExperience"
+	"Microsoft Teams"         = "MSTeams"
 
     #"linkedin"               = "linkedin_searchId"                       #BUSCAR ID COMPLETO
     #"Camo Studio"            = "CamoStudio_searchId"                     #BUSCAR ID COMPLETO
 }
 
 function Remove_Provisioned_Appx () {
+
 	Write-Host "REMOVE PROVISIONED APPX`n-----------------------"
-	foreach ($appxName in $provPackageList.Keys) {
-		$appxId = $provPackageList[$appxName]
+	$ListToRemoveP = @()
+	foreach ($appx in $provPackageList.Keys) {
 
 		Write-Host "Remove AppxProvisioned [" -NoNewline
-		Write-Host $appxName -ForegroundColor Cyan -NoNewline; "]?"
+		Write-Host $appx -ForegroundColor Cyan -NoNewline; "]?"
 
-		Invoke-Confirmation {
-			RemoveProAppx $appxId
+		$selectedApp = Add-AppSelection $provPackageList[$appx]
+		if ($selectedApp) {
+			$ListToRemoveP += $selectedApp
 		}
 		Write-Host ""
 	}
+
+	"***********************************"
+	"REMOVING SELECTED APPXS PROVISIONED"
+	"***********************************"
+	foreach ($appxId in $ListToRemoveP) {
+		RemoveProAppx $appxId
+	}
+	Write-Host ""
 }
 
 # FeatureWindow 5: Enable or Disable features
@@ -1306,57 +1233,72 @@ function InfoFeature ($feature, $featureName) {
 # function...
 function FeatureConfig ($featureName, $stateType) {
 	$feature = Get-WindowsOptionalFeature -FeatureName $featureName -Online
-
-	InfoFeature $feature $featureName | Format-List
 	
 	$newState = $stateType.Substring(0, $stateType.Length - 1)
-	$acctionCmd = "$newState-WindowsOptionalFeature -FeatureName '$featureName' -Online"
+	$actionCmd = "$newState-WindowsOptionalFeature -FeatureName `"$featureName`" -Online"
 	if ($feature) {
 		
-		"Setting feature [$featureName] to $stateType."
-		$null = Invoke-Expression $acctionCmd
-    } 
+		Write-Host "Setting feature [$featureName] to $stateType." -NoNewline
+		InfoFeature $feature $featureName | Format-List
+
+		$null = Invoke-Expression $actionCmd
+	} 
 	else {
-		"Error setting feature [$featureName] to $stateType, Feature not found."
+		Write-Host "Error setting feature [$featureName] to $stateType, Feature not found."
 		# "Cannot find path 'HKCU:\Software\Microsoft' because it does not exist."
-    }
+	}
+}
+
+$featureDisList = [ordered]@{
+	"Internet Explorer 11" = "Internet-Explorer-Optional-amd64"
+	"Media Features"       = "MediaPlayback"
+	"Windows Media Player" = "WindowsMediaPlayer"
+}
+
+$featureEnaList = [ordered]@{
+	".NET Framework 3.5" = "NetFx3"
+	"Windows Sandbox"    = "Containers-DisposableClientVM"
 }
 
 # Features 5.3: Turn on/off
 function Set_Optional_Feature () {
-    Write-Host "SET OPTIONAL FEATURES`n---------------------"
 
-	Write-Host "Disable Feature [" -NoNewline
-	Write-Host "Media Features" -ForegroundColor Cyan -NoNewline; "]?"
+	Write-Host "SET OPTIONAL FEATURES`n---------------------"
+	$ListToDisable = @()
+	foreach ($feature in $featureDisList.Keys) {
+		
+		Write-Host "Disable Feature [" -NoNewline
+		Write-Host $feature -ForegroundColor Cyan -NoNewline; "]?"
 
-	Invoke-Confirmation {
-		FeatureConfig "MediaPlayback" Disabled
+		$selectedFeature = Add-AppSelection $featureDisList[$feature]
+		if ($selectedFeature) {
+			$ListToDisable += $selectedFeature
+		}
+		Write-Host ""
 	}
-	Write-Host ""
 
-	# FeatureConfig "WindowsMediaPlayer" Disabled #[Reproductor de Windows Media]
+	$ListToEnable = @()
+	foreach ($feature in $featureEnaList.Keys) {
+		
+		Write-Host "Enbale Feature [" -NoNewline
+		Write-Host $feature -ForegroundColor Cyan -NoNewline; "]?"
 
-	Write-Host "Disable Feature [" -NoNewline
-	Write-Host "Internet Explorer 11" -ForegroundColor Cyan -NoNewline; "]?"
-
-	Invoke-Confirmation {
-		FeatureConfig "Internet-Explorer-Optional-amd64" Disabled
+		$selectedFeature = Add-AppSelection $featureEnaList[$feature]
+		if ($selectedFeature) {
+			$ListToEnable += $selectedFeature
+		}
+		Write-Host ""
 	}
-	Write-Host ""
-
-	Write-Host "Enbale Feature [" -NoNewline
-	Write-Host ".NET Framework 3.5" -ForegroundColor Cyan -NoNewline; "]?"
-
-	Invoke-Confirmation {
-		FeatureConfig "NetFx3" Enabled
-	}
-	Write-Host ""
 	
-	Write-Host "Enbale Feature [" -NoNewline
-	Write-Host "Windows Sandbox" -ForegroundColor Cyan -NoNewline; "]?"
+	"*************************"
+	"SETTING SELECTED FEATURES"
+	"*************************"
+	foreach ($featureId in $ListToDisable) {
+		FeatureConfig $featureId Disabled
+	}
 
-	Invoke-Confirmation {
-		FeatureConfig "Containers-DisposableClientVM" Enabled
+	foreach ($featureId in $ListToEnable) {
+		FeatureConfig $featureId Enabled
 	}
 	Write-Host ""
 }
@@ -1368,16 +1310,16 @@ function InstallApp ($appId, $sourceType) {
 	$outputGet = Invoke-Expression $listCmd -ErrorAction SilentlyContinue
 	$installed = $outputGet | Where-Object { $_.contains("$appId") }
 	
-	$installCmd = "$sourceType install --id '$appId'"
-    if (!$installed) {
-		
-        Write-Host "App [$appId] Installing..."
+	$installCmd = "$sourceType install --id `"$appId`""  #--accept-source-agreements
+	if (!$installed) {
+
+		Write-Host "App [$appId] Installing..."
 		Invoke-Expression $installCmd
-    } 
+	} 
 	else {
 		Write-Host "App [$appId] Already Installed."
 		Write-Host "Found an existing package already installed."
-    }
+	}
 }
 
 # winget search [Manufacture.AppName]
@@ -1418,7 +1360,7 @@ $wingetList = [ordered]@{
     "Git"                         = "Git.Git"
 	"Python 3.12"                 = "Python.Python.3.12"
 	# "Rustup: toolchain"           = "Rustlang.Rustup"
-	"Rust (MSVC)"                 = "Rustlang.Rust.MSVC"                   # (v1.78.0)
+	"Rust (MSVC)"                 = "Rustlang.Rust.MSVC"                   # (v1.79.0)
 	"7-Zip"                       = "7zip.7zip"
 	"WinRAR"                      = "RARLab.WinRAR"
 	"Box Desktop"                 = "Box.Box"
@@ -1457,7 +1399,7 @@ $wingetList = [ordered]@{
     "WinSCP"                      = "WinSCP.WinSCP"
 	"TeamViewer"                  = "TeamViewer.TeamViewer"
 	"Oracle VM VirtualBox"        = "Oracle.VirtualBox"
-	"VMware Workstation Pro"      = "VMware.WorkstationPro"
+	# "VMware Workstation Pro"      = "VMware.???"
     "TechPowerUp GPU-Z"           = "TechPowerUp.GPU-Z"
     #"NVCleanstall"               = "TechPowerUp.NVCleanstall"
     "WinDirStat"                  = "WinDirStat.WinDirStat"
@@ -1471,7 +1413,7 @@ $wingetList = [ordered]@{
     "Java SDK"                    = "Oracle.JDK.22"
     "Apache NetBeans IDE"         = "Apache.NetBeans"
     "MySQL"                       = "Oracle.MySQL"
-    # "PostgreSQL 16"               = "PostgreSQL.PostgreSQL"              # revisar compilacion seteada
+    # "PostgreSQL 16"               = "PostgreSQL.PostgreSQL.16"           # revisar compilacion seteada
     "Android Studio"              = "Google.AndroidStudio"
     "App Installer"               = "Microsoft.AppInstaller"
 	"Windows Terminal"            = "Microsoft.WindowsTerminal"
@@ -1480,37 +1422,51 @@ $wingetList = [ordered]@{
 # choco search [AppName]
 $chocoList = [ordered]@{
 	"Fing Desktop"        = "fing"
-    "Keypirinha Launcher" = "keypirinha"
-    "AIMP Music Player"   = "aimp"
+	"Keypirinha Launcher" = "keypirinha"
+	"AIMP Music Player"   = "aimp"
 	"FileZilla Client"    = "filezilla"
 }
 
 function Install_Apps () {
-	Write-Host "Winget Search Apps`n------------------"
+
+	Write-Host "INSTALL APP`n-----------"
+	$ListToInstallW = @()
 	foreach ($app in $wingetList.Keys) {
-		$appId = $wingetList[$app]
-
-		Write-Host "Install App [" -NoNewline
-		Write-Host $app -ForegroundColor Cyan -NoNewline; "]?"
-
-		Invoke-Confirmation {
-			InstallApp $appId winget
-		}
-		Write-Host ""
-	}
-
-	Write-Host "Choco Search Apps`n-----------------"
-	foreach ($app in $chocoList.Keys) {
-		$appId = $chocoList[$app]
 		
 		Write-Host "Install App [" -NoNewline
 		Write-Host $app -ForegroundColor Cyan -NoNewline; "]?"
 
-		Invoke-Confirmation {
-			InstallApp $appId choco
+		$selectedApp = Add-AppSelection $wingetList[$app]
+		if ($selectedApp) {
+			$ListToInstallW += $selectedApp
 		}
 		Write-Host ""
 	}
+
+	$ListToInstallC = @()
+	foreach ($app in $chocoList.Keys) {
+		
+		Write-Host "Install App [" -NoNewline
+		Write-Host $app -ForegroundColor Cyan -NoNewline; "]?"
+
+		$selectedApp = Add-AppSelection $chocoList[$app]
+		if ($selectedApp) {
+			$ListToInstallC += $selectedApp
+		}
+		Write-Host ""
+	}
+	
+	"************************"
+	"INSTALLING SELECTED APPS"
+	"************************"
+	foreach ($appId in $ListToInstallW) {
+		InstallApp $appId winget
+	}
+
+	foreach ($appId in $ListToInstallC) {
+		InstallApp $appId choco
+	}
+	Write-Host ""
 }
 
 function DownloadApp ($toolUrl, $toolFile) {
@@ -1522,9 +1478,10 @@ function DownloadApp ($toolUrl, $toolFile) {
 
 	if (!(Test-Path -Path $filePath)) {
 		
-		Write-Host "Tool [$toolFile] Downloading...`nUrl: $toolUrl"
+		Write-Host "Tool [$toolFile] Downloading...`nUrl: " -NoNewline
+		Write-Host $toolUrl -ForegroundColor Blue -NoNewline
 		Invoke-WebRequest -Uri $toolUrl -OutFile $filePath
-		Get-ChildItem $filePath
+		Get-ChildItem $filePath | Select-Object Mode, LastWriteTime, Length, Name | Format-List
 	} 
 	else {
 		Write-Host "Tool [$toolFile] Already Downloaded"
@@ -1555,8 +1512,8 @@ $toolList = @(
 	},
 	@{
 		Name = "pestudio"
-		TUrl = "https://www.winitor.com/tools/pestudio/current/pestudio-9.58.zip"
-		File = "pestudio-9.58.zip"
+		TUrl = "https://www.winitor.com/tools/pestudio/current/pestudio-9.59.zip"
+		File = "pestudio-9.59.zip"
 	},
 	@{
 		Name = "Rufus"
@@ -1570,23 +1527,23 @@ $toolList = @(
 	},
 	@{
 		Name = "CPU-Z"
-		TUrl = "https://download.cpuid.com/cpu-z/cpu-z_2.09-en.zip"
-		File = "cpu-z_2.09-en.zip"
+		TUrl = "https://download.cpuid.com/cpu-z/cpu-z_2.10-en.zip"
+		File = "cpu-z_2.10-en.zip"
 	},
 	@{
 		Name = "HWMonitor"
-		TUrl = "https://download.cpuid.com/hwmonitor/hwmonitor_1.53.zip"
-		File = "hwmonitor_1.53.zip"
+		TUrl = "https://download.cpuid.com/hwmonitor/hwmonitor_1.54.zip"
+		File = "hwmonitor_1.54.zip"
 	},
 	@{
 		Name = "HWiNFO"
-		TUrl = "https://www.sac.sk/download/utildiag/hwi_802.zip"
-		File = "hwi_802.zip"
+		TUrl = "https://www.sac.sk/download/utildiag/hwi_806.zip"
+		File = "hwi_806.zip"
 	},
 	@{
 		Name = "CrystalDiskInfo"
-		TUrl = "https://downloads.sourceforge.net/project/crystaldiskinfo/9.3.0/CrystalDiskInfo9_3_0.zip?ts=gAAAAABmVQXR9RjeNxz_DObPbCgIlEDUHIwkG8HfdNZy1fM-Yto8gwcF7wyCJFJv7eAxoq5_DZhJLbQ-nWE7Jj11MEXsanNC7A%3D%3D&use_mirror=sitsa&r=https%3A%2F%2Fcrystalmark.info%2F"
-		File = "CrystalDiskInfo9_3_0.zip"
+		TUrl = "https://downloads.sourceforge.net/project/crystaldiskinfo/9.3.2/CrystalDiskInfo9_3_2.zip?ts=gAAAAABmxATDiGgHn2taCOQBwlpedDQDGc3qkdVb4nl_wlSmHAeP5yBneUjs08rklYZo14DpHd5AdO5KetJwKGLbAJV0ERxkmQ%3D%3D&use_mirror=cfhcable&r=https%3A%2F%2Fcrystalmark.info%2F"
+		File = "CrystalDiskInfo9_3_2.zip"
 	},
 	@{
 		Name = "Hard Disk Sentinel"
@@ -1610,23 +1567,67 @@ $toolList = @(
 	},
 	@{
 		Name = "Display Driver Uninstaller"
-		TUrl = "https://www.wagnardsoft.com/DDU/download/DDU%20v18.0.7.6.exe"
-		File = "DDU v18.0.7.6.exe"
+		TUrl = "https://www.wagnardsoft.com/DDU/download/DDU%20v18.0.8.0.exe"
+		File = "DDU v18.0.8.0.exe"
 	}
 )
 
 #function Download App Portable
 function Download_Tools () {
+	
 	Write-Host "Url Search Tools`n------------------"
+	$ListToDownload = @()
 	foreach ($tool in $toolList) {
 
 		Write-Host "Download App Portable [" -NoNewline
 		Write-Host $tool.Name -ForegroundColor Cyan -NoNewline; "]?"
 
-		Invoke-Confirmation {
-			DownloadApp $tool.TUrl $tool.File
+		$selectedApp = Add-AppSelection $tool
+		if ($selectedApp) {
+			$ListToDownload += $selectedApp
 		}
 		Write-Host ""
+	}
+
+	"**************************"
+	"DOWNLOADING SELECTED TOOLS"
+	"**************************"
+	foreach ($toolId in $ListToDownload) {
+		DownloadApp $toolId.TUrl $toolId.File
+	}
+	Write-Host ""
+}
+
+# Modification 3.0: Configure Windows Defender
+function Set_Config_ScanCpuLoad {
+	$property = 'ScanAvgCPULoadFactor'
+	$preference = (Get-MpPreference).$property
+	$value = 1
+
+	"The current value [$property] is [$preference]"
+	if ($preference -ne $value) {
+
+		"Setting value [$property] to [1]."
+		Set-MpPreference -ScanAvgCPULoadFactor $value
+	} 
+	else {
+		"Value [$property] has already been set to [1]."
+	}
+}
+
+# Modification 3.0: Configure Memory Management Agent
+function Set_Config_MemoryCompression {
+	$property = 'MemoryCompression'
+	$mcValue = (Get-MMAgent).$property
+
+	"The current status [$property] is [$mcValue]"
+	if (!$mcValue) {
+
+		"Setting status [$property] to Enabled."
+		Enable-MMAgent -MemoryCompression
+	} 
+	else {
+		"Status [$property] has already been Enabled."
 	}
 }
 
@@ -1645,56 +1646,33 @@ function Get-StatusValue {
 
 # Modification 3.0: Configure TRIM for SSD
 function Set_Config_TurnTrimSSD {
-    $trimCmd = fsutil behavior query DisableDeleteNotify
+	$trimCmd = fsutil behavior query DisableDeleteNotify
 	$trimString = $trimCmd -match "NTFS DisableDeleteNotify = (\d)"
 	$value = 0
 
 	$trimValue = Get-StatusValue $trimString
 
 	"The current value [TRIM operations] is [$trimValue]"
-    if ($trimValue -ne $value) {
-    	
-    	"Setting status [TRIM operations] to Enabled."
-    	fsutil behavior set DisableDeleteNotify $value
-    }
-    else {
-    	"Status [TRIM operations] has already been Enabled."
-    }
-}
+	if ($trimValue -ne $value) {
 
-# Modification 3.0: Configure Memory Management Agent
-function Set_Config_MemoryCompression {
-	$property = 'MemoryCompression'
-    $mcValue = (Get-MMAgent).$property
-
-    "The current status [$property] is [$mcValue]"
-    if (!$mcValue) {
-        
-        "Setting status [$property] to Enabled."
-        Enable-MMAgent -MemoryCompression
+		"Setting status [TRIM operations] to Enabled."
+		fsutil behavior set DisableDeleteNotify $value
     } 
 	else {
-        "Status [$property] has already been Enabled."
-    }
+		"Status [TRIM operations] has already been Enabled."
+	}
 }
 
-# Modification 3.0: Configure Windows Defender
-function Set_Config_ScanCpuLoad {
-	$property = 'ScanAvgCPULoadFactor'
-    $preference = (Get-MpPreference).$property
-    $value = 1
-    
-    "The current value [$property] is [$preference]"
-    if ($preference -ne $value) {
+function Set_Disable_BackgroundApp {
+	$backgroundAppPath = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications'
+	$property = 'GlobalUserDisabled'
+	$value = 1
 
-        "Setting value [$property] to [1]."
-        Set-MpPreference -ScanAvgCPULoadFactor $value
-    } 
-	else {
-        "Value [$property] has already been set to [1]."
-    }
+	Test_Property $backgroundAppPath $property
+	
+	# Change value option
+	Set_OptionStatus $backgroundAppPath $property $value
 }
-
 function Minimum_Preferences {
 	$pathPreferencesMask = 'HKCU:\Control Panel\Desktop'
 	$property1 = 'UserPreferencesMask'
@@ -1705,109 +1683,69 @@ function Minimum_Preferences {
 		$preferMask[0] = 0x90 ; $preferMask[1] = 0x12
 		$preferMask[2] = 0x03 ; $preferMask[4] = 0x10
 
-		"Setting options minimum [$property1] to Disabled."
-		Set-ItemProperty -Path $pathPreferencesMask -Name $property1 -Value $preferMask -Force
+		# "Setting options minimum [$property1] to Disabled."
+		"Option [$property1] has been Changing..."
+		Set-Itemproperty1 -Path $pathPreferencesMask -Name $property1 -Value $preferMask -Force
 	} 
 	else {
-		"Options minimum [$property1] has already been Disabled."
+		# "Options minimum [$property1] has already been Disabled."
+		"Option [$property] remains Changed"
 	}
 }
 
 function Animate_MinMax {
 	$pathAnimateMinMax = 'HKCU:\Control Panel\Desktop\WindowMetrics'
 	$property2 = 'MinAnimate'
-	$animateMinMax = (Get-ItemProperty -Path $pathAnimateMinMax).$property2
 	$value = 0
 
-	if ($animateMinMax -ne $value) {
-
-		"Setting option [$property2] to Disabled."
-		Set-ItemProperty -Path $pathAnimateMinMax -Name $property2 -Value $value -Force
-	} 
-	else {
-		"Option [$property2] has already been Disabled."
-	}
+	# Change value option
+	Set_OptionStatus $pathAnimateMinMax $property2 $value
 }
 
 function Animate_Taskbar {
 	$pathTaskbarAnimations = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
 	$property3 = 'TaskbarAnimations'
-	$taskbarAnimations = (Get-ItemProperty -Path $pathTaskbarAnimations).$property3
 	$value = 0
 
-	if ($taskbarAnimations -ne $value) {
-
-		"Setting option [$property3] to Disabled."
-		Set-ItemProperty -Path $pathTaskbarAnimations -Name $property3 -Value $value -Force
-	} 
-	else {
-		"Option [$property3] has already been Disabled."
-	}
+	# Change value option
+	Set_OptionStatus $pathTaskbarAnimations $property3 $value
 }
 
 function Enable_Peek {
 	$pathEnablePeek = 'HKCU:\Software\Microsoft\Windows\DWM'
 	$property4 = 'EnableAeroPeek'
-	$enablePeek = (Get-ItemProperty -Path $pathEnablePeek).$property4
 	$value = 0
 
-	if ($enablePeek -ne $value) {
-
-		"Setting option [$property4] to Disabled."
-		Set-ItemProperty -Path $pathEnablePeek -Name $property4 -Value $value -Force
-	} 
-	else {
-		"Option [$property4] has already been Disabled."
-	}
+	# Change value option
+	Set_OptionStatus $pathEnablePeek $property4 $value
 }
 
 function Show_Translucent {
 	$pathTranslucent = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
 	$property5 = 'ListviewAlphaSelect'
-	$translucent = (Get-ItemProperty -Path $pathTranslucent).$property5
 	$value = 0
 
-	if ($translucent -ne $value) {
-
-		"Setting option [$property5] to Disabled."
-		Set-ItemProperty -Path $pathTranslucent -Name $property5 -Value $value -Force
-	} 
-	else {
-		"Option [$property5] has already been Disabled."
-	}
+	# Change value option
+	Set_OptionStatus $pathTranslucent $property5 $value
 }
 
 function Drop_Shadows {
 	$pathDropShadows = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
 	$property6 = 'ListviewShadow'
-	$dropShadows = (Get-ItemProperty -Path $pathDropShadows).$property6
 	$value = 0
-	
-	if ($dropShadows -ne $value) {
 
-		"Setting option [$property6] to Disabled."
-		Set-ItemProperty -Path $pathDropShadows -Name $property6 -Value $value -Force
-	} 
-	else {
-		"Option [$property6] has already been Disabled."
-	}
+	# Change value option
+	Set_OptionStatus $pathDropShadows $property6 $value
 }
 
 function Set_Appearance_Custom {
 	$pathVisualEffects = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects'
 	$property = 'VisualFXSetting'
-    $visualEffects = (Get-ItemProperty -Path $pathVisualEffects).$property
 	$value = 3
 
-	if ($visualEffects -ne $value) {
-
-		"Setting appearance [$property] to Custom."
-		Set-ItemProperty -Path $pathVisualEffects -Name $property -Value $value -Force
-	} 
-	else {
-		"Appearance [$property] has already been set to Custom."
-	}
-
+	# Change value option
+	Set_OptionStatus $pathVisualEffects $property $value
+	
 	#************************************************************************
 
 	# Efectos visuales minimos
@@ -1820,25 +1758,35 @@ function Set_Appearance_Custom {
 }
 
 $performanceFnList = [ordered]@{
-	"Turn Trim SSD"      = "Set_Config_TurnTrimSSD"
-	"Memory Compression" = "Set_Config_MemoryCompression"
-	"Scan CPU Load"      = "Set_Config_ScanCpuLoad"
-	"Appearance Custom"  = "Set_Appearance_Custom"
+	"Scan CPU Load"           = "Set_Config_ScanCpuLoad"
+	"Memory Compression"      = "Set_Config_MemoryCompression"
+	"Turn Trim SSD"           = "Set_Config_TurnTrimSSD"
+	"Disable Background Apps" = "Set_Disable_BackgroundApp"
+	"Minimal Visual Effects"  = "Set_Appearance_Custom"
 }
 
 function Set_Performance_Mode () {
 
+	$ListToChanged = @()
 	foreach ($performanceFn in $performanceFnList.Keys) {
-		$performanceFnName = $performanceFnList[$performanceFn]
 
 		Write-Host "Do you want to Apply [" -NoNewline
 		Write-Host $performanceFn -ForegroundColor Cyan -NoNewline; "]?"
 
-		Invoke-Confirmation {
-			& $performanceFnName
+		$selectedApp = Add-AppSelection $performanceFnList[$performanceFn]
+		if ($selectedApp) {
+			$ListToChanged += $selectedApp
 		}
 		Write-Host ""
 	}
+
+	"******************************"
+	"SETTING SELECTED OPTIMIZATIONS"
+	"******************************"
+	foreach ($operation in $ListToChanged) {
+		& $operation
+	}
+	Write-Host ""
 }
 
 # MyTheme 7: Custom Terminal
@@ -1877,7 +1825,8 @@ function ActivateModule ($moduleName) {
 
 # var Deprecated
 $VersionNumber = $PSVersionTable.PSVersion.Major
-# function Deprecated
+
+<# function Deprecated
 function Get-PoshTheme {
 
 	$PoshThemeName = switch ($VersionNumber) {
@@ -1894,6 +1843,7 @@ function Get-PoshTheme {
 
 	return $PoshThemeName
 }
+#>
 
 # MyTheme 7.1: Verificar si OhMyPosh está instalado [Get-PoshThemes]
 function Install_Prompt_Terminal {
@@ -2002,6 +1952,17 @@ function Test_FileContent {
 	}
 }
 
+function Show-FileContent {
+	param (
+		[string]$filePath
+	)
+
+	Write-Host "`n$(Get-Content -Path $filePath -Raw)" -ForegroundColor Cyan -NoNewline
+	Write-Host "+- Message ------------------------------+"
+	Write-Host "|   The content was added to the file!   |"
+	Write-Host "+----------------------------------------+`n"
+}
+
 # MyTheme 7.5: Agregar el contenido de configuración al perfil
 function Custom_Shell_Pwsh () {
 
@@ -2016,17 +1977,14 @@ function Custom_Shell_Pwsh () {
 	$fileInfo = Get-ChildItem $PROFILE
 	Write-Host "[*] Current File found, Adding Content... : $($fileInfo.Name)"
 
+	# Add File Content
 	$stringReduce = $activatePrompt.Substring(0, $activatePrompt.Length - 26)
 	Test_FileContent $PROFILE $stringReduce $activatePrompt
-
 	Test_FileContent $PROFILE $iconsComand $iconsComand
-
 	Test_FileContent $PROFILE $predictionComand $predictionComand
 
-	Write-Host "`n$(Get-Content -Path $PROFILE -Raw)" -ForegroundColor Cyan -NoNewline
-	Write-Host "+- Message ------------------------------+"
-	Write-Host "|   The content was added to the file!   |"
-	Write-Host "+----------------------------------------+`n"
+	# Show File Content
+	Show-FileContent $PROFILE
 }
 
 function Custom_Shell_Powershell () {
@@ -2041,13 +1999,12 @@ function Custom_Shell_Powershell () {
 	$fileInfo = Get-ChildItem $PROFILE_TEMP
 	Write-Host "[*] Current File found, Adding Content... : $($fileInfo.Name)"
 
+	# Add File Content
 	$stringReduce = $activatePrompt.Substring(0, $activatePrompt.Length - 26)
 	Test_FileContent $PROFILE_TEMP $stringReduce $activatePrompt
 
-	Write-Host "`n$(Get-Content -Path $PROFILE_TEMP -Raw)" -ForegroundColor Cyan -NoNewline
-	Write-Host "+- Message ------------------------------+"
-	Write-Host "|   The content was added to the file!   |"
-	Write-Host "+----------------------------------------+`n"
+	# Show File Content
+	Show-FileContent $PROFILE_TEMP
 }
 
 function Install_Prompt_Shell {
@@ -2095,14 +2052,12 @@ function Custom_Shell_Cmd () {
 	$fileInfo = Get-ChildItem $CONFIG
 	Write-Host "[*] Current File found, Adding Content... : $($fileInfo.Name)"
 
+	# Add File Content
 	Test_FileContent $CONFIG $addComment $addComment
-
 	Test_FileContent $CONFIG $loadPrompt $loadPrompt
 
-	Write-Host "`n$(Get-Content -Path $CONFIG -Raw)" -ForegroundColor Cyan -NoNewline
-	Write-Host "+- Message ------------------------------+"
-	Write-Host "|   The content was added to the file!   |"
-	Write-Host "+----------------------------------------+`n"
+	# Show File Content
+	Show-FileContent $CONFIG
 }
 
 #****************************************************
@@ -2184,7 +2139,7 @@ function Show-MainMenu {
 	"║ [2] Essential Tweaks           ║"
 	"║ [3] Remove Bloatware           ║"
 	"║ [4] Add Apps/Tools             ║"
-   #"║ ![5] Customize PowerPlan        ║"
+	# "║ ![5] Customize PowerPlan        ║"
 	"║ [5] Customize Terminal         ║"
 	"║ [6] Exit                       ║"
 	"╚════════════════════════════════╝"
@@ -2700,12 +2655,15 @@ Test-ChocoVersion
 Write-Host "Checking if allowGlobalConfirmation is Enabled..."
 Test-ChocoFeature
 
-#"Invoke the Main Menu the Script."
+# Establecer la página de códigos a UTF-8
+chcp 65001 > $null
+
+# Invoke the Main Menu the Script.
 Invoke-MainMenu
 
 # Sleep for 2 seconds
 Start-Sleep -Milliseconds 3000
 
 # Policy Execution Restart
-#Set-ExecutionPolicy -ExecutionPolicy Undefined -Scope CurrentUser
-#Set-ExecutionPolicy -ExecutionPolicy Undefined -Scope Process
+#Set-ExecutionPolicy -ExecutionPolicy "Undefined" -Scope "CurrentUser" -Force
+#Set-ExecutionPolicy -ExecutionPolicy "Undefined" -Scope "Process" -Force
