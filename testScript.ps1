@@ -1792,7 +1792,7 @@ function Set_Performance_Mode () {
 # MyTheme 7: Custom Terminal
 #function Install module
 function InstallModule ($moduleName) {
-	$modComand = $moduleName -eq "Terminal-Icons" ? " -Repository PSGallery" : ""
+	$modComand = if ($moduleName -eq "Terminal-Icons") { " -Repository PSGallery" } else { "" }
 	
 	$moduleComand = 'Install-Module -Name ' + $moduleName + $modComand + ' -Force'
 	if (!(Get-Module -ListAvailable -Name $moduleName)) {
