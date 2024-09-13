@@ -14,5 +14,5 @@ Ejecucion sin restricciones, para el Usuario actual.
 Ejecutar el script de manera remota en Powershell:
 
    ```
-   irm https://raw.githubusercontent.com/DiegoEli/test-script/main/testScript.ps1 | iex
+   irm https://raw.githubusercontent.com/DiegoEli/test-script/preview/testScript.ps1 | iex
    ```
