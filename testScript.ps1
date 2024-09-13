@@ -8,9 +8,9 @@
 #****************************************************
 
 # Show script info
-$WPName = "WinPerf"
+$WPName = "WinPerf (Preview)"
 $WPVersion = "v1.50.5"
-$repositoryPath = "https://raw.githubusercontent.com/DiegoEli/test-script/main/testScript.ps1"
+$repositoryPath = "https://raw.githubusercontent.com/DiegoEli/test-script/test-(preview)/testScript.ps1"
 # $repositoryPath = "https://raw.githubusercontent.com/DiegoEli/test-script/main/WinPerf.ps1"
 
 <#
