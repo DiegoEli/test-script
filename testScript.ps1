@@ -96,7 +96,7 @@ function Test-ItemPath {
 	if ( -not (Test-Path -Path "$itemPath\$itemName") ) {
 
 		Write-Host "Item [$itemName] not found, Creating..." -ForegroundColor Yellow
-		New-Item -Path $itemPath -Name $itemName -ItemType $itemType -Force
+		$null = New-Item -Path $itemPath -Name $itemName -ItemType $itemType -Force
 	}
 }
 
@@ -156,6 +156,180 @@ function Add-ItemSelection {
 	else {
 		Add-ItemSelection $valueMessage $valueName
 	}
+}
+
+Add-Type -AssemblyName PresentationFramework
+
+function GenerateWinGUI ($varTitle, $varAction) {
+	
+	# XAML básico sin CheckBoxes
+	$XAML = @"
+	<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+			Title="Dead Script 💀" 
+			Height="430" Width="390" Background="#1A1A1A" Foreground="White" 
+			FontFamily="Cascadia Mono" FontSize="12" FontWeight="Bold"
+			WindowStartupLocation="CenterScreen">
+		<StackPanel>
+			<!-- Titulo que desribira que se hace -->
+			<TextBlock Text="$varTitle" Margin="10"/>
+			
+			<!-- Marco (Border) con ScrollViewer para los CheckBox -->
+			<Border BorderBrush="Gray" BorderThickness="1" Margin="10" Padding="10" CornerRadius="7">
+				<ScrollViewer VerticalScrollBarVisibility="Auto" Height="260">
+					<StackPanel Name="ListContainer"></StackPanel>
+				</ScrollViewer>
+			</Border>
+			
+			<!-- Botón de Selección -->
+			<Button Content="$varAction" Height="30" Width="100" Background="LightGray" Foreground="Black" 
+					Name="ActionButton" BorderBrush="Transparent" HorizontalAlignment="Center" Margin="10"/>
+		</StackPanel>
+	</Window>
+"@
+	
+	# Cargar la interfaz
+	$reader = New-Object System.Xml.XmlNodeReader ([xml]$XAML)
+	$window = [Windows.Markup.XamlReader]::Load($reader)
+	
+	return $window
+}
+
+function GenerateWinGUITriple ($varTitle, $varAction) {
+	
+	# XAML básico sin CheckBoxes
+	$XAML = @"
+	<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+			Title="Dead Script 💀" 
+			Height="430" Width="910" Background="#1A1A1A" Foreground="White" 
+			FontFamily="Cascadia Mono" FontSize="12" FontWeight="Bold"
+			WindowStartupLocation="CenterScreen">
+		<StackPanel>
+			<!-- Titulo que describe qué se hace -->
+			<TextBlock Text="$varTitle" Margin="10" TextWrapping="Wrap"/>
+		
+			<!-- Panel principal con dos columnas -->
+			<Grid Margin="5">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="*" />
+					<ColumnDefinition Width="*" />
+					<ColumnDefinition Width="*" />
+				</Grid.ColumnDefinitions>
+			
+				<!-- Panel de Lista 1 -->
+				<Border Grid.Column="0" BorderBrush="Gray" BorderThickness="1" Margin="5" Padding="10" CornerRadius="7">
+					<ScrollViewer VerticalScrollBarVisibility="Auto" Height="260">
+						<StackPanel Name="ListContainer1"></StackPanel>
+					</ScrollViewer>
+				</Border>
+			
+				<!-- Panel de Lista 2 -->
+				<Border Grid.Column="1" BorderBrush="Gray" BorderThickness="1" Margin="5" Padding="10" CornerRadius="7">
+					<ScrollViewer VerticalScrollBarVisibility="Auto" Height="260">
+						<StackPanel Name="ListContainer2"></StackPanel>
+					</ScrollViewer>
+				</Border>
+
+				<!-- Panel de Lista 3 -->
+				<Border Grid.Column="3" BorderBrush="Gray" BorderThickness="1" Margin="5" Padding="10" CornerRadius="7">
+					<ScrollViewer VerticalScrollBarVisibility="Auto" Height="260">
+						<StackPanel Name="ListContainer3"></StackPanel>
+					</ScrollViewer>
+				</Border>
+			</Grid>
+		
+			<!-- Botón de Selección -->
+			<Button Content="$varAction" Height="30" Width="100" Background="LightGray" Foreground="Black" 
+					Name="ActionButton" BorderBrush="Transparent" HorizontalAlignment="Center" Margin="10"/>
+		</StackPanel>
+	</Window>
+"@
+	
+	# Cargar la interfaz
+	$reader = New-Object System.Xml.XmlNodeReader ([xml]$XAML)
+	$window = [Windows.Markup.XamlReader]::Load($reader)
+	
+	return $window
+}
+
+function GenerateWinGUIShell ($varTitle, $varAction) {
+	
+	$XAML = @"
+	<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+			Title="Dead Script 💀" 
+			Height="430" Width="810" Background="#1A1A1A" Foreground="White" 
+			FontFamily="Cascadia Mono" FontSize="12" FontWeight="Bold" 
+			WindowStartupLocation="CenterScreen">
+		<StackPanel>
+			<!-- Titulo que describe qué se hace -->
+			<TextBlock Text="$varTitle" Margin="10" TextWrapping="Wrap"/>
+		
+			<!-- Panel principal con dos columnas -->
+			<Grid Margin="5">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="*" />
+					<ColumnDefinition Width="*" />
+					<ColumnDefinition Width="*" />
+				</Grid.ColumnDefinitions>
+			
+				<!-- Panel de Lista 1 -->
+				<Border Grid.Column="0" BorderBrush="Gray" BorderThickness="1" Margin="5" Padding="10" CornerRadius="7">
+					<StackPanel Height="260">
+						<TextBlock Name="TextBlock1" Margin="5,2,5,2" TextWrapping="Wrap"/>
+						<CheckBox Name="CheckBox1" Margin="5,2,5,2" Foreground="White"/>
+					</StackPanel>
+				</Border>
+			
+				<!-- Panel de Lista 2 -->
+				<Border Grid.Column="1" BorderBrush="Gray" BorderThickness="1" Margin="5" Padding="10" CornerRadius="7">
+					<StackPanel Height="260">
+						<TextBlock Name="TextBlock2" Margin="5,2,5,2" TextWrapping="Wrap"/>
+						<CheckBox Name="CheckBox2" Margin="5,2,5,2" Foreground="White"/>
+					</StackPanel>
+				</Border>
+				
+				<!-- Panel de Lista 3 -->
+				<Border Grid.Column="2" BorderBrush="Gray" BorderThickness="1" Margin="5" Padding="10" CornerRadius="7">
+					<StackPanel Height="260">
+						<TextBlock Name="TextBlock3" Margin="5,2,5,2" TextWrapping="Wrap"/>
+						<CheckBox Name="CheckBox3" Margin="5,2,5,2" Foreground="White"/>
+					</StackPanel>
+				</Border>
+			</Grid>
+		
+			<!-- Botón de Selección -->
+			<Button Content="$varAction" Height="30" Width="100" Background="LightGray" Foreground="Black" 
+					Name="ActionButton" BorderBrush="Transparent" HorizontalAlignment="Center" Margin="10"/>
+		</StackPanel>
+	</Window>
+"@
+
+    # Cargar la interfaz
+    $reader = New-Object System.Xml.XmlNodeReader ([xml]$XAML)
+    $window = [Windows.Markup.XamlReader]::Load($reader)
+
+    return $window
+}
+
+function GenerateCheckBox ($currentList, $window, $listContainerName) {
+	
+	# Generar CheckBoxes dinámicamente y registrarlos en el objeto $window
+	foreach ($item in $currentList) {
+		$checkBox = New-Object System.Windows.Controls.CheckBox
+		$checkBox.Content = $item.ShowInGUI
+		$checkBox.Name = $item.IsXamlId
+		$checkBox.Foreground = 'White'
+		$checkBox.FontWeight = 'Regular'
+		$window.FindName($listContainerName).Children.Add($checkBox)
+		$window.RegisterName($item.IsXamlId, $checkBox)  # Registrar el CheckBox
+	}
+	
+	return $checkBox
+}
+
+function GenerateTextBlock ($currentText, $checkBoxText, $window, $textBlockName, $checkBoxName) {
+	
+	$window.FindName($textBlockName).Text = $currentText
+	$window.FindName($checkBoxName).Content = $checkBoxText
 }
 
 function Invoke-Confirmation {
@@ -245,7 +419,7 @@ function Opt_HibernateMode {
 	$property1 = 'ShowHibernateOption'
 	$value1 = 0
 
-	#"Don´t Show Option Hibernate"
+	#"Hide Option Hibernate"
 	Set-OptionValue $pathHibernateOption $property1 $value1
 
 	$pathHibernateMode = 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power'
@@ -259,6 +433,15 @@ function Opt_HibernateMode {
 
 	#"Disable Hibernate Mode"
 	powercfg /hibernate off
+}
+
+function Opt_WiFiSense {
+	$wifiPath = ''
+	$property = ''
+	$value = 00
+	
+	# Option change value
+	Set-OptionValue $wifiPath $property $value
 }
 
 function Opt_StartupSound {
@@ -539,55 +722,65 @@ function Remove_DesktopIcons {
 	Set-OptionValue $classicPath $property4 $value1
 }
 
-$optionList = [ordered]@{
-	"Enable Auto Logon"               = "Opt_AutoLogon"
-	"Disable Fast Startup"            = "Opt_FastStartup"
-	"Enable Verbose Logon Messages"   = "Opt_VerboseLogon"
-	"Enable Show Version in Desktop"  = "Opt_ShowBuildVersion"
-	"Disable Hibernate Mode(Desktop)" = "Opt_HibernateMode"
-	"Disable Windows Startup Sound"   = "Opt_StartupSound"
-	"Disable Adjust Volume of Sounds" = "Opt_CommunicationsActivity"
-	"Disable Pointer Precision"       = "Opt_MousePrecision"
-	"Disable Storage Sense"           = "Opt_StorageSense"
-	# "Disable Device Encryption"       = "Opt_DeviceEncryption"
-	"Disable Suggest Snap"            = "Opt_SnapSuggest"
-	"Enable Show File Extensions"     = "Opt_ShowFileExtensions"
-	"Enable Show Hidden System Files" = "Opt_ShowHiddenFiles"
-	"Disable Show Sync Provider"      = "Opt_ShowSyncProvider"
-	"Enable End Task in Taskbar"      = "Opt_ShowEndTask"
-	# "Enable Sudo Command"             = "Opt_SudoCommand"
-	"Enable Dark Mode"                = "Opt_DarkMode"
-	"Enable Hide Item Search"         = "Opt_ShowItemSearch"
-	"Disable Show Item TaskView"      = "Opt_ShowItemTaskView"
-	"Disable Hide the Taskbar"        = "Opt_HideTaskbar"
-	"Enable Show the Desktop"         = "Opt_ShowDesktop"
-	"Disable Show Language Bar"       = "Opt_ShowLanguageBar"
-	"Enable Show Seconds in Clock"    = "Opt_ShowSeconds"
-	"Disable Game Bar"                = "Opt_GameBar"
-	"Disable Game Mode"               = "Opt_GameMode"
-	"Remove Gallery Icon in Explorer" = "Remove_GalleryIcon"
-	"Remove System Icons in Desktop"  = "Remove_DesktopIcons"
-}
+$optionList = @(
+	@{ ShowInGUI = "Enable Auto Logon"; IsXamlId = "AutoLogon"; IsOperation = "Opt_AutoLogon" }
+	@{ ShowInGUI = "Disable Fast Startup"; IsXamlId = "FastStartup"; IsOperation = "Opt_FastStartup" }
+	@{ ShowInGUI = "Enable Verbose Logon Messages"; IsXamlId = "VerboseLogon"; IsOperation = "Opt_VerboseLogon" }
+	@{ ShowInGUI = "Enable Show Version in Desktop"; IsXamlId = "ShowBuildVersion"; IsOperation = "Opt_ShowBuildVersion" }
+	@{ ShowInGUI = "Disable Hibernate Mode (Only Desktop PC)"; IsXamlId = "HibernateMode"; IsOperation = "Opt_HibernateMode" }
+	@{ ShowInGUI = "Disable Wi-Fi Sense (Only Desktop PC)"; IsXamlId = "WiFi_Sense"; IsOperation = "Opt_WiFiSense" }
+	@{ ShowInGUI = "Disable Windows Startup Sound"; IsXamlId = "StartupSound"; IsOperation = "Opt_StartupSound" }
+	@{ ShowInGUI = "Disable Adjust Volume of Sounds"; IsXamlId = "CommunicationsActivity"; IsOperation = "Opt_CommunicationsActivity" }
+	@{ ShowInGUI = "Disable Pointer Precision"; IsXamlId = "MousePrecision"; IsOperation = "Opt_MousePrecision" }
+	@{ ShowInGUI = "Disable Storage Sense"; IsXamlId = "StorageSense"; IsOperation = "Opt_StorageSense" }
+	# @{ ShowInGUI = "Disable Device Encryption"; IsXamlId = "DeviceEncryption"; IsOperation = "Opt_DeviceEncryption" }
+	@{ ShowInGUI = "Disable Suggest Snap"; IsXamlId = "SnapSuggest"; IsOperation = "Opt_SnapSuggest" }
+	@{ ShowInGUI = "Enable Show File Extensions"; IsXamlId = "ShowFileExtensions"; IsOperation = "Opt_ShowFileExtensions" }
+	@{ ShowInGUI = "Enable Show Hidden System Files"; IsXamlId = "ShowHiddenFiles"; IsOperation = "Opt_ShowHiddenFiles" }
+	@{ ShowInGUI = "Disable Show Sync Provider"; IsXamlId = "ShowSyncProvider"; IsOperation = "Opt_ShowSyncProvider" }
+	@{ ShowInGUI = "Enable End Task in Taskbar"; IsXamlId = "ShowEndTask"; IsOperation = "Opt_ShowEndTask" }
+	# @{ ShowInGUI = "Enable Sudo Command"; IsXamlId = "SudoCommand"; IsOperation = "Opt_SudoCommand" }
+	@{ ShowInGUI = "Enable Dark Mode"; IsXamlId = "DarkMode"; IsOperation = "Opt_DarkMode" }
+	@{ ShowInGUI = "Enable Hide Item Search"; IsXamlId = "ShowItemSearch"; IsOperation = "Opt_ShowItemSearch" }
+	@{ ShowInGUI = "Disable Show Item TaskView"; IsXamlId = "ShowItemTaskView"; IsOperation = "Opt_ShowItemTaskView" }
+	@{ ShowInGUI = "Disable Hide the Taskbar"; IsXamlId = "HideTaskbar"; IsOperation = "Opt_HideTaskbar" }
+	@{ ShowInGUI = "Enable Show the Desktop"; IsXamlId = "ShowDesktop"; IsOperation = "Opt_ShowDesktop" }
+	@{ ShowInGUI = "Disable Show Language Bar"; IsXamlId = "ShowLanguageBar"; IsOperation = "Opt_ShowLanguageBar" }
+	@{ ShowInGUI = "Enable Show Seconds in Clock"; IsXamlId = "ShowSeconds"; IsOperation = "Opt_ShowSeconds" }
+	@{ ShowInGUI = "Disable Game Bar"; IsXamlId = "GameBar"; IsOperation = "Opt_GameBar" }
+	@{ ShowInGUI = "Disable Game Mode"; IsXamlId = "GameMode"; IsOperation = "Opt_GameMode" }
+	@{ ShowInGUI = "Remove Gallery Icon in Explorer"; IsXamlId = "GalleryIcon"; IsOperation = "Remove_GalleryIcon" }
+	@{ ShowInGUI = "Remove System Icons in Desktop"; IsXamlId = "DesktopIcons"; IsOperation = "Remove_DesktopIcons" }
+)
 
 function Set_Default_Option () {
 
-	Write-Host "SET DEFAULT OPTION`n------------------"
-	$ListToChanged = @()
-	foreach ($listKey in $optionList.Keys) {
-
-		$selectedApp = Add-ItemSelection $listKey $optionList[$listKey]
-		if ($selectedApp) {
-			$ListToChanged += $selectedApp
+	$window = GenerateWinGUI "SELECCIONE LAS PREFERENCIAS" "Aplicar"
+	$checkBox = GenerateCheckBox $optionList $window "ListContainer"
+	
+	$window.FindName("ActionButton").Add_Click({
+		
+		$ListToChanged = @()
+		foreach ($listKey in $optionList) {
+			$checkBox = $window.FindName($listKey.IsXamlId)
+			if ($checkBox -and $checkBox.IsChecked) {
+				$ListToChanged += $listKey.IsOperation
+			}
 		}
-	}
-	Write-Host ""
-
-	"***************************"
-	"SETTING SELECTED PREFERENCE"
-	"***************************"
-	foreach ($operation in $ListToChanged) {
-		& $operation
-	}
+		
+		Write-Host "==  SELECTED PREFERENCE  =="
+		if ( $ListToChanged.Count -gt 0 ) {
+			foreach ($Operation in $ListToChanged) {
+				& $Operation
+			}
+		}
+		Write-Host "=========================="
+		Write-Host "  Operation are Finished  "
+		Write-Host "=========================="
+		$window.Close()
+	})
+	
+	$window.ShowDialog()
 }
 
 # Modification #: Configure privacity in Windows
@@ -833,41 +1026,51 @@ function Disable_LocationTracking {
 	Set-OptionValue $path_4 $property4 $value4
 }
 
-$privacyList = [ordered]@{
-	"Disable Windows Spotlight"      = "Disable_Spotlight"
-	"Disable Welcome Experience"     = "Disable_AdditionalSettings"
-	"Disable Get Facts, Tips, Trick" = "Disable_GetTipsTricks"
-	"Disable Windows Start Info"     = "Disable_WinStartInfo"
-	"Disable Personalize Ads"        = "Disable_PersonalizeAds"
-	"Disable Typing Personalization" = "Disable_TypingPersonalization"
-	"Disable Diagnostic Data"        = "Disable_DiagnosticData"
-	"Disable Activity History"       = "Disable_ActivityHistory"
-	"Disable Cortana Results"        = "Disable_CortanaResults"
-	"Disable Web Results"            = "Disable_WebResults"
-	"Disable Local Results"          = "Disable_LocalResults"
-	"Disable Location Tracking"      = "Disable_LocationTracking"
-}
+$privacyList = @(
+	@{ ShowInGUI = "Disable Windows Spotlight"; IsXamlId = "Spotlight"; IsOperation = "Disable_Spotlight" }
+	@{ ShowInGUI = "Disable Welcome Experience"; IsXamlId = "AdditionalSettings"; IsOperation = "Disable_AdditionalSettings" }
+	@{ ShowInGUI = "Disable Get Facts, Tips, Trick"; IsXamlId = "GetTipsTricks"; IsOperation = "Disable_GetTipsTricks" }
+	@{ ShowInGUI = "Disable Windows Start Info"; IsXamlId = "WinStartInfo"; IsOperation = "Disable_WinStartInfo" }
+	@{ ShowInGUI = "Disable Personalize Ads"; IsXamlId = "PersonalizeAds"; IsOperation = "Disable_PersonalizeAds" }
+	@{ ShowInGUI = "Disable Typing Personalization"; IsXamlId = "TypingPersonalization"; IsOperation = "Disable_TypingPersonalization" }
+	@{ ShowInGUI = "Disable Diagnostic Data"; IsXamlId = "DiagnosticData"; IsOperation = "Disable_DiagnosticData" }
+	@{ ShowInGUI = "Disable Activity History"; IsXamlId = "ActivityHistory"; IsOperation = "Disable_ActivityHistory" }
+	@{ ShowInGUI = "Disable Cortana Results"; IsXamlId = "CortanaResults"; IsOperation = "Disable_CortanaResults" }
+	@{ ShowInGUI = "Disable Web Results"; IsXamlId = "WebResults"; IsOperation = "Disable_WebResults" }
+	@{ ShowInGUI = "Disable Local Results"; IsXamlId = "LocalResults"; IsOperation = "Disable_LocalResults" }
+	@{ ShowInGUI = "Disable Location Tracking"; IsXamlId = "LocationTracking"; IsOperation = "Disable_LocationTracking" }
+)
 
-function Set_Privacy_Security () {
+# function Set_Privacy_Security () {
 
-	Write-Host "SET PRIVACY TWEAKS`n------------------"
-	$ListToChanged = @()
-	foreach ($listKey in $privacyList.Keys) {
+# 	$window = GenerateWinGUI "SELECCIONE LOS AJUSTES DE PRIVACIDAD" "Aplicar"
+# 	$checkBox = GenerateCheckBox $privacyList $window "ListContainer"
 
-		$selectedApp = Add-ItemSelection $listKey $privacyList[$listKey]
-		if ($selectedApp) {
-			$ListToChanged += $selectedApp
-		}
-	}
-	Write-Host ""
-	
-	"*******************************"
-	"SETTING SELECTED PRIVACY TWEAKS"
-	"*******************************"
-	foreach ($operation in $ListToChanged) {
-		& $operation
-	}
-}
+# 	$window.FindName("ActionButton").Add_Click({
+		
+# 		$ListToChanged = @()
+# 		foreach ($listKey in $privacyList) {
+# 			$checkBox = $window.FindName($listKey.IsXamlId)
+# 			if ($checkBox -and $checkBox.IsChecked) {
+# 				$ListToChanged += $listKey.IsOperation
+# 			}
+# 		}
+		
+# 		Write-Host "==  SELECTED PRIVACY TWEAKS  =="
+# 		if ( $ListToChanged.Count -gt 0 ) {
+# 			foreach ($Operation in $ListToChanged) {
+# 				& $Operation
+# 			}
+# 		}
+# 		Write-Host "=========================="
+# 		Write-Host "  Operation are Finished  "
+# 		Write-Host "=========================="
+# 		$window.Close()
+# 	})
+
+# 	# Mostrar la interfaz
+# 	$window.ShowDialog()
+# }
 
 # Modification #: Configure Update behavior in Windows
 function Set_WinAutoUpdates {
@@ -993,38 +1196,47 @@ function Set_LimitBandwidthUpdates {
 	Set-OptionValue $bandwidthPath $property $value
 }
 
-$updateList = [ordered]@{
-	"Disable Windows AutoUpdates"        = "Set_WinAutoUpdates"
-	"Disable Preliminary Updates"        = "Set_PreliminaryUpdates"
-	"Enable Delay Security Updates"      = "Set_DelaySecurityUpdates"
-	"Disable Get the latest Updates"     = "Set_GetLatestUpdates"
-	"Disable Updates for other products" = "Set_UpdateOtherProduct"
-	"Enable Active Hours of 06:00-23:00" = "Set_ActiveHours"
-	"Disable Downloads from other PCs"   = "Set_DownloadsOtherPCs"
-	"Disable Store AutoUpdates"          = "Set_StoreAutoUpdates"
-	"Limit reservable bandwidth"         = "Set_LimitBandwidthUpdates"
-}
+$updateList = @(
+	@{ ShowInGUI = "Disable Windows AutoUpdates"; IsXamlId = "WinAutoUpdates"; IsOperation = "Set_WinAutoUpdates" }
+	@{ ShowInGUI = "Disable Preliminary Updates"; IsXamlId = "PreliminaryUpdates"; IsOperation = "Set_PreliminaryUpdates" }
+	@{ ShowInGUI = "Enable Delay Security Updates"; IsXamlId = "DelaySecurityUpdates"; IsOperation = "Set_DelaySecurityUpdates" }
+	@{ ShowInGUI = "Disable Get the latest Updates"; IsXamlId = "GetLatestUpdates"; IsOperation = "Set_GetLatestUpdates" }
+	@{ ShowInGUI = "Disable Updates for other products"; IsXamlId = "UpdateOtherProduct"; IsOperation = "Set_UpdateOtherProduct" }
+	@{ ShowInGUI = "Enable Active Hours of 06:00-23:00"; IsXamlId = "ActiveHours"; IsOperation = "Set_ActiveHours" }
+	@{ ShowInGUI = "Disable Downloads from other PCs"; IsXamlId = "DownloadsOtherPCs"; IsOperation = "Set_DownloadsOtherPCs" }
+	@{ ShowInGUI = "Disable Store AutoUpdates"; IsXamlId = "StoreAutoUpdates"; IsOperation = "Set_StoreAutoUpdates" }
+	@{ ShowInGUI = "Limit reservable bandwidth"; IsXamlId = "LimitBandwidthUpdates"; IsOperation = "Set_LimitBandwidthUpdates" }
+)
 
-function Set_Update_Behavior () {
+# function Set_Update_Behavior () {
 
-	Write-Host "SET UPDATE BEHAVIOR`n-------------------"
-	$ListToChanged = @()
-	foreach ($listKey in $updateList.Keys) {
+# 	$window = GenerateWinGUI "SELECCIONE EL COMPORTAMIENTO DE LAS UPDATES" "Aplicar"
+# 	$checkBox = GenerateCheckBox $updateList $window "ListContainer"
 
-		$selectedApp = Add-ItemSelection $listKey $updateList[$listKey]
-		if ($selectedApp) {
-			$ListToChanged += $selectedApp
-		}
-	}
-	Write-Host ""
+# 	$window.FindName("ActionButton").Add_Click({
 
-	"********************************"
-	"SETTING SELECTED UPDATE BEHAVIOR"
-	"********************************"
-	foreach ($operation in $ListToChanged) {
-		& $operation
-	}
-}
+# 		$ListToChanged = @()
+# 		foreach ($listKey in $updateList) {
+# 			$checkBox = $window.FindName($listKey.IsXamlId)
+# 			if ($checkBox -and $checkBox.IsChecked) {
+# 				$ListToChanged += $listKey.IsOperation
+# 			}
+# 		}
+
+# 		Write-Host "==  SELECTED UPDATE BEHAVIOR  =="
+# 		if ( $ListToChanged.Count -gt 0 ) {
+# 			foreach ($Operation in $ListToChanged) {
+# 				& $Operation
+# 			}
+# 		}
+# 		Write-Host "=========================="
+# 		Write-Host "  Operation are Finished  "
+# 		Write-Host "=========================="
+# 		$window.Close()
+# 	})
+
+# 	$window.ShowDialog()
+# }
 
 # Modification #: Configure performance in Windows
 function Config_ScanCpuLoad {
@@ -1207,36 +1419,71 @@ function Set_GroupProcesses {
 	Set-OptionValue $svchostPath $property $ram
 }
 
-$performanceList = [ordered]@{
-	"Reduce Scan CPU Load"         = "Config_ScanCpuLoad"
-	"Disable Auto Sample"          = "Config_AutoSample"
-	"Enable Memory Compression"    = "Config_MemoryCompression"
-	"Enable TRIM SSD"              = "Config_TrimSSD"
-	"Disable Background Apps"      = "Disable_BackgroundApp"
-	"Disable Transparency Effects" = "Disable_TransparencyEffects"
-	"Apply Minimal Visual Effects" = "Set_CustomAppearance"
-	"Group Svchost Processes"      = "Set_GroupProcesses"
-}
+$performanceList = @(
+	@{ ShowInGUI = "Reduce Scan CPU Load"; IsXamlId = "ScanCpuLoad"; IsOperation = "Config_ScanCpuLoad" }
+	@{ ShowInGUI = "Disable Auto Sample"; IsXamlId = "AutoSample"; IsOperation = "Config_AutoSample" }
+	@{ ShowInGUI = "Enable Memory Compression"; IsXamlId = "MemoryCompression"; IsOperation = "Config_MemoryCompression" }
+	@{ ShowInGUI = "Enable TRIM SSD"; IsXamlId = "TrimSSD"; IsOperation = "Config_TrimSSD" }
+	@{ ShowInGUI = "Disable Background Apps"; IsXamlId = "BackgroundApp"; IsOperation = "Disable_BackgroundApp" }
+	@{ ShowInGUI = "Disable Transparency Effects"; IsXamlId = "TransparencyEffects"; IsOperation = "Disable_TransparencyEffects" }
+	@{ ShowInGUI = "Apply Minimal Visual Effects"; IsXamlId = "CustomAppearance"; IsOperation = "Set_CustomAppearance" }
+	@{ ShowInGUI = "Group Svchost Processes"; IsXamlId = "GroupProcesses"; IsOperation = "Set_GroupProcesses" }
+)
 
-function Set_Performance_Mode () {
+function Set_PrivacySecu_UpdateBeha_PerformanceMode () {
 
-	Write-Host "SET PERFORMANCE TWEAKS`n----------------------"
-	$ListToChanged = @()
-	foreach ($listKey in $performanceList.Keys) {
+	$window = GenerateWinGUITriple "SELECCIONE LOS AJUSTES DE PRIVACIDAD, EL COMPORTAMIENTO DE LAS ACTUALIZACIONES Y LOS AJUSTES DE RENDIMIENTO" "Aplicar"
+	$checkBox1 = GenerateCheckBox $privacyList $window "ListContainer1"
+	$checkBox2 = GenerateCheckBox $updateList $window "ListContainer2"
+	$checkBox3 = GenerateCheckBox $performanceList $window "ListContainer3"
 
-		$selectedApp = Add-ItemSelection $listKey $performanceList[$listKey]
-		if ($selectedApp) {
-			$ListToChanged += $selectedApp
+	$window.FindName("ActionButton").Add_Click({
+
+		$ListToChanged1 = @()
+		foreach ($listKey in $privacyList) {
+			$checkBox1 = $window.FindName($listKey.IsXamlId)
+			if ($checkBox1 -and $checkBox1.IsChecked) {
+				$ListToChanged1 += $listKey.IsOperation
+			}
 		}
-	}
-	Write-Host ""
+		$ListToChanged2 = @()
+		foreach ($listKey in $updateList) {
+			$checkBox2 = $window.FindName($listKey.IsXamlId)
+			if ($checkBox2 -and $checkBox2.IsChecked) {
+				$ListToChanged2 += $listKey.IsOperation
+			}
+		}
+		$ListToChanged3 = @()
+		foreach ($listKey in $performanceList) {
+			$checkBox3 = $window.FindName($listKey.IsXamlId)
+			if ($checkBox3 -and $checkBox3.IsChecked) {
+				$ListToChanged3 += $listKey.IsOperation
+			}
+		}
 
-	"******************************"
-	"SETTING SELECTED OPTIMIZATIONS"
-	"******************************"
-	foreach ($operation in $ListToChanged) {
-		& $operation
-	}
+		Write-Host "==  SELECTED OPERATIONS  =="
+		if ( $ListToChanged1.Count -gt 0 ) {
+			foreach ($Operation in $ListToChanged1) {
+				& $Operation
+			}
+		}
+		if ( $ListToChanged2.Count -gt 0 ) {
+			foreach ($Operation in $ListToChanged2) {
+				& $Operation
+			}
+		}
+		if ( $ListToChanged3.Count -gt 0 ) {
+			foreach ($Operation in $ListToChanged3) {
+				& $Operation
+			}
+		}
+		Write-Host "=========================="
+		Write-Host "  Operation are Finished  "
+		Write-Host "=========================="
+		$window.Close()
+	})
+
+	$window.ShowDialog()
 }
 
 # Modification #: Configure service in Windows
@@ -1326,7 +1573,7 @@ $manualList = @(
 
 function Set_Service_Startup () {
 	
-	Write-Host "SET SERVICES`n------------"
+	Write-Host "==  SET SERVICES  =="
 	foreach ($serviceId in $disableList) {
 		ConfigService $serviceId Disabled
 	}
@@ -1334,6 +1581,9 @@ function Set_Service_Startup () {
 	foreach ($serviceId in $manualList) {
 		ConfigService $serviceId Manual
 	}
+	Write-Host "=========================="
+	Write-Host "  Operation are Finished  "
+	Write-Host "=========================="
 }
 
 # Modification #: Configure Task Sheduler in Windows
@@ -1443,11 +1693,14 @@ $disableTList = @(
 )
 
 function Set_Scheduled_Task () {
-
-	Write-Host "SET SCHEDULED TASKS`n-------------------"
+	
+	Write-Host "==  SET SCHEDULED TASKS  =="
 	foreach ($task in $disableTList) {
 		ConfigTask $task.Path $task.Name Disabled
 	}
+	Write-Host "=========================="
+	Write-Host "  Operation are Finished  "
+	Write-Host "=========================="
 }
 
 # Modification #: Configure Remove AppCapability in Windows
@@ -1482,50 +1735,59 @@ function RemoveCapabilityApp ($appName) {
 	}
 }
 
-$capabilityList = [ordered]@{
-	"Analog Holographic"   = "Analog.Holographic.Desktop"
-	"Steps Recorder"       = "App.StepsRecorder"
-	"Quick Assist"         = "App.Support.QuickAssist"
-	"Internet Explorer"    = "Browser.InternetExplorer"
-	"Hello Face"           = "Hello.Face.20134"
-	"Math Recognizer"      = "MathRecognizer"
-	"Windows Media Player" = "Media.WindowsMediaPlayer"
-	"Wallpapers Extended"  = "Microsoft.Wallpapers.Extended"
-	"MSPaint OLD"          = "Microsoft.Windows.MSPaint"
-	"Notepad OLD"          = "Microsoft.Windows.Notepad.System"
-	"PowerShell ISE"       = "Microsoft.Windows.PowerShell.ISE"
-	"WordPad"              = "Microsoft.Windows.WordPad"
-	"Print Fax"            = "Print.Fax.Scan"
-	# "WMIC Command"         = "WMIC"
-	"XPS Viewer"           = "XPS.Viewer"
-}
+$capabilityList = @(
+	@{ ShowInGUI = "Analog Holographic"; IsXamlId = "AnalogHolographic"; IsOperation = "Analog.Holographic.Desktop" }
+	@{ ShowInGUI = "Steps Recorder"; IsXamlId = "StepsRecorder"; IsOperation = "App.StepsRecorder" }
+	@{ ShowInGUI = "Quick Assist"; IsXamlId = "QuickAssist"; IsOperation = "App.Support.QuickAssist" }
+	@{ ShowInGUI = "Internet Explorer"; IsXamlId = "InternetExplorer"; IsOperation = "Browser.InternetExplorer" }
+	@{ ShowInGUI = "Hello Face"; IsXamlId = "HelloFace"; IsOperation = "Hello.Face.20134" }
+	@{ ShowInGUI = "Math Recognizer"; IsXamlId = "MathRecognizer"; IsOperation = "MathRecognizer" }
+	@{ ShowInGUI = "Windows Media Player"; IsXamlId = "WindowsMediaPlayer"; IsOperation = "Media.WindowsMediaPlayer" }
+	@{ ShowInGUI = "Wallpapers Extended"; IsXamlId = "WallpapersExtended"; IsOperation = "Microsoft.Wallpapers.Extended" }
+	@{ ShowInGUI = "MSPaint (OLD)"; IsXamlId = "WindowsMSPaint"; IsOperation = "Microsoft.Windows.MSPaint" }
+	@{ ShowInGUI = "Notepad (OLD)"; IsXamlId = "WindowsNotepad"; IsOperation = "Microsoft.Windows.Notepad.System" }
+	@{ ShowInGUI = "PowerShell ISE"; IsXamlId = "PowerShellISE"; IsOperation = "Microsoft.Windows.PowerShell.ISE" }
+	@{ ShowInGUI = "WordPad"; IsXamlId = "WindowsWordPad"; IsOperation = "Microsoft.Windows.WordPad" }
+	@{ ShowInGUI = "Print Fax"; IsXamlId = "PrintFax"; IsOperation = "Print.Fax.Scan" }
+	# @{ ShowInGUI = "WMIC Command"; IsXamlId = "WMIC"; IsOperation = "WMIC" }
+	@{ ShowInGUI = "XPS Viewer"; IsXamlId = "XPSViewer"; IsOperation = "XPS.Viewer" }
+)
 
-function Remove_Capability_App () {
-	
-	Write-Host "REMOVE CAPABILITY APP`n---------------------"
-	$ListToRemoveC = @()
-	foreach ($listKey in $capabilityList.Keys) {
+# function Remove_Capability_App () {
 
-		$messageS = "Remove Capability $listKey"
-		$selectedApp = Add-ItemSelection $messageS $capabilityList[$listKey]
-		if ($selectedApp) {
-			$ListToRemoveC += $selectedApp
-		}
-	}
+# 	$window = GenerateWinGUI "SELECCIONE LAS CAPACIDADES DE WINDOWS" "Remover"
+# 	$checkBox = GenerateCheckBox $capabilityList $window "ListContainer"
 
-	Write-Host "`n======================="
-	Write-Host "  SELECTED CAPABILITY  "
-	Write-Host "======================="
-	Write-Host "$ListToRemoveC`n"
-	foreach ($appcId in $ListToRemoveC) {
-		RemoveCapabilityApp $appcId
-	}
-}
+# 	$window.FindName("ActionButton").Add_Click({
+
+# 		$ListToRemoveC = @()
+# 		foreach ($listKey in $capabilityList) {
+# 			$checkBox = $window.FindName($listKey.IsXamlId)
+# 			if ($checkBox -and $checkBox.IsChecked) {
+# 				$ListToRemoveC += $listKey.IsOperation
+# 			}
+# 		}
+
+# 		Write-Host "==  SELECTED CAPABILITY  =="
+# 		if ( $ListToRemoveC.Count -gt 0 ) {
+# 			foreach ($appcId in $ListToRemoveC) {
+# 				RemoveCapabilityApp $appcId
+# 			}
+# 		}
+# 		Write-Host "=========================="
+# 		Write-Host "  Operation are Finished  "
+# 		Write-Host "=========================="
+# 		$window.Close()
+# 	})
+
+# 	$window.ShowDialog()
+# }
 
 # Modification #: Configure Remove AppxPackage in Windows
 # Get-AppxPackage | Where-Object { $_.NonRemovable -like "False" } | Sort-Object Name | Format-Table -Property Name, PackageFullName, NonRemovable
 function RemovePackageAppx ($appxName) {
-	$appx = Get-AppxPackage | Where-Object { $_.PackageFullName -like "*$appxName*" }
+	# $appx = Get-AppxPackage | Where-Object { ($_.NonRemovable -like "False") -and ($_.PackageFullName -like "*$appxName*") }
+	$appx = Get-AppxPackage -Name "*$appxName*"
 
 	if ($appx) {
 		
@@ -1539,83 +1801,96 @@ function RemovePackageAppx ($appxName) {
 	}
 }
 
-$packageList = [ordered]@{
-	"Microsoft Clipchamp"     = "Clipchamp.Clipchamp"
-	"Cortana"                 = "Microsoft.549981C3F5F10"
-	"Microsoft News"          = "Microsoft.BingNews"
-	"MSN Weather"             = "Microsoft.BingWeather"
-	# "Copilot"                 = "Microsoft.Copilot"
-	"Xbox App"                = "Microsoft.GamingApp"
-	"Get Help"                = "Microsoft.GetHelp"
-	"Get Started"             = "Microsoft.Getstarted"
-	"HEIF Image Extension"    = "Microsoft.HEIFImageExtension"
-	"HEVC Video Extension"    = "Microsoft.HEVCVideoExtension"
-	"Paint 3D"                = "Microsoft.Microsoft3DViewer"
-	# "Microsoft Edge"          = "Microsoft.MicrosoftEdge.Stable"        #QUITARLO ROMPE COSAS
-	# "Microsoft Edge Tools"    = "Microsoft.MicrosoftEdgeDevToolsClient"
-	"Microsoft 365 (PWA)"     = "Microsoft.MicrosoftOfficeHub"
-	"Solitaire Collection"    = "Microsoft.MicrosoftSolitaireCollection"
-	"Microsoft Sticky Notes"  = "Microsoft.MicrosoftStickyNotes"
-	"Mixed Reality Portal"    = "Microsoft.MixedReality.Portal"
-	"Paint (OLD)"             = "Microsoft.MSPaint"
-	"OneNote"                 = "Microsoft.Office.OneNote"
-	"Outlook for Windows"     = "Microsoft.OutlookForWindows"
-	"Microsoft People"        = "Microsoft.People"
-	"Power Automate"          = "Microsoft.PowerAutomateDesktop"
-	"Raw Image Extension"     = "Microsoft.RawImageExtension"
-	# "Store Purchase App"      = "Microsoft.StorePurchaseApp" #REVISAR
-	"Skype"                   = "Microsoft.SkypeApp"
-	"Microsoft To Do"         = "Microsoft.Todos"
-	"VP9 Video Extension"     = "Microsoft.VP9VideoExtensions"
-	"Microsoft Wallet"        = "Microsoft.Wallet"
-	"Web Media Extension"     = "Microsoft.WebMediaExtensions"
-	"Webp Image Extension"    = "Microsoft.WebpImageExtension"
-	"Dev Home"                = "Microsoft.Windows.DevHome"
-	"Microsoft Photos"        = "Microsoft.Windows.Photos"
-	"Mail and Calendar"       = "microsoft.windowscommunicationsapps"
-	"Feedback Hub"            = "Microsoft.WindowsFeedbackHub"
-	"Windows Maps"            = "Microsoft.WindowsMaps"
-	"Xbox TCUI"               = "Microsoft.Xbox.TCUI"
-	"Xbox App (OLD)"          = "Microsoft.XboxApp"
-	"Xbox Game Overlay"       = "Microsoft.XboxGameOverlay"
-	# "Game Bar"                = "Microsoft.XboxGamingOverlay"
-	"Xbox Provider"           = "Microsoft.XboxIdentityProvider"
-	"Xbox Text Overlay"       = "Microsoft.XboxSpeechToTextOverlay"
-	# "Phone Link"              = "Microsoft.YourPhone"
-	"Windows Media Player"    = "Microsoft.ZuneMusic"
-	"Movies & TV"             = "Microsoft.ZuneVideo"
-	"Microsoft Family Safety" = "MicrosoftCorporationII.MicrosoftFamily"
-	"Quick Assist"            = "MicrosoftCorporationII.QuickAssist"
-	"Widgets"                 = "MicrosoftWindows.Client.WebExperience"
-	# "Cross Device Host"       = "MicrosoftWindows.CrossDevice" #REVISAR
-	"Widgets PlatformRuntime" = "Microsoft.WidgetsPlatformRuntime"
-	"Microsoft Teams"         = "MSTeams"
-	"Spotify Music"           = "SpotifyAB.SpotifyMusic"
-	#"linkedin"               = "linkedin_searchId"                 #BUSCAR ID COMPLETO
-	#"Camo Studio"            = "CamoStudio_searchId"               #BUSCAR ID COMPLETO
-}
+$packageList = @(
+	@{ ShowInGUI = "Microsoft Clipchamp"; IsXamlId = "MSClipchamp"; IsOperation = "Clipchamp.Clipchamp" }
+	@{ ShowInGUI = "Cortana"; IsXamlId = "MSCortana"; IsOperation = "Microsoft.549981C3F5F10" }
+	@{ ShowInGUI = "AV1 Video Extension"; IsXamlId = "MSAV1VideoExtension"; IsOperation = "Microsoft.AV1VideoExtension" }
+	@{ ShowInGUI = "Microsoft News"; IsXamlId = "MSBingNews"; IsOperation = "Microsoft.BingNews" }
+	@{ ShowInGUI = "MSN Weather"; IsXamlId = "MSBingWeather"; IsOperation = "Microsoft.BingWeather" }
+	# @{ ShowInGUI = "Copilot"; IsXamlId = "MSCopilot"; IsOperation = "Microsoft.Copilot" }
+	@{ ShowInGUI = "Xbox App"; IsXamlId = "MSGamingApp"; IsOperation = "Microsoft.GamingApp" }
+	@{ ShowInGUI = "Get Help"; IsXamlId = "MSGetHelp"; IsOperation = "Microsoft.GetHelp" }
+	@{ ShowInGUI = "Get Started"; IsXamlId = "MSGetstarted"; IsOperation = "Microsoft.Getstarted" }
+	@{ ShowInGUI = "HEIF Image Extension"; IsXamlId = "MSHEIFImageExtension"; IsOperation = "Microsoft.HEIFImageExtension" }
+	@{ ShowInGUI = "HEVC Video Extension"; IsXamlId = "MSHEVCVideoExtension"; IsOperation = "Microsoft.HEVCVideoExtension" }
+	@{ ShowInGUI = "Paint 3D"; IsXamlId = "MSMicrosoft3DViewer"; IsOperation = "Microsoft.Microsoft3DViewer" }
+	# @{ ShowInGUI = "Microsoft Edge"; IsXamlId = "MSEdge"; IsOperation = "Microsoft.MicrosoftEdge.Stable" }
+	# @{ ShowInGUI = "Microsoft Edge Tools"; IsXamlId = "MSEdgeDevTools"; IsOperation = "Microsoft.MicrosoftEdgeDevToolsClient" }
+	@{ ShowInGUI = "Microsoft 365 (PWA)"; IsXamlId = "MSOfficeHub"; IsOperation = "Microsoft.MicrosoftOfficeHub" }
+	@{ ShowInGUI = "Solitaire Collection"; IsXamlId = "MSSolitaireCollection"; IsOperation = "Microsoft.MicrosoftSolitaireCollection" }
+	@{ ShowInGUI = "Microsoft Sticky Notes"; IsXamlId = "MSStickyNotes"; IsOperation = "Microsoft.MicrosoftStickyNotes" }
+	@{ ShowInGUI = "Mixed Reality Portal"; IsXamlId = "MSMixedReality"; IsOperation = "Microsoft.MixedReality.Portal" }
+	@{ ShowInGUI = "Paint (OLD)"; IsXamlId = "MSPaint"; IsOperation = "Microsoft.MSPaint" }
+	@{ ShowInGUI = "OneNote"; IsXamlId = "MSOneNote"; IsOperation = "Microsoft.Office.OneNote" }
+	@{ ShowInGUI = "Outlook for Windows"; IsXamlId = "MSOutlookForWindows"; IsOperation = "Microsoft.OutlookForWindows" }
+	@{ ShowInGUI = "Microsoft People"; IsXamlId = "MSPeople"; IsOperation = "Microsoft.People" }
+	@{ ShowInGUI = "Power Automate"; IsXamlId = "MSPowerAutomate"; IsOperation = "Microsoft.PowerAutomateDesktop" }
+	@{ ShowInGUI = "Raw Image Extension"; IsXamlId = "MSRawImageExtension"; IsOperation = "Microsoft.RawImageExtension" }
+	# @{ ShowInGUI = "Store Purchase App"; IsXamlId = "MSStorePurchaseApp"; IsOperation = "Microsoft.StorePurchaseApp" }
+	@{ ShowInGUI = "Skype"; IsXamlId = "MSSkypeApp"; IsOperation = "Microsoft.SkypeApp" }
+	@{ ShowInGUI = "Microsoft To Do"; IsXamlId = "MSTodos"; IsOperation = "Microsoft.Todos" }
+	@{ ShowInGUI = "VP9 Video Extension"; IsXamlId = "MSVP9VideoExtensions"; IsOperation = "Microsoft.VP9VideoExtensions" }
+	@{ ShowInGUI = "Microsoft Wallet"; IsXamlId = "MSWallet"; IsOperation = "Microsoft.Wallet" }
+	@{ ShowInGUI = "Web Media Extension"; IsXamlId = "MSWebMediaExtensions"; IsOperation = "Microsoft.WebMediaExtensions" }
+	@{ ShowInGUI = "Webp Image Extension"; IsXamlId = "MSWebpImageExtension"; IsOperation = "Microsoft.WebpImageExtension" }
+	@{ ShowInGUI = "Dev Home"; IsXamlId = "MSDevHome"; IsOperation = "Microsoft.Windows.DevHome" }
+	@{ ShowInGUI = "Microsoft Photos"; IsXamlId = "MSPhotos"; IsOperation = "Microsoft.Windows.Photos" }
+	@{ ShowInGUI = "Windows Camera"; IsXamlId = "MSCamera"; IsOperation = "Microsoft.WindowsCamera" }
+	@{ ShowInGUI = "Mail and Calendar"; IsXamlId = "MScommunicationsapps"; IsOperation = "microsoft.windowscommunicationsapps" }
+	@{ ShowInGUI = "Feedback Hub"; IsXamlId = "MSFeedbackHub"; IsOperation = "Microsoft.WindowsFeedbackHub" }
+	@{ ShowInGUI = "Windows Maps"; IsXamlId = "MSMaps"; IsOperation = "Microsoft.WindowsMaps" }
+	@{ ShowInGUI = "Windows Sound Recorder"; IsXamlId = "MSSoundRecorder"; IsOperation = "Microsoft.WindowsSoundRecorder" }
+	@{ ShowInGUI = "Xbox TCUI"; IsXamlId = "MSXboxTCUI"; IsOperation = "Microsoft.Xbox.TCUI" }
+	@{ ShowInGUI = "Xbox App (OLD)"; IsXamlId = "MSXboxApp"; IsOperation = "Microsoft.XboxApp" }
+	@{ ShowInGUI = "Xbox Game Overlay"; IsXamlId = "MSXboxGameOverlay"; IsOperation = "Microsoft.XboxGameOverlay" }
+	# @{ ShowInGUI = "Game Bar"; IsXamlId = "MSXboxGamingOverlay"; IsOperation = "Microsoft.XboxGamingOverlay" }
+	@{ ShowInGUI = "Xbox Provider"; IsXamlId = "MSXboxIdentityProvider"; IsOperation = "Microsoft.XboxIdentityProvider" }
+	@{ ShowInGUI = "Xbox Text Overlay"; IsXamlId = "MSXboxSpeechToTextOverlay"; IsOperation = "Microsoft.XboxSpeechToTextOverlay" }
+	# @{ ShowInGUI = "Phone Link"; IsXamlId = "MSYourPhone"; IsOperation = "Microsoft.YourPhone" }
+	@{ ShowInGUI = "Windows Media Player"; IsXamlId = "MSZuneMusic"; IsOperation = "Microsoft.ZuneMusic" }
+	@{ ShowInGUI = "Movies & TV"; IsXamlId = "MSZuneVideo"; IsOperation = "Microsoft.ZuneVideo" }
+	@{ ShowInGUI = "Microsoft Family Safety"; IsXamlId = "MSFamily"; IsOperation = "MicrosoftCorporationII.MicrosoftFamily" }
+	@{ ShowInGUI = "Quick Assist"; IsXamlId = "MSQuickAssist"; IsOperation = "MicrosoftCorporationII.QuickAssist" }
+	@{ ShowInGUI = "Windows App Runtime Main"; IsXamlId = "MSWinAppRuntime_Main"; IsOperation = "MicrosoftCorporationII.WinAppRuntime.Main.1.5" }
+	@{ ShowInGUI = "Windows App Runtime Singleton"; IsXamlId = "MSWinAppRuntime_Singleton"; IsOperation = "MicrosoftCorporationII.WinAppRuntime.Singleton" }
+	@{ ShowInGUI = "Widgets"; IsXamlId = "MSWebExperience"; IsOperation = "MicrosoftWindows.Client.WebExperience" }
+	# @{ ShowInGUI = "Cross Device Host"; IsXamlId = "MSCrossDevice"; IsOperation = "MicrosoftWindows.CrossDevice" }
+	@{ ShowInGUI = "Widgets Platform"; IsXamlId = "MSWidgetsPlatform"; IsOperation = "Microsoft.WidgetsPlatformRuntime" }
+	@{ ShowInGUI = "Microsoft Teams"; IsXamlId = "MSWTeams"; IsOperation = "MSTeams" }
+	@{ ShowInGUI = "Spotify Music"; IsXamlId = "MSSpotifyMusic"; IsOperation = "SpotifyAB.SpotifyMusic" }
+	# @{ ShowInGUI = "linkedin"; IsXamlId = "MSlinkedin"; IsOperation = "linkedin_searchId" }
+	# @{ ShowInGUI = "Camo Studio"; IsXamlId = "MSCamoStudio"; IsOperation = "CamoStudio_searchId" }
+)
 
-function Remove_User_Appx () {
+# function Remove_User_Appx () {
 
-	Write-Host "REMOVE USER APPX`n----------------"
-	$ListToRemoveU = @()
-	foreach ($listKey in $packageList.Keys) {
+# 	$window = GenerateWinGUI "SELECCIONE LOS PAQUETES DE WINDOWS" "Remover"
+# 	$checkBox = GenerateCheckBox $packageList $window "ListContainer"
 
-		$messageS = "Remove Package $listKey"
-		$selectedApp = Add-ItemSelection $messageS $packageList[$listKey]
-		if ($selectedApp) {
-			$ListToRemoveU += $selectedApp
-		}
-	}
+# 	$window.FindName("ActionButton").Add_Click({
 
-	Write-Host "`n===================="
-	Write-Host "  SELECTED PACKAGE  "
-	Write-Host "===================="
-	Write-Host "$ListToRemoveU`n"
-	foreach ($appxId in $ListToRemoveU) {
-		RemovePackageAppx $appxId
-	}
-}
+# 		$ListToRemoveU = @()
+# 		foreach ($listKey in $packageList) {
+# 			$checkBox = $window.FindName($listKey.IsXamlId)
+# 			if ($checkBox -and $checkBox.IsChecked) {
+# 				$ListToRemoveU += $listKey.IsOperation
+# 			}
+# 		}
+
+# 		Write-Host "==  SELECTED PACKAGE  =="
+# 		if ( $ListToRemoveU.Count -gt 0 ) {
+# 			foreach ($appxId in $ListToRemoveU) {
+# 				RemovePackageAppx $appxId
+# 			}
+# 		}
+# 		Write-Host "=========================="
+# 		Write-Host "  Operation are Finished  "
+# 		Write-Host "=========================="
+# 		$window.Close()
+# 	})
+
+# 	$window.ShowDialog()
+# }
 
 <# function Deprecated
 # Uninstall 5.0: ProvisionedAppxPackages list
@@ -1650,80 +1925,114 @@ function RemoveProvisionedAppx ($appxName) {
 	}
 }
 
-$provisionedList = [ordered]@{
-	"Microsoft Clipchamp"     = "Clipchamp.Clipchamp"
-	"Cortana"                 = "Microsoft.549981C3F5F10"
-	"Microsoft News"          = "Microsoft.BingNews"
-	"Bing Search (Edge)"      = "Microsoft.BingSearch"
-	"MSN Weather"             = "Microsoft.BingWeather"
-	# "Copilot"                 = "Microsoft.Copilot"
-	"Xbox App"                = "Microsoft.GamingApp"
-	"Get Help"                = "Microsoft.GetHelp"
-	"Get Started"             = "Microsoft.Getstarted"
-	"HEIF Image Extension"    = "Microsoft.HEIFImageExtension"
-	"HEVC Video Extension"    = "Microsoft.HEVCVideoExtension"
-	"Paint 3D"                = "Microsoft.Microsoft3DViewer"
-	# "Microsoft Edge"          = "Microsoft.MicrosoftEdge.Stable"        #QUITARLO ROMPE COSAS
-	# "Microsoft Edge Tools"    = "Microsoft.MicrosoftEdgeDevToolsClient"
-	"Microsoft 365 (PWA)"     = "Microsoft.MicrosoftOfficeHub"
-	"Solitaire Collection"    = "Microsoft.MicrosoftSolitaireCollection"
-	"Microsoft Sticky Notes"  = "Microsoft.MicrosoftStickyNotes"
-	"Mixed Reality Portal"    = "Microsoft.MixedReality.Portal"
-	"Paint (OLD)"             = "Microsoft.MSPaint"
-	"OneNote"                 = "Microsoft.Office.OneNote"
-	"Outlook for Windows"     = "Microsoft.OutlookForWindows"
-	"Microsoft People"        = "Microsoft.People"
-	"Power Automate"          = "Microsoft.PowerAutomateDesktop"
-	"Raw Image Extension"     = "Microsoft.RawImageExtension"
-	# "Store Purchase App"      = "Microsoft.StorePurchaseApp" #REVISAR
-	"Skype"                   = "Microsoft.SkypeApp"
-	"Microsoft To Do"         = "Microsoft.Todos"
-	"VP9 Video Extension"     = "Microsoft.VP9VideoExtensions"
-	"Microsoft Wallet"        = "Microsoft.Wallet"
-	"Web Media Extension"     = "Microsoft.WebMediaExtensions"
-	"Webp Image Extension"    = "Microsoft.WebpImageExtension"
-	"Dev Home"                = "Microsoft.Windows.DevHome"
-	"Microsoft Photos"        = "Microsoft.Windows.Photos"
-	"Mail and Calendar"       = "microsoft.windowscommunicationsapps"
-	"Feedback Hub"            = "Microsoft.WindowsFeedbackHub"
-	"Windows Maps"            = "Microsoft.WindowsMaps"
-	"Xbox TCUI"               = "Microsoft.Xbox.TCUI"
-	"Xbox App (OLD)"          = "Microsoft.XboxApp"
-	"Xbox Game Overlay"       = "Microsoft.XboxGameOverlay"
-	# "Game Bar"                = "Microsoft.XboxGamingOverlay"
-	"Xbox Provider"           = "Microsoft.XboxIdentityProvider"
-	"Xbox Text Overlay"       = "Microsoft.XboxSpeechToTextOverlay"
-	# "Phone Link"              = "Microsoft.YourPhone"
-	"Windows Media Player"    = "Microsoft.ZuneMusic"
-	"Movies & TV"             = "Microsoft.ZuneVideo"
-	"Microsoft Family Safety" = "MicrosoftCorporationII.MicrosoftFamily"
-	"Quick Assist"            = "MicrosoftCorporationII.QuickAssist"
-	"Widgets"                 = "MicrosoftWindows.Client.WebExperience"
-	# "Cross Device Host"       = "MicrosoftWindows.CrossDevice" #REVISAR
-	"Widgets PlatformRuntime" = "Microsoft.WidgetsPlatformRuntime"
-	"Microsoft Teams"         = "MSTeams"
-}
+$provisionedList = @(
+	@{ ShowInGUI = "Microsoft Clipchamp"; IsXamlId = "PMSClipchamp"; IsOperation = "Clipchamp.Clipchamp" }
+	@{ ShowInGUI = "Cortana"; IsXamlId = "PMSCortana"; IsOperation = "Microsoft.549981C3F5F10" }
+	@{ ShowInGUI = "Microsoft News"; IsXamlId = "PMSBingNews"; IsOperation = "Microsoft.BingNews" }
+	@{ ShowInGUI = "Bing Search (Edge)"; IsXamlId = "PMSBingSearch"; IsOperation = "Microsoft.BingSearch" }
+	@{ ShowInGUI = "MSN Weather"; IsXamlId = "PMSBingWeather"; IsOperation = "Microsoft.BingWeather" }
+	# @{ ShowInGUI = "Copilot"; IsXamlId = "PMSCopilot"; IsOperation = "Microsoft.Copilot" }
+	@{ ShowInGUI = "Xbox App"; IsXamlId = "PMSGamingApp"; IsOperation = "Microsoft.GamingApp" }
+	@{ ShowInGUI = "Get Help"; IsXamlId = "PMSGetHelp"; IsOperation = "Microsoft.GetHelp" }
+	@{ ShowInGUI = "Get Started"; IsXamlId = "PMSGetstarted"; IsOperation = "Microsoft.Getstarted" }
+	@{ ShowInGUI = "HEIF Image Extension"; IsXamlId = "PMSHEIFImageExtension"; IsOperation = "Microsoft.HEIFImageExtension" }
+	@{ ShowInGUI = "HEVC Video Extension"; IsXamlId = "PMSHEVCVideoExtension"; IsOperation = "Microsoft.HEVCVideoExtension" }
+	@{ ShowInGUI = "Paint 3D"; IsXamlId = "PMSMicrosoft3DViewer"; IsOperation = "Microsoft.Microsoft3DViewer" }
+	# @{ ShowInGUI = "Microsoft Edge"; IsXamlId = "PMSEdge"; IsOperation = "Microsoft.MicrosoftEdge.Stable" }
+	# @{ ShowInGUI = "Microsoft Edge Tools"; IsXamlId = "PMSEdgeDevTools"; IsOperation = "Microsoft.MicrosoftEdgeDevToolsClient" }
+	@{ ShowInGUI = "Microsoft 365 (PWA)"; IsXamlId = "PMSOfficeHub"; IsOperation = "Microsoft.MicrosoftOfficeHub" }
+	@{ ShowInGUI = "Solitaire Collection"; IsXamlId = "PMSSolitaireCollection"; IsOperation = "Microsoft.MicrosoftSolitaireCollection" }
+	@{ ShowInGUI = "Microsoft Sticky Notes"; IsXamlId = "PMSStickyNotes"; IsOperation = "Microsoft.MicrosoftStickyNotes" }
+	@{ ShowInGUI = "Mixed Reality Portal"; IsXamlId = "PMSMixedReality"; IsOperation = "Microsoft.MixedReality.Portal" }
+	@{ ShowInGUI = "Paint (OLD)"; IsXamlId = "PMSPaint"; IsOperation = "Microsoft.MSPaint" }
+	@{ ShowInGUI = "OneNote"; IsXamlId = "PMSOneNote"; IsOperation = "Microsoft.Office.OneNote" }
+	@{ ShowInGUI = "Outlook for Windows"; IsXamlId = "PMSOutlookForWindows"; IsOperation = "Microsoft.OutlookForWindows" }
+	@{ ShowInGUI = "Microsoft People"; IsXamlId = "PMSPeople"; IsOperation = "Microsoft.People" }
+	@{ ShowInGUI = "Power Automate"; IsXamlId = "PMSPowerAutomate"; IsOperation = "Microsoft.PowerAutomateDesktop" }
+	@{ ShowInGUI = "Raw Image Extension"; IsXamlId = "PMSRawImageExtension"; IsOperation = "Microsoft.RawImageExtension" }
+	# @{ ShowInGUI = "Store Purchase App"; IsXamlId = "PMSStorePurchaseApp"; IsOperation = "Microsoft.StorePurchaseApp" }
+	@{ ShowInGUI = "Skype"; IsXamlId = "PMSSkypeApp"; IsOperation = "Microsoft.SkypeApp" }
+	@{ ShowInGUI = "Microsoft To Do"; IsXamlId = "PMSTodos"; IsOperation = "Microsoft.Todos" }
+	@{ ShowInGUI = "VP9 Video Extension"; IsXamlId = "PMSVP9VideoExtensions"; IsOperation = "Microsoft.VP9VideoExtensions" }
+	@{ ShowInGUI = "Microsoft Wallet"; IsXamlId = "PMSWallet"; IsOperation = "Microsoft.Wallet" }
+	@{ ShowInGUI = "Web Media Extension"; IsXamlId = "PMSWebMediaExtensions"; IsOperation = "Microsoft.WebMediaExtensions" }
+	@{ ShowInGUI = "Webp Image Extension"; IsXamlId = "PMSWebpImageExtension"; IsOperation = "Microsoft.WebpImageExtension" }
+	@{ ShowInGUI = "Dev Home"; IsXamlId = "PMSDevHome"; IsOperation = "Microsoft.Windows.DevHome" }
+	@{ ShowInGUI = "Microsoft Photos"; IsXamlId = "PMSPhotos"; IsOperation = "Microsoft.Windows.Photos" }
+	@{ ShowInGUI = "Mail and Calendar"; IsXamlId = "PMScommunicationsapps"; IsOperation = "microsoft.windowscommunicationsapps" }
+	@{ ShowInGUI = "Feedback Hub"; IsXamlId = "PMSFeedbackHub"; IsOperation = "Microsoft.WindowsFeedbackHub" }
+	@{ ShowInGUI = "Windows Maps"; IsXamlId = "PMSMaps"; IsOperation = "Microsoft.WindowsMaps" }
+	@{ ShowInGUI = "Xbox TCUI"; IsXamlId = "PMSXboxTCUI"; IsOperation = "Microsoft.Xbox.TCUI" }
+	@{ ShowInGUI = "Xbox App (OLD)"; IsXamlId = "PMSXboxApp"; IsOperation = "Microsoft.XboxApp" }
+	@{ ShowInGUI = "Xbox Game Overlay"; IsXamlId = "PMSXboxGameOverlay"; IsOperation = "Microsoft.XboxGameOverlay" }
+	# @{ ShowInGUI = "Game Bar"; IsXamlId = "PMSXboxGamingOverlay"; IsOperation = "Microsoft.XboxGamingOverlay" }
+	@{ ShowInGUI = "Xbox Provider"; IsXamlId = "PMSXboxIdentityProvider"; IsOperation = "Microsoft.XboxIdentityProvider" }
+	@{ ShowInGUI = "Xbox Text Overlay"; IsXamlId = "PMSXboxSpeechToTextOverlay"; IsOperation = "Microsoft.XboxSpeechToTextOverlay" }
+	# @{ ShowInGUI = "Phone Link"; IsXamlId = "PMSYourPhone"; IsOperation = "Microsoft.YourPhone" }
+	@{ ShowInGUI = "Windows Media Player"; IsXamlId = "PMSZuneMusic"; IsOperation = "Microsoft.ZuneMusic" }
+	@{ ShowInGUI = "Movies & TV"; IsXamlId = "PMSZuneVideo"; IsOperation = "Microsoft.ZuneVideo" }
+	@{ ShowInGUI = "Microsoft Family Safety"; IsXamlId = "PMSFamily"; IsOperation = "MicrosoftCorporationII.MicrosoftFamily" }
+	@{ ShowInGUI = "Quick Assist"; IsXamlId = "PMSQuickAssist"; IsOperation = "MicrosoftCorporationII.QuickAssist" }
+	@{ ShowInGUI = "Widgets"; IsXamlId = "PMSWebExperience"; IsOperation = "MicrosoftWindows.Client.WebExperience" }
+	# @{ ShowInGUI = "Cross Device Host"; IsXamlId = "PMSCrossDevice"; IsOperation = "MicrosoftWindows.CrossDevice" }
+	@{ ShowInGUI = "Widgets Platform"; IsXamlId = "PMSWidgetsPlatform"; IsOperation = "Microsoft.WidgetsPlatformRuntime" }
+	@{ ShowInGUI = "Microsoft Teams"; IsXamlId = "PMSWTeams"; IsOperation = "MSTeams" }
+)
 
-function Remove_Provisioned_Appx () {
+function Remove_Capability_Package_Provisioned () {
 
-	Write-Host "REMOVE PROVISIONED APPX`n-----------------------"
-	$ListToRemoveP = @()
-	foreach ($listKey in $provisionedList.Keys) {
+	$window = GenerateWinGUITriple "SELECCIONE LAS CAPACIDADES DE WINDOWS, LOS PAQUETES DE WINDOWS Y LOS PROVISIONADOS DE WINDOWS" "Remover"
+	$checkBox1 = GenerateCheckBox $capabilityList $window "ListContainer1"
+	$checkBox2 = GenerateCheckBox $packageList $window "ListContainer2"
+	$checkBox3 = GenerateCheckBox $provisionedList $window "ListContainer3"
 
-		$messageS = "Remove Provisioned $listKey"
-		$selectedApp = Add-ItemSelection $messageS $provisionedList[$listKey]
-		if ($selectedApp) {
-			$ListToRemoveP += $selectedApp
+	$window.FindName("ActionButton").Add_Click({
+
+		$ListToRemoveC = @()
+		foreach ($listKey in $capabilityList) {
+			$checkBox1 = $window.FindName($listKey.IsXamlId)
+			if ($checkBox1 -and $checkBox1.IsChecked) {
+				$ListToRemoveC += $listKey.IsOperation
+			}
 		}
-	}
+		$ListToRemoveU = @()
+		foreach ($listKey in $packageList) {
+			$checkBox2 = $window.FindName($listKey.IsXamlId)
+			if ($checkBox2 -and $checkBox2.IsChecked) {
+				$ListToRemoveU += $listKey.IsOperation
+			}
+		}
+		$ListToRemoveP = @()
+		foreach ($listKey in $provisionedList) {
+			$checkBox3 = $window.FindName($listKey.IsXamlId)
+			if ($checkBox3 -and $checkBox3.IsChecked) {
+				$ListToRemoveP += $listKey.IsOperation
+			}
+		}
+		
+		Write-Host "==  SELECTED OPERATIONS  =="
+		if ( $ListToRemoveC.Count -gt 0 ) {
+			foreach ($appcId in $ListToRemoveC) {
+				RemoveCapabilityApp $appcId
+			}
+		}
+		if ( $ListToRemoveU.Count -gt 0 ) {
+			foreach ($appxId in $ListToRemoveU) {
+				RemovePackageAppx $appxId
+			}
+		}
+		if ( $ListToRemoveP.Count -gt 0 ) {
+			foreach ($appxId in $ListToRemoveP) {
+				RemoveProvisionedAppx $appxId
+			}
+		}
+		Write-Host "=========================="
+		Write-Host "  Operation are Finished  "
+		Write-Host "=========================="
+		$window.Close()
+	})
 
-	Write-Host "`n========================"
-	Write-Host "  SELECTED PROVISIONED  "
-	Write-Host "========================"
-	Write-Host "$ListToRemoveP`n"
-	foreach ($appxId in $ListToRemoveP) {
-		RemoveProvisionedAppx $appxId
-	}
+	$window.ShowDialog()
 }
 
 # Modification #: Configure Enable or Disable features in Windows
@@ -1746,19 +2055,60 @@ function ConfigFeature ($featureName, $stateType) {
 	}
 }
 
-$disableFList = [ordered]@{
-	"Internet Explorer 11" = "Internet-Explorer-Optional-amd64"
-	"Media Features"       = "MediaPlayback"
-	"Windows Media Player" = "WindowsMediaPlayer"
-}
+$disableFList = @(
+	@{ ShowInGUI = "Disable Internet Explorer 11"; IsXamlId = "Internet_Explorer"; IsOperation = "Internet-Explorer-Optional-amd64" }
+	@{ ShowInGUI = "Disable Media Features"; IsXamlId = "MediaPlay"; IsOperation = "MediaPlayback" }
+	@{ ShowInGUI = "Disable Windows Media Player"; IsXamlId = "MediaPlayer"; IsOperation = "WindowsMediaPlayer" }
+)
 
-$enableFList = [ordered]@{
-	".NET Framework 3.5" = "NetFx3"
-	"Windows Sandbox"    = "Containers-DisposableClientVM"
-}
+$enableFList = @(
+	@{ ShowInGUI = "Enable .NET Framework 3.5"; IsXamlId = "NetFramework"; IsOperation = "NetFx3" }
+	@{ ShowInGUI = "Enable Windows Sandbox"; IsXamlId = "ClientVM"; IsOperation = "Containers-DisposableClientVM" }
+)
 
 function Set_Optional_Feature () {
 
+	$window = GenerateWinGUI "SELECCIONE LAS CARACTERISTICAS OPCIONALES" "Aplicar"
+	$checkBox1 = GenerateCheckBox $disableFList $window "ListContainer"
+	$checkBox2 = GenerateCheckBox $enableFList $window "ListContainer"
+
+	$window.FindName("ActionButton").Add_Click({
+
+		$ListToDisable = @()
+		foreach ($listKey in $disableFList) {
+			$checkBox1 = $window.FindName($listKey.IsXamlId)
+			if ($checkBox1 -and $checkBox1.IsChecked) {
+				$ListToDisable += $listKey.IsOperation
+			}
+		}
+		$ListToEnable = @()
+		foreach ($currentItemName in $collection) {
+			$checkBox2 = $window.FindName($listKey.IsXamlId)
+			if ($checkBox2 -and $checkBox2.IsChecked) {
+				$ListToEnable += $listKey.IsOperation
+			}
+		}
+
+		Write-Host "==  SELECTED FEATURE  =="
+		if ( $ListToDisable.Count -gt 0 ) {
+			foreach ($featureId in $ListToDisable) {
+				ConfigFeature $featureId Disabled
+			}
+		}
+		if ( $ListToEnable.Count -gt 0 ) {
+			foreach ($featureId in $ListToEnable) {
+				ConfigFeature $featureId Enabled
+			}
+		}
+		Write-Host "=========================="
+		Write-Host "  Operation are Finished  "
+		Write-Host "=========================="
+		$window.Close()
+	})
+
+	$window.ShowDialog()
+
+	<#
 	Write-Host "SET OPTIONAL FEATURES`n---------------------"
 	$ListToDisable = @()
 	foreach ($listKey in $disableFList.Keys) {
@@ -1779,10 +2129,9 @@ function Set_Optional_Feature () {
 			$ListToEnable += $selectedFeature
 		}
 	}
-	Write-Host "`n===================="
-	Write-Host "  SELECTED FEATURE  "
-	Write-Host "===================="
-	Write-Host "$ListToDisable $ListToEnable`n"
+
+	Write-Host "==  SELECTED FEATURE  =="
+	Write-Host "Setting Feature: $ListToDisable $ListToEnable"
 	foreach ($featureId in $ListToDisable) {
 		ConfigFeature $featureId Disabled
 	}
@@ -1790,6 +2139,10 @@ function Set_Optional_Feature () {
 	foreach ($featureId in $ListToEnable) {
 		ConfigFeature $featureId Enabled
 	}
+	Write-Host "=========================="
+	Write-Host "  Operation are Finished  "
+	Write-Host "=========================="
+	#>
 }
 
 # Modification #: Configure Install App
@@ -1806,145 +2159,141 @@ function InstallApp ($appId, $sourceType) {
 		Invoke-Expression "$sourceType install `"$appId`""
 	} 
 	else {
-		Write-Host "App [$appId] Already Installed."
-		Write-Host "Found an existing package already installed."
+		Write-Host "App [$appId] found, existing Package."
+		Write-Host "$appId already installed."
 	}
 }
 
-$wingetList = [ordered]@{
-	"Visual C++ 2010(x86)"        = "Microsoft.VCRedist.2010.x86"
-	"Visual C++ 2010(x64)"        = "Microsoft.VCRedist.2010.x64"
-	# "Visual C++ 2012(x86)"        = "Microsoft.VCRedist.2012.x86"
-	# "Visual C++ 2012(x64)"        = "Microsoft.VCRedist.2012.x64"
-	"Visual C++ 2015+(x86)"       = "Microsoft.VCRedist.2015+.x86"
-	"Visual C++ 2015+(x64)"       = "Microsoft.VCRedist.2015+.x64"
-	"Bitwarden"                   = "Bitwarden.Bitwarden"
-	"Firefox Browser"             = "Mozilla.Firefox"
-	"Vivaldi Browser"             = "Vivaldi.Vivaldi"
-	"OperaGX Browser"             = "Opera.OperaGX"
-	# "Microsoft Edge"              = "Microsoft.Edge"
-	"ZoomIt"                      = "Microsoft.Sysinternals.ZoomIt"
-	"Energy Star X"               = "9NF7JTB3B17P"
-	"Microsoft PC Manager"        = "9PM860492SZD"
-	"AutoHotkey"                  = "AutoHotkey.AutoHotkey"
-	"Everything x64"              = "voidtools.Everything"
-	"QuickLook"                   = "QL-Win.QuickLook"                     # USO TEMPORAL
-	"Quick Share Google"          = "Google.QuickShare"
-	"PowerToys (Preview)"         = "Microsoft.PowerToys"
-	"7-Zip"                       = "7zip.7zip"
-	"WinRAR"                      = "RARLab.WinRAR"
-	"Google Drive"                = "Google.GoogleDrive"
-	"TeraBox Desktop"             = "Baidu.TeraBox"
-	"Notepad++"                   = "Notepad++.Notepad++"
-	"GIMP"                        = "GIMP.GIMP"
-	"Audacity"                    = "Audacity.Audacity"
-	"IrfanView x64"               = "IrfanSkiljan.IrfanView"
-	"VLC Media Player"            = "VideoLAN.VLC"
-	"SumatraPDF"                  = "SumatraPDF.SumatraPDF"
-	"Microsoft 365 Apps"          = "Microsoft.Office"
-	"OnlyOffice"                  = "ONLYOFFICE.DesktopEditors"
-	"LibreOffice LTS"             = "TheDocumentFoundation.LibreOffice.LTS"
-	"Steam Launcher"              = "Valve.Steam"
-	"Epic Games Launcher"         = "EpicGames.EpicGamesLauncher"
-	"Ubisoft Connect"             = "Ubisoft.Connect"
-	"BlueStacks"                  = "BlueStack.BlueStacks"
-	"qBittorrent"                 = "qBittorrent.qBittorrent"
-	"WhatsApp"                    = "9NKSQGP7F2NH"
-	"Telegram"                    = "Telegram.TelegramDesktop"
-	"Mozilla Thunderbird"         = "Mozilla.Thunderbird"
-	"scrcpy"                      = "Genymobile.scrcpy"
-	"Discord"                     = "Discord.Discord"
-	"Zoom Workplace"              = "Zoom.Zoom"
-	"Microsoft Teams (New)"       = "Microsoft.Teams"
-	"Slack"                       = "SlackTechnologies.Slack"
-	"OBS Studio"                  = "OBSProject.OBSStudio"
-	# "MiniTool Partition Wizard"   = "MiniTool.PartitionWizard.Free"
-	"PuTTY"                       = "PuTTY.PuTTY"
-	"WinSCP"                      = "WinSCP.WinSCP"
-	"TeamViewer"                  = "TeamViewer.TeamViewer"
-	"Oracle VM VirtualBox"        = "Oracle.VirtualBox"
-	# "VMware Workstation Pro"      = "VMware.???"
-	"FxSound"                     = "FxSoundLLC.FxSound"
-	"Fan Control"                 = "Rem0o.FanControl"
-	"MSI Afterburner"             = "Guru3D.Afterburner"
-	"TechPowerUp GPU-Z"           = "TechPowerUp.GPU-Z"
-	"WinDirStat"                  = "WinDirStat.WinDirStat"
-	"BleachBit"                   = "BleachBit.BleachBit"
-	# "NVCleanstall"                = "TechPowerUp.NVCleanstall"
-	"Recuva"                      = "Piriform.Recuva"
-	"Visual Studio Code"          = "Microsoft.VisualStudioCode"           # revisar opcion seteada
-	"Git"                         = "Git.Git"
-	"Neovim"                      = "Neovim.Neovim"
-	"Java SDK"                    = "Oracle.JDK.22"
-	"Python 3.12"                 = "Python.Python.3.12"
-	"Rust (MSVC)"                 = "Rustlang.Rust.MSVC"                   # (v1.79.0)
-	# "Rustup: toolchain"           = "Rustlang.Rustup"
-	"Node.js LTS"                 = "OpenJS.NodeJS.LTS"
-	"GitHub Desktop"              = "GitHub.GitHubDesktop"
-	"Visual Studio Community"     = "Microsoft.VisualStudio.2022.Community"
-	"Apache NetBeans IDE"         = "Apache.NetBeans"
-	"Android Studio"              = "Google.AndroidStudio"
-	"MySQL"                       = "Oracle.MySQL"
-	# "PostgreSQL 16"               = "PostgreSQL.PostgreSQL.16"           # revisar compilacion seteada
-	# "SQLServer Express"           = "Microsoft.SQLServer.2022.Express"
-	"SQLServer Management Studio" = "Microsoft.SQLServerManagementStudio"
-	"Docker Desktop"              = "Docker.DockerDesktop"
-	# "Windows Terminal"            = "Microsoft.WindowsTerminal"
-}
+$wingetList = @(
+	@{ ShowInGUI = "Visual C++ 2015-2022 Redist (x86)"; IsXamlId = "MSVisuCplusRedis2015_x86"; IsOperation = "Microsoft.VCRedist.2015+.x86" }
+	@{ ShowInGUI = "Visual C++ 2015-2022 Redist (x64)"; IsXamlId = "MSVisuCplusRedis2015_x64"; IsOperation = "Microsoft.VCRedist.2015+.x64" }
+	@{ ShowInGUI = "Bitwarden"; IsXamlId = "BitwardenId"; IsOperation = "Bitwarden.Bitwarden" }
+	@{ ShowInGUI = "Mozilla Firefox"; IsXamlId = "FirefoxBrow"; IsOperation = "Mozilla.Firefox" }
+	@{ ShowInGUI = "Vivaldi Browser"; IsXamlId = "VivaldiBrow"; IsOperation = "Vivaldi.Vivaldi" }
+	@{ ShowInGUI = "OperaGX Browser"; IsXamlId = "OperaGXBrow"; IsOperation = "Opera.OperaGX" }
+	# @{ ShowInGUI = "Microsoft Edge"; IsXamlId = "MSEdgeBrow"; IsOperation = "Microsoft.Edge" }
+	@{ ShowInGUI = "ZoomIt"; IsXamlId = "MSZoomIt"; IsOperation = "Microsoft.Sysinternals.ZoomIt" }
+	@{ ShowInGUI = "Energy Star X"; IsXamlId = "StoreEnergyStarX"; IsOperation = "9NF7JTB3B17P" }
+	@{ ShowInGUI = "Microsoft PC Manager"; IsXamlId = "StorePCManager"; IsOperation = "9PM860492SZD" }
+	@{ ShowInGUI = "AutoHotkey"; IsXamlId = "AutoHotkeyId"; IsOperation = "AutoHotkey.AutoHotkey" }
+	@{ ShowInGUI = "Everything (x64)"; IsXamlId = "Everything"; IsOperation = "voidtools.Everything" }
+	@{ ShowInGUI = "QuickLook"; IsXamlId = "QuickLookId"; IsOperation = "QL-Win.QuickLook" }
+	@{ ShowInGUI = "Lightshot"; IsXamlId = "LightshotId"; IsOperation = "Skillbrains.Lightshot" }
+	@{ ShowInGUI = "ChatGPT"; IsXamlId = "ChatGPTId"; IsOperation = "9NT1R1C2HH7J" }
+	@{ ShowInGUI = "Quick Share Google"; IsXamlId = "QuickShare"; IsOperation = "Google.QuickShare" }
+	@{ ShowInGUI = "PowerToys (Preview)"; IsXamlId = "PowerToys"; IsOperation = "Microsoft.PowerToys" }
+	@{ ShowInGUI = "7-Zip"; IsXamlId = "SevenZip"; IsOperation = "7zip.7zip" }
+	@{ ShowInGUI = "WinRAR"; IsXamlId = "WinRARId"; IsOperation = "RARLab.WinRAR" }
+	@{ ShowInGUI = "Google Drive"; IsXamlId = "GoogleDrive"; IsOperation = "Google.GoogleDrive" }
+	@{ ShowInGUI = "TeraBox Desktop"; IsXamlId = "TeraBox"; IsOperation = "Baidu.TeraBox" }
+	@{ ShowInGUI = "Notepad++"; IsXamlId = "Notepadplusplus"; IsOperation = "Notepad++.Notepad++" }
+	@{ ShowInGUI = "GIMP"; IsXamlId = "GimpId"; IsOperation = "GIMP.GIMP" }
+	@{ ShowInGUI = "Audacity"; IsXamlId = "AudacityId"; IsOperation = "Audacity.Audacity" }
+	@{ ShowInGUI = "IrfanView (x64)"; IsXamlId = "IrfanView"; IsOperation = "IrfanSkiljan.IrfanView" }
+	@{ ShowInGUI = "VLC Media Player"; IsXamlId = "VLCMediaPlayer"; IsOperation = "VideoLAN.VLC" }
+	@{ ShowInGUI = "SumatraPDF"; IsXamlId = "SumatraPDFId"; IsOperation = "SumatraPDF.SumatraPDF" }
+	@{ ShowInGUI = "Microsoft 365 Apps"; IsXamlId = "MSOffice"; IsOperation = "Microsoft.Office" }
+	@{ ShowInGUI = "OnlyOffice"; IsXamlId = "OnlyOfficeId"; IsOperation = "ONLYOFFICE.DesktopEditors" }
+	@{ ShowInGUI = "LibreOffice LTS"; IsXamlId = "LibreOffice"; IsOperation = "TheDocumentFoundation.LibreOffice.LTS" }
+	@{ ShowInGUI = "Steam Launcher"; IsXamlId = "SteamLauncher"; IsOperation = "Valve.Steam" }
+	@{ ShowInGUI = "Epic Games Launcher"; IsXamlId = "EpicLauncher"; IsOperation = "EpicGames.EpicGamesLauncher" }
+	@{ ShowInGUI = "Ubisoft Connect"; IsXamlId = "UbisoftConnet"; IsOperation = "Ubisoft.Connect" }
+	@{ ShowInGUI = "BlueStacks"; IsXamlId = "BlueStacksId"; IsOperation = "BlueStack.BlueStacks" }
+	@{ ShowInGUI = "qBittorrent"; IsXamlId = "qBittorrentId"; IsOperation = "qBittorrent.qBittorrent" }
+	@{ ShowInGUI = "WhatsApp Desktop"; IsXamlId = "WhatsApp"; IsOperation = "9NKSQGP7F2NH" }
+	@{ ShowInGUI = "Telegram Desktop"; IsXamlId = "Telegram"; IsOperation = "Telegram.TelegramDesktop" }
+	@{ ShowInGUI = "Mozilla Thunderbird"; IsXamlId = "Thunderbird"; IsOperation = "Mozilla.Thunderbird" }
+	@{ ShowInGUI = "scrcpy"; IsXamlId = "scrcpyId"; IsOperation = "Genymobile.scrcpy" }
+	@{ ShowInGUI = "Discord"; IsXamlId = "DiscordId"; IsOperation = "Discord.Discord" }
+	@{ ShowInGUI = "Zoom Workplace"; IsXamlId = "ZoomId"; IsOperation = "Zoom.Zoom" }
+	@{ ShowInGUI = "Microsoft Teams (New)"; IsXamlId = "MSTeams"; IsOperation = "Microsoft.Teams" }
+	@{ ShowInGUI = "Slack"; IsXamlId = "SlackId"; IsOperation = "SlackTechnologies.Slack" }
+	@{ ShowInGUI = "OBS Studio"; IsXamlId = "OBSStudio"; IsOperation = "OBSProject.OBSStudio" }
+	# @{ ShowInGUI = "MiniTool Partition Wizard"; IsXamlId = "PartitionWizard"; IsOperation = "MiniTool.PartitionWizard.Free" }
+	@{ ShowInGUI = "PuTTY"; IsXamlId = "PuTTYId"; IsOperation = "PuTTY.PuTTY" }
+	@{ ShowInGUI = "WinSCP"; IsXamlId = "WinSCPId"; IsOperation = "WinSCP.WinSCP" }
+	@{ ShowInGUI = "TeamViewer"; IsXamlId = "TeamViewerId"; IsOperation = "TeamViewer.TeamViewer" }
+	@{ ShowInGUI = "Oracle VM VirtualBox"; IsXamlId = "VirtualBox"; IsOperation = "Oracle.VirtualBox" }
+	# @{ ShowInGUI = "VMware Workstation Pro"; IsXamlId = "VMware"; IsOperation = "VMware.IDDDDDDD" }
+	@{ ShowInGUI = "FxSound"; IsXamlId = "FxSoundId"; IsOperation = "FxSoundLLC.FxSound" }
+	@{ ShowInGUI = "Fan Control"; IsXamlId = "FanControl"; IsOperation = "Rem0o.FanControl" }
+	@{ ShowInGUI = "MSI Afterburner"; IsXamlId = "Afterburner"; IsOperation = "Guru3D.Afterburner" }
+	@{ ShowInGUI = "TechPowerUp GPU-Z"; IsXamlId = "GPU_Z"; IsOperation = "TechPowerUp.GPU-Z" }
+	@{ ShowInGUI = "WinDirStat"; IsXamlId = "WinDirStatId"; IsOperation = "WinDirStat.WinDirStat" }
+	@{ ShowInGUI = "Recuva"; IsXamlId = "RecuvaId"; IsOperation = "Piriform.Recuva" }
+	@{ ShowInGUI = "BleachBit"; IsXamlId = "BleachBitId"; IsOperation = "BleachBit.BleachBit" }
+	# @{ ShowInGUI = "NVCleanstall"; IsXamlId = "NVCleanstallId"; IsOperation = "TechPowerUp.NVCleanstall" }
+	@{ ShowInGUI = "starship"; IsXamlId = "StarshipId"; IsOperation = "Starship.Starship" }
+	@{ ShowInGUI = "Neovim"; IsXamlId = "NeovimId"; IsOperation = "Neovim.Neovim" }
+	@{ ShowInGUI = "Visual Studio Code"; IsXamlId = "VSCode"; IsOperation = "Microsoft.VisualStudioCode" }
+	@{ ShowInGUI = "Git"; IsXamlId = "GitId"; IsOperation = "Git.Git" }
+	@{ ShowInGUI = "Java SDK"; IsXamlId = "JavaSDK"; IsOperation = "Oracle.JDK.22" }
+	@{ ShowInGUI = "Python 3.12"; IsXamlId = "Python"; IsOperation = "Python.Python.3.12" }
+	@{ ShowInGUI = "Rust (MSVC)"; IsXamlId = "Rustlang"; IsOperation = "Rustlang.Rust.MSVC" }
+	# @{ ShowInGUI = "Rustup: toolchain"; IsXamlId = "Rustlang"; IsOperation = "Rustlang.Rustup" }
+	@{ ShowInGUI = "Node.js LTS"; IsXamlId = "NodeJS"; IsOperation = "OpenJS.NodeJS.LTS" }
+	@{ ShowInGUI = "GitHub Desktop"; IsXamlId = "GitHubId"; IsOperation = "GitHub.GitHubDesktop" }
+	@{ ShowInGUI = "Visual Studio Community"; IsXamlId = "VSCommunity"; IsOperation = "Microsoft.VisualStudio.2022.Community" }
+	@{ ShowInGUI = "Apache NetBeans IDE"; IsXamlId = "NetBeans"; IsOperation = "Apache.NetBeans" }
+	@{ ShowInGUI = "Android Studio"; IsXamlId = "AndroidStudio"; IsOperation = "Google.AndroidStudio" }
+	@{ ShowInGUI = "MySQL"; IsXamlId = "MySQLId"; IsOperation = "Oracle.MySQL" }
+	# @{ ShowInGUI = "PostgreSQL 16"; IsXamlId = "PostgreSQL"; IsOperation = "PostgreSQL.PostgreSQL.16" }
+	# @{ ShowInGUI = "SQLServer Express"; IsXamlId = "SQLServer"; IsOperation = "Microsoft.SQLServer.2022.Express" }
+	@{ ShowInGUI = "SQLServer Management Studio"; IsXamlId = "SQLServerMS"; IsOperation = "Microsoft.SQLServerManagementStudio" }
+	@{ ShowInGUI = "Docker Desktop"; IsXamlId = "Docker"; IsOperation = "Docker.DockerDesktop" }
+	# @{ ShowInGUI = "Windows Terminal"; IsXamlId = "WindowsTerminal"; IsOperation = "Microsoft.WindowsTerminal" }
+)
 
-$chocoList = [ordered]@{
-	"AIMP Music Player"   = "aimp"
-	"Keypirinha Launcher" = "keypirinha"
-	"FileZilla Client"    = "filezilla"
-	"Fing Desktop"        = "fing"
-}
+$chocoList = @(
+	@{ ShowInGUI = "AIMP Music Player"; IsXamlId = "AimpId"; IsOperation = "aimp" }
+	@{ ShowInGUI = "Keypirinha Launcher"; IsXamlId = "KeypirinhaId"; IsOperation = "keypirinha" }
+	@{ ShowInGUI = "FileZilla Client"; IsXamlId = "FilezillaId"; IsOperation = "filezilla" }
+	@{ ShowInGUI = "Fing Desktop"; IsXamlId = "FingId"; IsOperation = "fing" }
+)
 
 function Install_Apps () {
 
-	Write-Host "INSTALL APP`n-----------"
-	$ListToInstallW = @()
-	foreach ($listKey in $wingetList.Keys) {
+	$window = GenerateWinGUI "SELECCIONE LAS APLICACIONES" "Instalar"
+	$checkBox1 = GenerateCheckBox $wingetList $window "ListContainer"
+	$checkBox2 = GenerateCheckBox $chocoList $window "ListContainer"
+
+	$window.FindName("ActionButton").Add_Click({
 		
-		$messageS = "Install App $listKey"
-		$selectedApp = Add-ItemSelection $messageS $wingetList[$listKey]
-		if ($selectedApp) {
-			$ListToInstallW += $selectedApp
+		$ListToInstallW = @()
+		foreach ($listKey in $wingetList) {
+			$checkBox1 = $window.FindName($listKey.IsXamlId)
+			if ($checkBox1 -and $checkBox1.IsChecked) {
+				$ListToInstallW += $listKey.IsOperation
+			}
 		}
-	}
-
-	$ListToInstallC = @()
-	foreach ($listKey in $chocoList.Keys) {
-		
-		$messageS = "Install App $listKey"
-		$selectedApp = Add-ItemSelection $messageS $chocoList[$listKey]
-		if ($selectedApp) {
-			$ListToInstallC += $selectedApp
+	
+		$ListToInstallC = @()
+		foreach ($listKey in $chocoList) {
+			$checkBox2 = $window.FindName($listKey.IsXamlId)
+			if ($checkBox2 -and $checkBox2.IsChecked) {
+				$ListToInstallC += $listKey.IsOperation
+			}
 		}
-	}
-	Write-Host "`n================"
-	Write-Host "  SELECTED APP  "
-	Write-Host "================"
-	if ( $ListToInstallW.Count -gt 0) {
-
-		Write-Host "Winget Packages: $ListToInstallW"
-		Start-Process "winget" -ArgumentList "install $ListToInstallW" -NoNewWindow -Wait
-		# winget install $ListToInstallW
-	}
-
-	if ( $ListToInstallC.Count -gt 0 ) {
 		
-		Write-Host "Choco Packages: $ListToInstallC"
-		Start-Process "choco" -ArgumentList "install $ListToInstallC" -NoNewWindow -Wait
-		# choco install $ListToInstallC
-	}
-	Write-Host "Finished"
-	# foreach ($appId in $ListToInstallW) {
-	# 	InstallApp $appId winget
-	# }
+		Write-Host "==  SELECTED APP  =="
+		if ( $ListToInstallW.Count -gt 0 ) {
+			foreach ($appId in $ListToInstallW) {
+				InstallApp $appId winget
+			}
+		}
 
-	# foreach ($appId in $ListToInstallC) {
-	# 	InstallApp $appId choco
-	# }
+		if ( $ListToInstallC.Count -gt 0 ) {
+			foreach ($appId in $ListToInstallC) {
+				InstallApp $appId choco
+			}
+		}
+		Write-Host "=========================="
+		Write-Host "  Operation are Finished  "
+		Write-Host "=========================="
+		$window.Close()
+	})
+
+	$window.ShowDialog()
 }
 
 # Modification #: Configure Download App Portable
@@ -1967,6 +2316,7 @@ function DownloadApp ($toolUrl, $toolFile) {
 	}
 }
 
+<#
 $toolList = @(
 	@{
 		Name = "AnyDesk"
@@ -2049,9 +2399,11 @@ $toolList = @(
 		File = "DDU v18.0.8.0.exe"
 	}
 )
+#>
 
 function Download_Tools () {
 	
+	<#
 	Write-Host "Url Search Tools`n------------------"
 	$ListToDownload = @()
 	foreach ($toolData in $toolList) {
@@ -2062,13 +2414,16 @@ function Download_Tools () {
 			$ListToDownload += $selectedApp
 		}
 	}
-	Write-Host "`n================="
-	Write-Host "  SELECTED TOOL  "
-	Write-Host "================="
-	Write-Host "$ListToDownload`n"
+	
+	Write-Host "==  SELECTED TOOL  =="
+	Write-Host "Download Tool: $ListToDownload`n"
 	foreach ($toolId in $ListToDownload) {
 		DownloadApp $toolId.TUrl $toolId.File
 	}
+	Write-Host "=========================="
+	Write-Host "  Operation are Finished  "
+	Write-Host "=========================="
+	#>
 }
 
 # Modification #: Configure custom system in Windows
@@ -2108,31 +2463,30 @@ function Install_PromptT {
 	)
 
 	# Instalar Oh-My-Posh en la terminal
-	Write-Host "Prompt Oh-My-Posh`n-----------------"
+	Write-Host "##  PROMPT OH-MY-POSH"
 	InstallApp "JanDeDobbeleer.OhMyPosh" winget
-	Write-Host ""
 	
 	# Iniciar Oh-My-Posh en la terminal
 	$initPrompt = 'oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH\' + $themeName + '.omp.json"'
 	$activatePrompt = Invoke-Expression $initPrompt
-	Write-Host "App [JanDeDobbeleer.OhMyPosh] Initializing...`n$initPrompt`n"
+	Write-Host "Initializing the following prompt: $initPrompt"
 	
 	# Activar Oh-My-Posh en la terminal
-	Write-Host "App [JanDeDobbeleer.OhMyPosh] Activating...`n$activatePrompt`n"
+	Write-Host "Activating the following config of prompt: $activatePrompt`n"
 	
 	return $activatePrompt
 }
 
 function Install_ModuleT {
 	
-	# MyTheme 7.2: Module Terminal-Icons	
-	Write-Host "PS Module TerminalIcons`n-----------------------"
+	# MyTheme 7.2: Module Terminal-Icons
+	Write-Host "##  PS MODULE TERMINAL-ICONS"
 	InstallModule "Terminal-Icons"
 	$iconsComand = ActivateModule "Terminal-Icons"
 	Write-Host ""
 	
 	# MyTheme 7.2: Module z
-	Write-Host "PS Module Z`n-----------"
+	Write-Host "##  PS MODULE Z"
 	InstallModule "z"
 	Write-Host ""
 
@@ -2144,7 +2498,7 @@ function Enable_ListViewT {
 	$modeName = 'ListView'
 	$option = Get-PSReadLineOption | Where-Object { $_.PredictionViewStyle -notlike "$modeName" }
 
-	Write-Host "PS Option PredictionStyle`n-------------------------"
+	Write-Host "##  PS OPTION PREDICTION-STYLE"
 	$predictionComand = "Set-PSReadLineOption -PredictionViewStyle $modeName"
 	if ($option) {
 		
@@ -2172,7 +2526,7 @@ function Test-FileContent {
 
 	if ( -not ($fileContent -match [regex]::escape($valueToCompare)) ) {
 
-		Write-Host "String not found, Adding..." -ForegroundColor Yellow
+		Write-Host "String [$valueToAdd] not found, Adding..." -ForegroundColor Yellow
 		& $addContent $valueToAdd
 	}
 }
@@ -2226,49 +2580,80 @@ function Set_FitType {
 function Custom_Background_Picture () {
 
 	# Change to Picture
-	Write-Host "Background Type`n---------------"
+	Write-Host "---------------------------"
+	Write-Host "==  SET BACKGROUND TYPE  =="
+	Write-Host "---------------------------"
 	Set_BackgroundType
 
+	Write-Host "`n----------------------------"
+	Write-Host "==  SET BACKGROUND IMAGE  =="
+	Write-Host "----------------------------"
 	$filePath = "$env:USERPROFILE\Pictures\wallpaperbetter-3840-2160-3.jpg"
 	$webPath = "https://raw.githubusercontent.com/DiegoEli/wallpaper-dark/refs/heads/main/wallpaper_desktop/wallpaperbetter-3840-2160-3.jpg"
-
+	
+	Write-Host "Test [Image] for Background."
 	Test_ImagePath $filePath $webPath
 
+	# Show File
+	Get-ChildItem $filePath | Format-Table
+
 	# Change current picture
-	Write-Host "`nBackground Image`n----------------"
 	Set_BackgroundImage "HKCU:\Control Panel\Desktop" "WallPaper" $filePath
 	
-	# Show File
-	Get-ChildItem $filePath | Format-List
-
 	# Change to a Fill
-	Write-Host "Fit Type`n--------"
+	Write-Host "`n--------------------"
+	Write-Host "==  SET FIT TYPE  =="
+	Write-Host "--------------------"
 	Set_FitType
+	
+	Write-Host "`n-----------------------------"
+	Write-Host "==  TEST BACKGROUND OTHER  =="
+	Write-Host "-----------------------------"
+	$filePath1 = "$env:USERPROFILE\Pictures\cropped-3840-2160-310526.jpg"
+	$webPath1 = "https://raw.githubusercontent.com/DiegoEli/wallpaper-dark/refs/heads/main/wallpaper_desktop/cropped-3840-2160-310526.jpg"
+
+	Write-Host "Test [Image] for Lock Screen."
+	Test_ImagePath $filePath1 $webPath1
+
+	# Show File
+	Get-ChildItem $filePath1 | Format-Table
+
+	$filePath2 = "$env:USERPROFILE\Pictures\dark-minimal-mountains.png"
+	$webPath2 = "https://raw.githubusercontent.com/DiegoEli/wallpaper-dark/refs/heads/main/wallpaper_desktop/dark-minimal-mountains.png"
+
+	Write-Host "Test [Image] for Browser."
+	Test_ImagePath $filePath2 $webPath2
+
+	# Show File
+	Get-ChildItem $filePath2 | Format-Table
+
+	Write-Host "=========================="
+	Write-Host "  Operation are Finished  "
+	Write-Host "=========================="
 }
 
 function Custom_Shell_Pwsh () {
+
+	Write-Host "--------------------------"
+	Write-Host "==  PROFILE SHELL PWSH  =="
+	Write-Host "--------------------------"
 
 	$activatePrompt = Install_PromptT "kushal"
 	$iconsComand = Install_ModuleT
 	$predictionComand = Enable_ListViewT
 
 	# Create File
-	Write-Host "PROFILE Shell`n-------------"
-	Write-Host "[*] Current File not found, Creating...   : Microsoft.PowerShell_profile.ps1"
-	
+	Write-Host "##  PROFILE SHELL"
+	Write-Host "Creating the following file: `$PROFILE"
 	$PROFILE_TEMP1 = "$env:USERPROFILE\Documents\PowerShell"
 	Test-ItemPath $PROFILE_TEMP1 "Microsoft.PowerShell_profile.ps1" "File"
 	$PROFILE_PATH_1 = "$PROFILE_TEMP1\Microsoft.PowerShell_profile.ps1"
 
 	# Show File
-	Get-ChildItem $PROFILE_PATH_1
-	"+- Message ------------------------------+"
-	"|    A new file has not been created!    |"
-	"+----------------------------------------+`n"
+	Get-ChildItem $PROFILE_PATH_1 | Format-Table
 
 	# Add Content
-	Write-Host "[*] Current File found, Adding Content... : $((Get-ChildItem $PROFILE_PATH_1).Name)"
-
+	Write-Host "Adding content the following file: `$PROFILE"
 	$stringReduce = $activatePrompt.Substring(0, $activatePrompt.Length - 26)
 	Test-FileContent $PROFILE_PATH_1 $stringReduce $activatePrompt
 	Test-FileContent $PROFILE_PATH_1 $iconsComand $iconsComand
@@ -2276,40 +2661,33 @@ function Custom_Shell_Pwsh () {
 
 	# Show Content
 	Write-Host "`n$(Get-Content -Path $PROFILE_PATH_1 -Raw)" -ForegroundColor Cyan -NoNewline
-	"+- Message ------------------------------+"
-	"|   The content was added to the file!   |"
-	"+----------------------------------------+"
 }
 
 function Custom_Shell_Powershell () {
 	
+	Write-Host "--------------------------------"
+	Write-Host "==  PROFILE SHELL POWERSHELL  =="
+	Write-Host "--------------------------------"
+
 	$activatePrompt = Install_PromptT "kali"
 
 	# Create File
-	Write-Host "PROFILE Shell`n-------------"
-	Write-Host "[*] Current File not found, Creating...   : Microsoft.PowerShell_profile.ps1"
-
+	Write-Host "##  PROFILE SHELL"
+	Write-Host "Creating the following file: `$PROFILE"
 	$PROFILE_TEMP2 = "$env:USERPROFILE\Documents\WindowsPowerShell"
 	Test-ItemPath $PROFILE_TEMP2 "Microsoft.PowerShell_profile.ps1" "File"
 	$PROFILE_PATH_2 = "$PROFILE_TEMP2\Microsoft.PowerShell_profile.ps1"
 
 	# Show File
-	Get-ChildItem $PROFILE_PATH_2
-	"+- Message ------------------------------+"
-	"|    A new file has not been created!    |"
-	"+----------------------------------------+`n"
+	Get-ChildItem $PROFILE_PATH_2 | Format-Table
 
 	# Add Content
-	Write-Host "[*] Current File found, Adding Content... : $((Get-ChildItem $PROFILE_PATH_2).Name)"
-
+	Write-Host "Adding content the following file: `$PROFILE"
 	$stringReduce = $activatePrompt.Substring(0, $activatePrompt.Length - 26)
 	Test-FileContent $PROFILE_PATH_2 $stringReduce $activatePrompt
 
 	# Show Content
 	Write-Host "`n$(Get-Content -Path $PROFILE_PATH_2 -Raw)" -ForegroundColor Cyan -NoNewline
-	"+- Message ------------------------------+"
-	"|   The content was added to the file!   |"
-	"+----------------------------------------+"
 }
 
 function Install_PromptC {
@@ -2318,58 +2696,91 @@ function Install_PromptC {
 	)
 
 	# Instalar Clink en la terminal
-	Write-Host "App Clink`n---------"
+	Write-Host "##  TOOL CLINK"
 	InstallApp "chrisant996.Clink" winget          # (clink set clink.logo none)
-	Write-Host ""
 
 	# Instalar Oh-My-Posh en la terminal
-	Write-Host "Prompt Oh-My-Posh`n-----------------"
+	Write-Host "##  PROMPT OH-MY-POSH"
 	InstallApp "JanDeDobbeleer.OhMyPosh" winget
-	Write-Host ""
 
 	# Iniciar Oh-My-Posh en la terminal
 	$initPrompt = 'oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH\' + $themeName + '.omp.json"'
 	$null = Invoke-Expression $initPrompt
-	Write-Host "App [JanDeDobbeleer.OhMyPosh] Initializing...`n$initPrompt`n"
+	Write-Host "Initializing the following prompt: $initPrompt"
 
 	# Cargar Oh-My-Posh en la terminal
 	$env:POSH_THEMES_PATH_TEMP = $env:POSH_THEMES_PATH -replace '\\', '/'
 	$loadPrompt = "load(io.popen('oh-my-posh.exe --config=`"$env:POSH_THEMES_PATH_TEMP/$themeName.omp.json`" --init --shell cmd'):read(`"*a`"))()"
-	Write-Host "App [JanDeDobbeleer.OhMyPosh] Loading Config...`n$loadPrompt`n"
+	Write-Host "Loading the following config of prompt : $loadPrompt`n"
 
 	return $loadPrompt
 }
 
 function Custom_Shell_Cmd () {
 
+	Write-Host "-------------------------"
+	Write-Host "==  PROFILE SHELL CMD  =="
+	Write-Host "-------------------------"
+
 	$addComment = "-- oh-my-posh.lua"
 	$loadPrompt = Install_PromptC "stelbent.minimal"
 
 	# Create File
-	Write-Host "PROFILE Shell`n-------------"
-	Write-Host "[*] Current File not found, Creating...   : oh-my-posh.lua"
-
-	$PROFILE_TEMP3 = "$env:LOCALAPPDATA\clink"
-	Test-ItemPath $PROFILE_TEMP3 "oh-my-posh.lua" "File"
-	$PROFILE_PATH_3 = "$PROFILE_TEMP3\oh-my-posh.lua"
+	Write-Host "##  CONFIG SHELL"
+	Write-Host "Creating the following file: `$CONFIG"
+	$CONFIG_TEMP3 = "$env:LOCALAPPDATA\clink"
+	Test-ItemPath $CONFIG_TEMP3 "oh-my-posh.lua" "File"
+	$CONFIG_PATH_3 = "$CONFIG_TEMP3\oh-my-posh.lua"
 
 	# Show File
-	Get-ChildItem $PROFILE_PATH_3
-	"+- Message ------------------------------+"
-	"|    A new file has not been created!    |"
-	"+----------------------------------------+`n"
+	Get-ChildItem $CONFIG_PATH_3 | Format-Table
 	
 	# Add Content
-	Write-Host "[*] Current File found, Adding Content... : $((Get-ChildItem $PROFILE_PATH_3).Name)"
-
-	Test-FileContent $PROFILE_PATH_3 $addComment $addComment
-	Test-FileContent $PROFILE_PATH_3 $loadPrompt $loadPrompt
+	Write-Host "Adding content the following file: `$CONFIG"
+	Test-FileContent $CONFIG_PATH_3 $addComment $addComment
+	Test-FileContent $CONFIG_PATH_3 $loadPrompt $loadPrompt
 
 	# Show Content
-	Write-Host "`n$(Get-Content -Path $PROFILE_PATH_3 -Raw)" -ForegroundColor Cyan -NoNewline
-	"+- Message ------------------------------+"
-	"|   The content was added to the file!   |"
-	"+----------------------------------------+"
+	Write-Host "`n$(Get-Content -Path $CONFIG_PATH_3 -Raw)" -ForegroundColor Cyan -NoNewline
+}
+
+function Custom_Pwsh_Powershell_Cmd () {
+
+	$varTextBlock1 = "SHELL PWSH" + 
+	"`n- Se agrega un prompt personalizado de oh-my-posh con el tema 'kushal'." + 
+	"`n- Se agrega el modulo 'Terminal-Icons' para mostrar iconos en los archivos o carpetas." + 
+	"`n- Se agrega el modulo 'z' para moverse entre directorios mas rapido." + 
+	"`n- Se habilita el modo 'ListView' para mostrar las sugerencias en forma de lista.`n"
+	$varTextBlock2 = "SHELL POWERSHELL" + 
+	"`n- Se agrega un prompt personalizado de oh-my-posh con el tema 'kali'.`n"
+	$varTextBlock3 = "SHELL CMD" + 
+	"`n- Se agrega el complemento 'Clink' para ampliar las funcionalidades de la Shell." + 
+	"`n- Se agrega un prompt personalizado de oh-my-posh con el tema 'stelbent'.`n"
+
+	$window = GenerateWinGUIShell "SELECCIONE LOS PERFILES QUE DESEA AÑADIR" "Aplicar"
+	GenerateTextBlock $varTextBlock1 "Aplicar PERFIL" $window "TextBlock1" "CheckBox1"
+	GenerateTextBlock $varTextBlock2 "Aplicar PERFIL" $window "TextBlock2" "CheckBox2"
+	GenerateTextBlock $varTextBlock3 "Aplicar CONFIG" $window "TextBlock3" "CheckBox3"
+
+	$window.FindName("ActionButton").Add_Click({
+		
+		Write-Host "==  SELECTED OPERATIONS  =="
+		if ( $window.FindName("CheckBox1").IsChecked ) {
+			Custom_Shell_Pwsh
+		}
+		if ( $window.FindName("CheckBox2").IsChecked ) {
+			Custom_Shell_Powershell
+		}
+		if ( $window.FindName("CheckBox3").IsChecked ) {
+			Write-Host "FUNCION EN MANTENIMIENTO => Custom_Shell_Cmd"
+		}
+		Write-Host "=========================="
+		Write-Host "  Operation are Finished  "
+		Write-Host "=========================="
+		$window.Close()
+	})
+
+	$window.ShowDialog()
 }
 
 #####################################################
@@ -2396,10 +2807,10 @@ function Show-SubMenu2 {
 	"╔════════════════════════════╗"
 	"║         SUB-MENU-2         ║"
 	"╠════════════════════════════╣"
-	"║ [1] Privacy & Security     ║"
-	"║ [2] WindowsUpdate Behavior ║"
-	"║ [3] Performance Mode       ║"
-	"║ [4] Go Back                ║"
+	# "║ [1] Privacy & Security     ║"
+	# "║ [2] WindowsUpdate Behavior ║"
+	"║ [1] Performance Mode       ║"
+	"║ [2] Go Back                ║"
 	"╚════════════════════════════╝"
 }
 
@@ -2409,10 +2820,10 @@ function Show-SubMenu3 {
 	"╔════════════════════════════╗"
 	"║         SUB-MENU-3         ║"
 	"╠════════════════════════════╣"
-	"║ [1] Remove Capability      ║"
-	"║ [2] Remove Package         ║"
-	"║ [3] Remove Provisioned     ║"
-	"║ [4] Go Back                ║"
+	# "║ [1] Remove Capability      ║"
+	# "║ [2] Remove Package         ║"
+	"║ [1] Remove Provisioned     ║"
+	"║ [2] Go Back                ║"
 	"╚════════════════════════════╝"
 }
 
@@ -2435,10 +2846,10 @@ function Show-SubMenu5 {
 	"║         SUB-MENU-5         ║"
 	"╠════════════════════════════╣"
 	"║ [1] Customize background   ║"
-	"║ [2] Customize pwsh         ║"
-	"║ [3] Customize powershell   ║"
-	"║ [4] Customize cmd          ║"
-	"║ [5] Go Back                ║"
+	# "║ [2] Customize pwsh         ║"
+	# "║ [3] Customize powershell   ║"
+	"║ [2] Customize Shell        ║"
+	"║ [3] Go Back                ║"
 	"╚════════════════════════════╝"
 }
 
@@ -2528,12 +2939,13 @@ function Invoke-SubMenu2 () {
 	$optionMenu2 = Read-Host "Choose an option_2"
 
 	switch ($optionMenu2) {
+		<#
 		1 {
 			Clear-Host
 			Write-Host "Set Privacy"
 			Write-Host "Do you want disable Web results, Cortana results, Diagnoctics data, Activity history?"
 
-			Invoke-Confirmation { Set_Privacy_Security }
+			Invoke-Confirmation { "FUNCION OBSOLETA" }
 			break
 		}
 		2 {
@@ -2541,18 +2953,19 @@ function Invoke-SubMenu2 () {
 			Write-Host "Set Windows Update Behavior"
 			Write-Host "Do you want enable Manual Update, disable Preliminary Updates & Product Updates?"
 
-			Invoke-Confirmation { Set_Update_Behavior }
+			Invoke-Confirmation { "FUNCION OBSOLETA" }
 			break
 		}
-		3 {
+		#>
+		1 {
 			Clear-Host
 			Write-Host "Set Performance Mode"
 			Write-Host "Do you want enable the TRIM, MemoryCompression, Minimum VisualEffects. Change the CPU usage for Windows Defender?"
 
-			Invoke-Confirmation { Set_Performance_Mode }
+			Invoke-Confirmation { Set_PrivacySecu_UpdateBeha_PerformanceMode }
 			break
 		}
-		4 {
+		2 {
 			Clear-Host
 			Invoke-MainMenu
 			break
@@ -2578,12 +2991,13 @@ function Invoke-SubMenu3 () {
 	$optionMenu3 = Read-Host "Choose an option_3"
 
 	switch ($optionMenu3) {
+		<#
 		1 {
 			Clear-Host
 			Write-Host "Remove AppCapabilityPackages"
 			Write-Host "Do you want to remove App from the local host?"
 
-			Invoke-Confirmation { Remove_Capability_App }
+			Invoke-Confirmation { "FUNCION OBSOLETA Remove_Capability_App" }
 			break
 		}
 		2 {
@@ -2591,18 +3005,19 @@ function Invoke-SubMenu3 () {
 			Write-Host "Remove AppxUserPackages"
 			Write-Host "Do you want to remove Appx from the current user account?"
 
-			Invoke-Confirmation { Remove_User_Appx }
+			Invoke-Confirmation { "FUNCION OBSOLETA Remove_User_Appx" }
 			break
 		}
-		3 {
+		#>
+		1 {
 			Clear-Host
 			Write-Host "Remove AppxProvisionedPackages"
 			Write-Host "Do you want to remove Appx from Windows image?"
 
-			Invoke-Confirmation { Remove_Provisioned_Appx }
+			Invoke-Confirmation { Remove_Capability_Package_Provisioned }
 			break
 		}
-		4 {
+		2 {
 			Clear-Host
 			Invoke-MainMenu
 			break
@@ -2679,6 +3094,7 @@ function Invoke-SubMenu5 () {
 			Invoke-Confirmation { Custom_Background_Picture }
 			break
 		}
+		<#
 		2 {
 			Clear-Host
 			Write-Host "Customize pwsh"
@@ -2695,15 +3111,16 @@ function Invoke-SubMenu5 () {
 			Invoke-Confirmation { Custom_Shell_Powershell }
 			break
 		}
-		4 {
+		#>
+		2 {
 			Clear-Host
 			Write-Host "Customize cmd"
 			Write-Host "Do you want to customize cmd?"
 
-			Invoke-Confirmation { Custom_Shell_Cmd }
+			Invoke-Confirmation { Custom_Pwsh_Powershell_Cmd }
 			break
 		}
-		5 {
+		3 {
 			Clear-Host
 			Invoke-MainMenu
 			break
@@ -2833,7 +3250,7 @@ function Test-CurrentRol {
 function Test-WingetVersion {
 	try {
 
-		$wingetCondition = winget upgrade --include-unknown --accept-source-agreements --accept-package-agreements
+		$wingetCondition = winget upgrade --accept-source-agreements --accept-package-agreements
 	} 
 	catch {
 
@@ -2929,7 +3346,7 @@ function Test-PwshVersion {
 }
 
 Clear-Host
-$Host.UI.RawUI.WindowTitle = "Dead Script [ x__x ]"
+$Host.UI.RawUI.WindowTitle = "Dead Script 💀"
 
 # Checking if Winget is installed
 Test-WingetVersion
@@ -2955,7 +3372,7 @@ chcp 65001 > $null
 # Invoke the Main Menu the Script.
 Invoke-MainMenu
 
-# Sleep for 2 seconds
+# Sleep for 3 seconds
 Start-Sleep -Milliseconds 3000
 
 # Policy Execution Restart
