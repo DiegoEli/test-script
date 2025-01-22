@@ -10,7 +10,7 @@
 # Show script info
 $WPAuthor = "D_E_M_M"
 $WPName = "WinPerf"
-$WPVersion = "v3.0.1"
+$WPVersion = "v3.1.5"
 $WPRepository = "https://raw.githubusercontent.com/DiegoEli/test-script/dev/testScript.ps1"
 # $WPRepository = "https://raw.githubusercontent.com/DiegoEli/WinPerf/main/Win11Perfect.ps1"
 
@@ -19,7 +19,7 @@ $WPRepository = "https://raw.githubusercontent.com/DiegoEli/test-script/dev/test
 	Author  : Diego Mendoza(JuanPerez)
 	Github  : https://github.com/DiegoEli
 	Name    : WinPerf
-	Version : v3.0.1
+	Version : v3.1.5
 
 .PARAMETER [Aliases]
 	irm = Invoke-RestMethod
@@ -96,7 +96,7 @@ function Test-ItemPath {
 
 	if ( -not (Test-Path -Path "$itemPath\$itemName") ) {
 
-		Write-Host "Item [$itemName] not found, Creating..." -ForegroundColor Yellow
+		Write-Host "Item [$itemPath\$itemName] not found, Creating..." -ForegroundColor Yellow
 		$null = New-Item -Path $itemPath -Name $itemName -ItemType $itemType -Force
 	}
 }
@@ -113,7 +113,7 @@ function Test-PropertyPath {
 	
 	if ( -not $propertyTest ) {
 
-		Write-Host "Property [$proName] not found, Creating..." -ForegroundColor Yellow
+		Write-Host "Property [$proPath\$proName] not found, Creating..." -ForegroundColor Yellow
 		$null = New-ItemProperty -Path $proPath -Name $proName -PropertyType $proType -Value "0" -Force
 	}
 }
@@ -130,11 +130,11 @@ function Set-OptionValue {
 
 	if ( $currentValue -ne $value ) {
 
-		Write-Host "Setting value [$property], Changing..."
+		Write-Host "Setting value [$path\$property], Changing..."
 		Set-ItemProperty -Path $path -Name $property -Value $value -Force
 	} 
 	else {
-		Write-Host "Value [$property] remains Changed."
+		Write-Host "Value [$path\$property] remains Changed."
 	}
 }
 
@@ -395,21 +395,19 @@ function Invoke-Confirmation {
 	}
 }
 
-<# function Deprecated
 function Test-WinVersion {
 	param (
 		[scriptblock]$Operation,
 		[int]$OSNumber
 	)
 
-	# $WinOSVersion = (Get-ComputerInfo).OsName
-	$WinOSVersion = (Get-WmiObject -Class Win32_OperatingSystem).Caption
+	$WinOSVersion = (Get-ComputerInfo).OsName  #version con compatibilidad
+	# $WinOSVersion = (Get-WmiObject -Class Win32_OperatingSystem).Caption
 	
 	if ($WinOSVersion -match "Microsoft Windows $OSNumber") {
 		& $Operation
 	}
 }
-#>
 
 # Modification #: Configure preference in Windows
 function Opt_AutoLogon {
@@ -629,11 +627,11 @@ function Opt_HideTaskbar {
 	if ( $hideTaskbar[8] -ne 0x7A ) {
 
 		$hideTaskbar[8] = 0x7A
-		Write-Host "Setting value [$property], Changing..."
+		Write-Host "Setting value [$hideTbPath\$property], Changing..."
 		Set-ItemProperty -Path $hideTbPath -Name $property -Value $hideTaskbar -Force
 	}
 	else {
-		Write-Host "Value [$property] remains Changed."
+		Write-Host "Value [$hideTbPath\$property] remains Changed."
 	}
 }
 
@@ -769,27 +767,27 @@ $optionList = @(
 	@{ ShowInGUI = "Activar Logeo Automatico"; IsXamlId = "AutoLogon"; IsOperation = "Opt_AutoLogon" }
 	@{ ShowInGUI = "Desactivar Inico Rapido"; IsXamlId = "FastStartup"; IsOperation = "Opt_FastStartup" }
 	@{ ShowInGUI = "Activar Mensajes Detallados de Inicio"; IsXamlId = "VerboseLogon"; IsOperation = "Opt_VerboseLogon" }
-	@{ ShowInGUI = "Activar Mostrar Version en Desktop"; IsXamlId = "ShowBuildVersion"; IsOperation = "Opt_ShowBuildVersion" }
+	@{ ShowInGUI = "Mostrar Version de Build en Desktop"; IsXamlId = "ShowBuildVersion"; IsOperation = "Opt_ShowBuildVersion" }
 	@{ ShowInGUI = "Desactivar Modo Hibernacion (Desktop PC)"; IsXamlId = "HibernateMode"; IsOperation = "Opt_HibernateMode" }
 	# @{ ShowInGUI = "Desactivar Sensor de Wi-Fi (Desktop PC)"; IsXamlId = "WiFi_Sense"; IsOperation = "Opt_WiFiSense" }
 	@{ ShowInGUI = "Desactivar Sonidos de Inicio de Windows"; IsXamlId = "StartupSound"; IsOperation = "Opt_StartupSound" }
 	@{ ShowInGUI = "Desactivar Ajustar Volumen de Sonidos"; IsXamlId = "CommunicationsActivity"; IsOperation = "Opt_CommunicationsActivity" }
 	@{ ShowInGUI = "Desactivar Precision de Puntero"; IsXamlId = "MousePrecision"; IsOperation = "Opt_MousePrecision" }
 	@{ ShowInGUI = "Desactivar Sensor de Almacenamiento"; IsXamlId = "StorageSense"; IsOperation = "Opt_StorageSense" }
-	# @{ ShowInGUI = "Desactivar Encriptacion del Device"; IsXamlId = "DeviceEncryption"; IsOperation = "Opt_DeviceEncryption" }
+	# @{ ShowInGUI = "Desactivar Encriptacion del Equipo"; IsXamlId = "DeviceEncryption"; IsOperation = "Opt_DeviceEncryption" }
 	@{ ShowInGUI = "Desactivar Sugerencias para Snap"; IsXamlId = "SnapSuggest"; IsOperation = "Opt_SnapSuggest" }
-	@{ ShowInGUI = "Habilitar Mostrar Extensiones de Archivos"; IsXamlId = "ShowFileExtensions"; IsOperation = "Opt_ShowFileExtensions" }
-	@{ ShowInGUI = "Habilitar Mostrar Archivos Ocultos del Sistema"; IsXamlId = "ShowHiddenFiles"; IsOperation = "Opt_ShowHiddenFiles" }
-	@{ ShowInGUI = "Desactivar Mostrar Proveedor de Sincronizacion"; IsXamlId = "ShowSyncProvider"; IsOperation = "Opt_ShowSyncProvider" }
-	@{ ShowInGUI = "Habilitar Finalizar Tarea en Taskbar"; IsXamlId = "ShowEndTask"; IsOperation = "Opt_ShowEndTask" }
+	@{ ShowInGUI = "Mostrar Extensiones de Archivos"; IsXamlId = "ShowFileExtensions"; IsOperation = "Opt_ShowFileExtensions" }
+	@{ ShowInGUI = "Mostrar Archivos Ocultos del Sistema"; IsXamlId = "ShowHiddenFiles"; IsOperation = "Opt_ShowHiddenFiles" }
+	@{ ShowInGUI = "Ocultar Proveedor de Sincronizacion"; IsXamlId = "ShowSyncProvider"; IsOperation = "Opt_ShowSyncProvider" }
+	@{ ShowInGUI = "Habilitar Boton para Finalizar Tarea"; IsXamlId = "ShowEndTask"; IsOperation = "Opt_ShowEndTask" }
 	# @{ ShowInGUI = "Habilitar Comando Sudo"; IsXamlId = "SudoCommand"; IsOperation = "Opt_SudoCommand" }
 	@{ ShowInGUI = "Activar Full Modo Oscuro"; IsXamlId = "DarkMode"; IsOperation = "Opt_DarkMode" }
-	@{ ShowInGUI = "Desactivar Mostrar Icono de Search"; IsXamlId = "ShowItemSearch"; IsOperation = "Opt_ShowItemSearch" }
-	@{ ShowInGUI = "Desactivar Mostrar Icono de TaskView"; IsXamlId = "ShowItemTaskView"; IsOperation = "Opt_ShowItemTaskView" }
-	@{ ShowInGUI = "Desactivar Ocultar la Taskbar"; IsXamlId = "HideTaskbar"; IsOperation = "Opt_HideTaskbar" }
-	@{ ShowInGUI = "Habilitar Mostrar el Desktop"; IsXamlId = "ShowDesktop"; IsOperation = "Opt_ShowDesktop" }
-	@{ ShowInGUI = "Desactivar Mostrar la Barra de Lenguaje"; IsXamlId = "ShowLanguageBar"; IsOperation = "Opt_ShowLanguageBar" }
-	@{ ShowInGUI = "Activar Mostrar Segundos en Reloj"; IsXamlId = "ShowSeconds"; IsOperation = "Opt_ShowSeconds" }
+	@{ ShowInGUI = "Ocultar Icono de Search"; IsXamlId = "ShowItemSearch"; IsOperation = "Opt_ShowItemSearch" }
+	@{ ShowInGUI = "Ocultar Icono de TaskView"; IsXamlId = "ShowItemTaskView"; IsOperation = "Opt_ShowItemTaskView" }
+	@{ ShowInGUI = "Siempre Fijar la Taskbar"; IsXamlId = "HideTaskbar"; IsOperation = "Opt_HideTaskbar" }
+	@{ ShowInGUI = "Habilitar Boton para Mostrar el Desktop"; IsXamlId = "ShowDesktop"; IsOperation = "Opt_ShowDesktop" }
+	@{ ShowInGUI = "Ocultar la Barra de Lenguaje"; IsXamlId = "ShowLanguageBar"; IsOperation = "Opt_ShowLanguageBar" }
+	@{ ShowInGUI = "Mostrar Segundos en Reloj"; IsXamlId = "ShowSeconds"; IsOperation = "Opt_ShowSeconds" }
 	@{ ShowInGUI = "Desactivar Barra de Juego"; IsXamlId = "GameBar"; IsOperation = "Opt_GameBar" }
 	# @{ ShowInGUI = "Desactivar Modo de Juego"; IsXamlId = "GameMode"; IsOperation = "Opt_GameMode" }
 	@{ ShowInGUI = "Remover Icono de Galeria en Explorer"; IsXamlId = "GalleryIcon"; IsOperation = "Remove_GalleryIcon" }
@@ -894,7 +892,7 @@ function Set_Service_Startup () {
 # Get-ScheduledTask | Sort-Object TaskPath, TaskName | Format-Table -Property TaskPath, TaskName, State
 # Get-ScheduledTask | Sort-Object State, TaskPath, TaskName | Format-Table -GroupBy State -Property TaskPath, TaskName, State
 function ConfigTask ($taskPath, $taskName, $stateType) {
-	$task = Get-ScheduledTask -TaskPath $taskPath -TaskName $taskName
+	$task = Get-ScheduledTask -TaskPath $taskPath -TaskName $taskName -ErrorAction SilentlyContinue
 	
 	$newState = $stateType.Substring(0, $stateType.Length - 1)
 	if ( $null -ne $task ) {
@@ -1011,7 +1009,7 @@ function ConfigFeature ($featureName, $stateType) {
 	if ( $null -ne $feature ) {
 		
 		Write-Host "Setting feature [$featureName] to $stateType."
-		$null = Invoke-Expression "$newState-WindowsOptionalFeature -FeatureName `"$featureName`" -Online"
+		$null = Invoke-Expression "$newState-WindowsOptionalFeature -FeatureName `"$featureName`" -NoRestart -Online"
 	} 
 	else {
 		Write-Host "ERROR: Setting feature [$featureName] to $stateType, Feature not found."
@@ -1023,10 +1021,15 @@ $disableFList = @(
 	@{ ShowInGUI = "Desactivar Internet Explorer 11"; IsXamlId = "Internet_Explorer"; IsOperation = "Internet-Explorer-Optional-amd64" }
 	@{ ShowInGUI = "Desactivar Media Features"; IsXamlId = "MediaPlay"; IsOperation = "MediaPlayback" }
 	@{ ShowInGUI = "Desactivar Windows Media Player"; IsXamlId = "MediaPlayer"; IsOperation = "WindowsMediaPlayer" }
+	@{ ShowInGUI = "Desactivar Microsoft XPS Document Writer"; IsXamlId = "XPSServices"; IsOperation = "Printing-XPSServices-Features" }
+	@{ ShowInGUI = "Desactivar Work Folders Client"; IsXamlId = "WorkFolders"; IsOperation = "WorkFolders-Client" }
+	@{ ShowInGUI = "Desactivar Windows Search"; IsXamlId = "SearchEngine"; IsOperation = "SearchEngine-Client-Package" }
 )
 
 $enableFList = @(
 	@{ ShowInGUI = "Activar .NET Framework 3.5"; IsXamlId = "NetFramework"; IsOperation = "NetFx3" }
+	@{ ShowInGUI = "Activar Virtual Machine Platform"; IsXamlId = "VM_Platform"; IsOperation = "VirtualMachinePlatform" }
+	@{ ShowInGUI = "Activar Windows Hypervisor Platform"; IsXamlId = "HypervisorPlatform"; IsOperation = "HypervisorPlatform" }
 	@{ ShowInGUI = "Activar Windows Sandbox"; IsXamlId = "ClientVM"; IsOperation = "Containers-DisposableClientVM" }
 )
 
@@ -1474,11 +1477,11 @@ function Set_LimitBandwidthUpdates {
 $updateList = @(
 	@{ ShowInGUI = "Desactivar Actualizaciones Automaticas de Windows"; IsXamlId = "WinAutoUpdates"; IsOperation = "Set_WinAutoUpdates" }
 	@{ ShowInGUI = "Desactivar Actualizaciones Preliminares"; IsXamlId = "PreliminaryUpdates"; IsOperation = "Set_PreliminaryUpdates" }
-	@{ ShowInGUI = "Habilitar Retrasar las Actualizaciones de Seguridad"; IsXamlId = "DelaySecurityUpdates"; IsOperation = "Set_DelaySecurityUpdates" }
+	@{ ShowInGUI = "Retrasar las Actualizaciones de Seguridad"; IsXamlId = "DelaySecurityUpdates"; IsOperation = "Set_DelaySecurityUpdates" }
 	@{ ShowInGUI = "Desactivar Obtener las ultimas Actualizaciones"; IsXamlId = "GetLatestUpdates"; IsOperation = "Set_GetLatestUpdates" }
-	@{ ShowInGUI = "Desactivar Actualizaciones de otros Productos"; IsXamlId = "UpdateOtherProduct"; IsOperation = "Set_UpdateOtherProduct" }
+	@{ ShowInGUI = "Desactivar Actualizaciones para Productos MS"; IsXamlId = "UpdateOtherProduct"; IsOperation = "Set_UpdateOtherProduct" }
 	@{ ShowInGUI = "Habilitar Horas Activas de 06:00 a 23:00"; IsXamlId = "ActiveHours"; IsOperation = "Set_ActiveHours" }
-	@{ ShowInGUI = "Desactivar Descargas de otras PCs"; IsXamlId = "DownloadsOtherPCs"; IsOperation = "Set_DownloadsOtherPCs" }
+	@{ ShowInGUI = "Desactivar Descargas desde otros Equipos"; IsXamlId = "DownloadsOtherPCs"; IsOperation = "Set_DownloadsOtherPCs" }
 	@{ ShowInGUI = "Desactivar Actualizaciones Automaticas de la Store"; IsXamlId = "StoreAutoUpdates"; IsOperation = "Set_StoreAutoUpdates" }
 	@{ ShowInGUI = "Limitar Ancho de Banda Reservable"; IsXamlId = "LimitBandwidthUpdates"; IsOperation = "Set_LimitBandwidthUpdates" }
 )
@@ -1585,11 +1588,11 @@ function Minimum_Preferences {
 		$preferMask[0] = 0x90 ; $preferMask[1] = 0x12
 		$preferMask[2] = 0x03 ; $preferMask[4] = 0x10
 
-		Write-Host "Setting value [$property1], Changing..."
+		Write-Host "Setting value [$preferMaskPath\$property1], Changing..."
 		Set-ItemProperty -Path $preferMaskPath -Name $property1 -Value $preferMask -Force
 	} 
 	else {
-		Write-Host "Value [$property1] remains Changed."
+		Write-Host "Value [$preferMaskPath\$property1] remains Changed."
 	}
 }
 
@@ -1721,9 +1724,9 @@ function Set_Privacy_Update_Performance () {
 # Modification #: Configure Remove AppCapability in Windows
 function Test-ModuleAppx {
 
-	InstallModule "Appx"
-	ActivateModule "Appx"
+	& { Import-Module -Name "Appx" -UseWindowsPowerShell } 3> $null
 }
+
 function Test-ModuleDism {
 
 	InstallModule "Dism"
@@ -1735,12 +1738,12 @@ function Test-ModuleDism {
 function RemoveCapabilityApp ($appName) {
 	$appc = Get-WindowsCapability -Online | Where-Object { $_.Name -like "*$appName*" }
 
-	if ( ($null -ne $appc) -and ($appc.State -notlike "NotPresent") ) {
+	if ( ($null -ne $appc) -and ($appc.State -like "Installed") ) {
 
 		Write-Host "Capability [$appName] found, Removing..."
 		$null = Remove-WindowsCapability -Name "$($appc.Name)" -Online
 	} 
-	elseif ( ($null -ne $appc) -and ($appc.State -notlike "Installed") ) {
+	elseif ( ($null -ne $appc) -and ($appc.State -like "NotPresent") ) {
 		Write-Host "ERROR: Removing Capability [$appName], App not present."
 	} 
 	else {
@@ -1762,7 +1765,7 @@ $capabilityList = @(
 	@{ ShowInGUI = "PowerShell ISE"; IsXamlId = "PowerShellISE"; IsOperation = "Microsoft.Windows.PowerShell.ISE" }
 	@{ ShowInGUI = "WordPad"; IsXamlId = "WindowsWordPad"; IsOperation = "Microsoft.Windows.WordPad" }
 	@{ ShowInGUI = "Print Fax"; IsXamlId = "PrintFax"; IsOperation = "Print.Fax.Scan" }
-	# @{ ShowInGUI = "WMIC Command"; IsXamlId = "WMIC"; IsOperation = "WMIC" }
+	@{ ShowInGUI = "WMIC Command"; IsXamlId = "WMIC"; IsOperation = "WMIC" }
 	@{ ShowInGUI = "XPS Viewer"; IsXamlId = "XPSViewer"; IsOperation = "XPS.Viewer" }
 )
 
@@ -1981,11 +1984,11 @@ function InstallApp ($appId, $sourceType) {
 	Write-Host "Installing the following package: $appId"
 	if ( (-not $condition) -and ($sourceType -like "winget") ) {
 
-		Invoke-Expression "$sourceType install $appId --accept-source-agreements --accept-package-agreements"
+		Start-Process -FilePath $sourceType -ArgumentList "install $appId --accept-source-agreements --accept-package-agreements" -NoNewWindow -Wait
 	} 
 	elseif ( (-not $condition) -and ($sourceType -like "choco") ) {
 		
-		Invoke-Expression "$sourceType install $appId --confirm"
+		Start-Process -FilePath $sourceType -ArgumentList "install $appId --confirm" -NoNewWindow -Wait
 	} 
 	else {
 		Write-Host "$appId already installed." -ForegroundColor Yellow
@@ -2031,6 +2034,7 @@ $appPkgList = @(
 	@{ ShowInGUI = "Steam Launcher"; IsXamlId = "SteamLauncher"; IsOperation = "Valve.Steam" }
 	@{ ShowInGUI = "Epic Games Launcher"; IsXamlId = "EpicLauncher"; IsOperation = "EpicGames.EpicGamesLauncher" }
 	@{ ShowInGUI = "Ubisoft Connect"; IsXamlId = "UbisoftConnet"; IsOperation = "Ubisoft.Connect" }
+	@{ ShowInGUI = "GOG Galaxy"; IsXamlId = "GOGGalaxy"; IsOperation = "GOG.Galaxy" }
 	@{ ShowInGUI = "BlueStacks"; IsXamlId = "BlueStacksId"; IsOperation = "BlueStack.BlueStacks" }
 	@{ ShowInGUI = "PPSSPP"; IsXamlId = "PPSSPPId"; IsOperation = "PPSSPPTeam.PPSSPP" }
 	@{ ShowInGUI = "PCSX2"; IsXamlId = "PCSX2Id"; IsOperation = "PCSX2Team.PCSX2" }
@@ -2163,10 +2167,11 @@ function Install_AppPkg_AppDev_Tool () {
 function InstallModule ($moduleName) {
 	$modComand = if ( $moduleName -eq "Terminal-Icons" ) { " -Repository PSGallery" } else { "" }
 	
+	$moduleComand = 'Install-Module -Name ' + $moduleName + $modComand + ' -Force'
 	if ( -not (Get-Module -ListAvailable -Name $moduleName) ) {
 		
 		Write-Host "Module [$moduleName] not found, Installing..."
-		Invoke-Expression 'Install-Module -Name ' + $moduleName + $modComand + ' -Force'
+		Invoke-Expression $moduleComand
 	} 
 	else {
 		Write-Host "Module [$moduleName] remains Installed."
@@ -2584,7 +2589,7 @@ function Custom_Pwsh_Powershell_Cmd () {
 			Custom_Shell_Powershell
 		}
 		if ( $window.FindName("CheckBox3").IsChecked ) {
-			Write-Host "FUNCION EN MANTENIMIENTO => Custom_Shell_Cmd" -ForegroundColor Cyan
+			Write-Host "FUNCION EN MANTENIMIENTO => Custom_Shell_Cmd" -ForegroundColor Yellow
 		}
 		Write-Host "=========================="
 		Write-Host "  Operation are Finished  "
@@ -2700,7 +2705,7 @@ function Invoke-MainMenu () {
 		}
 		3 {
 			& { $null = Test-ModuleDism } 6> $null
-			# Test-WinVersion -Operation { Test-ModuleAppx } -OSNumber 10;
+			Test-WinVersion -Operation { Test-ModuleAppx } -OSNumber 10
 			Clear-Host
 			Write-Host "Confirm`nAre you sure you want to perform this action?"
 			Write-Host "Remove Capability, Remove Packages, Remove Provisioned."
@@ -2778,7 +2783,7 @@ function Test-CurrentRol {
 	$roleCurrent = ([Security.Principal.WindowsBuiltInRole] "Administrator")
 	
 	$adminCondition = $userCurrent.IsInRole($roleCurrent)
-	if ( -not $adminCondition ) {
+	if ( (-not $adminCondition) -or ($PSVersionTable.PSEdition -notlike "Core") ) {
 
 		Write-Host "Checking if Rol is Administrator..."
 		Write-Host " -The script requires to run as Administrator" -ForegroundColor Yellow
@@ -2803,24 +2808,17 @@ function Test-WingetVersion {
 
 		Write-Error "ERROR: $_"
 		Write-Host "Checking if PM Winget is Installed..."
-		$packageVCLibs = "Microsoft.VCLibs.x64.14.00.Desktop.appx"
-		$packageUIXaml = "Microsoft.UI.Xaml.2.8.x64.appx"
-		$packageWinget = "Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
 		
 		if ( -not $wingetCondition ) {
 
-			Write-Host " -Downloading dependencies VCLibs" -ForegroundColor Yellow
-			Invoke-WebRequest -Uri "https://aka.ms/$packageVCLibs" -OutFile $packageVCLibs
-			Add-AppxPackage -Path $packageVCLibs
-
-			Write-Host " -Downloading dependencies UI.Xaml" -ForegroundColor Yellow
-			Invoke-WebRequest -Uri "https://github.com/microsoft/microsoft-ui-xaml/releases/download/v2.8.6/$packageUIXaml" -OutFile $packageUIXaml
-			Add-AppxPackage -Path $packageUIXaml
+			Write-Host " -Installing WinGet PowerShell module from PSGallery" -ForegroundColor Yellow
+			$null = Install-PackageProvider -Name "NuGet" -Force
+			Install-Module -Name "Microsoft.WinGet.Client" -Repository "PSGallery" -Force
 			
-			Write-Host " -Installing the package manager Winget" -ForegroundColor Yellow
-			Invoke-WebRequest -Uri "https://github.com/microsoft/winget-cli/releases/download/v1.9.25200/$packageWinget" -OutFile $packageWinget
-			Add-AppxPackage -Path $packageWinget
-
+			Write-Host " -Using Repair-WinGetPackageManager cmdlet to bootstrap WinGet" -ForegroundColor Yellow
+			Repair-WinGetPackageManager
+			
+			Write-Host " -Accepting source and package agreements" -ForegroundColor Yellow
 			$null = Invoke-Expression "winget upgrade --accept-source-agreements --accept-package-agreements"
 		}
 	}
@@ -2866,6 +2864,25 @@ function Test-PwshVersion {
 	}
 }
 
+function Test-TerminalVersion {
+	try {
+
+		$packagePath = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe"
+		$wtCondition = Invoke-Expression "Get-ChildItem -Path $packagePath"
+	}
+	catch {
+
+		Write-Error "ERROR: $_"
+		Write-Host "Checking if Windows Terminal is Installed..."
+
+		if ( -not $wtCondition ) {
+			
+			Write-Host " -Installing the terminal Windows Terminal" -ForegroundColor Yellow
+			InstallApp "Microsoft.WindowsTerminal" winget
+		}
+	}
+}
+
 Clear-Host
 $Host.UI.RawUI.WindowTitle = "Dead Script 💀"
 
@@ -2877,6 +2894,9 @@ Test-ChocoVersion
 
 # Checking if Shell pwsh is installed
 Test-PwshVersion
+
+# Checking if Windows Terminal is installed
+Test-TerminalVersion
 
 # Checking if Rol is Administrator
 Test-CurrentRol
