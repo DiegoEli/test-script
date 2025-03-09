@@ -1,7 +1,7 @@
 
 # Policy Execution Enable
-#Set-ExecutionPolicy -ExecutionPolicy "Unrestricted" -Scope "Process" -Force
 #Set-ExecutionPolicy -ExecutionPolicy "Unrestricted" -Scope "CurrentUser" -Force
+#Set-ExecutionPolicy -ExecutionPolicy "Unrestricted" -Scope "LocalMachine" -Force
 
 #####################################################
 #	ABOUT_SCRIPT
@@ -10,7 +10,7 @@
 # Show script info
 $WPAuthor = "D_E_M_M"
 $WPName = "WinPerf"
-$WPVersion = "v3.1.5"
+$WPVersion = "v3.#.#"
 $WPRepository = "https://raw.githubusercontent.com/DiegoEli/test-script/dev/testScript.ps1"
 # $WPRepository = "https://raw.githubusercontent.com/DiegoEli/WinPerf/main/Win11Perfect.ps1"
 
@@ -19,7 +19,7 @@ $WPRepository = "https://raw.githubusercontent.com/DiegoEli/test-script/dev/test
 	Author  : Diego Mendoza(JuanPerez)
 	Github  : https://github.com/DiegoEli
 	Name    : WinPerf
-	Version : v3.1.5
+	Version : v3.2.8
 
 .PARAMETER [Aliases]
 	irm = Invoke-RestMethod
@@ -429,7 +429,7 @@ function Opt_AutoLogon {
 function Opt_FastStartup {
 	$pathFastStartup = 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power'
 	$property = 'HiberbootEnabled'
-	$value = 0
+	$value = 0  #ON $value = 1
 
 	#"FastStartup has been Disabled"
 	Set-OptionValue $pathFastStartup $property $value
@@ -521,12 +521,22 @@ function Opt_MousePrecision {
 
 # Modification 1: StorageSense in Windows(revisar si existe)
 function Opt_StorageSense {
+	$path = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\StorageSense\Parameters'
+	$item = 'StoragePolicy'
+
+	Test-ItemPath $path $item "Directory"
+
 	$pathStorageSense = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy'
-	$property = '01'
+	$property1 = '01'
+	$property2 = '04'
 	$value = 0
 
+	Test-PropertyPath $pathStorageSense $property1 "DWord"
+	Test-PropertyPath $pathStorageSense $property2 "DWord"
+	
 	#"StorageSense has been Disabled"
-	Set-OptionValue $pathStorageSense $property $value
+	Set-OptionValue $pathStorageSense $property1 $value
+	Set-OptionValue $pathStorageSense $property2 $value
 }
 
 function Opt_SnapSuggest {
@@ -540,6 +550,15 @@ function Opt_SnapSuggest {
 	Set-OptionValue $pathSnapSuggest $property1 $value
 	Set-OptionValue $pathSnapSuggest $property2 $value
 	Set-OptionValue $pathSnapSuggest $property3 $value
+}
+
+function Opt_ShowTabsApps {
+	$tabsPath = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+	$property = 'MultiTaskingAltTabFilter'
+	$value = 3
+	
+	#"Show TabsApps has been Disabled"
+	Set-OptionValue $tabsPath $property $value
 }
 
 function Opt_ShowFileExtensions {
@@ -558,6 +577,14 @@ function Opt_ShowHiddenFiles {
 
 	#"Show HiddenFilesFolders has been Enabled"
 	Set-OptionValue $pathHiddenFiFo $property $value
+}
+
+function Opt_OpenFileExplorer {
+	$openFiExPath = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced'
+	$property = 'LaunchTo'
+	$value = 1
+
+	Set-OptionValue $openFiExPath $property $value
 }
 
 function Opt_ShowSyncProvider {
@@ -672,6 +699,11 @@ function Opt_ShowLanguageBar {
 	Set-LanguageBarS $propertyB $stateB  # IsLegacyLanguageBar: True
 
 	# 2-Language Bar
+	$path = 'HKCU:\Software\Microsoft\CTF'
+	$item = 'LangBar'
+
+	Test-ItemPath $path $item "Directory"
+	
 	$LanguageBarPath = 'HKCU:\Software\Microsoft\CTF\LangBar'
 	$property1 = 'ShowStatus'
 	$property2 = 'Transparency'
@@ -680,6 +712,11 @@ function Opt_ShowLanguageBar {
 	$value1 = 3
 	$value2 = 255
 	$value3 = 0
+
+	Test-PropertyPath $LanguageBarPath $property1 "DWord"
+	Test-PropertyPath $LanguageBarPath $property2 "DWord"
+	Test-PropertyPath $LanguageBarPath $property3 "DWord"
+	Test-PropertyPath $LanguageBarPath $property4 "DWord"
 
 	# Option change value
 	Set-OptionValue $LanguageBarPath $property1 $value1
@@ -776,8 +813,10 @@ $optionList = @(
 	@{ ShowInGUI = "Desactivar Sensor de Almacenamiento"; IsXamlId = "StorageSense"; IsOperation = "Opt_StorageSense" }
 	# @{ ShowInGUI = "Desactivar Encriptacion del Equipo"; IsXamlId = "DeviceEncryption"; IsOperation = "Opt_DeviceEncryption" }
 	@{ ShowInGUI = "Desactivar Sugerencias para Snap"; IsXamlId = "SnapSuggest"; IsOperation = "Opt_SnapSuggest" }
+	@{ ShowInGUI = "Desactivar Tabs Individuales para Edge"; IsXamlId = "ShowTabsApps"; IsOperation = "Opt_ShowTabsApps" }
 	@{ ShowInGUI = "Mostrar Extensiones de Archivos"; IsXamlId = "ShowFileExtensions"; IsOperation = "Opt_ShowFileExtensions" }
 	@{ ShowInGUI = "Mostrar Archivos Ocultos del Sistema"; IsXamlId = "ShowHiddenFiles"; IsOperation = "Opt_ShowHiddenFiles" }
+	@{ ShowInGUI = "Siempre Iniciar FileExplorer en (Este Equipo)"; IsXamlId = "OpenFileExplorer"; IsOperation = "Opt_OpenFileExplorer" }
 	@{ ShowInGUI = "Ocultar Proveedor de Sincronizacion"; IsXamlId = "ShowSyncProvider"; IsOperation = "Opt_ShowSyncProvider" }
 	@{ ShowInGUI = "Habilitar Boton para Finalizar Tarea"; IsXamlId = "ShowEndTask"; IsOperation = "Opt_ShowEndTask" }
 	# @{ ShowInGUI = "Habilitar Comando Sudo"; IsXamlId = "SudoCommand"; IsOperation = "Opt_SudoCommand" }
@@ -1041,7 +1080,7 @@ function Set_Option_ServiceTask_Feature () {
 	$varTextBlock2 = "`nTAREAS PROGRAMADAS" +
 	"`n- Se establece el modo deshabilitado para las tareas programadas que por temas de seguridad requieren confirmacion del usuario."
 
-	$window = GenerateWinGUIMod "SELECCIONE LAS PREFERENCIAS, SETEE LOS SERVICIOS, SETEE LAS TAREAS PROGRAMADAS, LAS CARACTERISTICAS OPCIONALES" "Aplicar"
+	$window = GenerateWinGUIMod "SELECCIONE LAS PREFERENCIAS, SETEE LOS SERVICIOS, SETEE LAS TAREAS PROGRAMADAS Y LAS CARACTERISTICAS OPCIONALES" "Aplicar"
 
 	Add-GenerateTextBlock "OPCIONES POR DEFECTO" $window "TextBlock1"
 	$checkBox1 = GenerateCheckBoxList $optionList $window "ListContainer1"
@@ -1128,11 +1167,18 @@ function Disable_Spotlight {
 }
 
 function Disable_AdditionalSettings {
+	$path = 'HKCU:\Software\Microsoft\Windows\CurrentVersion'
+	$item = 'UserProfileEngagement'
+
+	Test-ItemPath $path $item "Directory"
+
 	$path1 = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager'
 	$path2 = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\UserProfileEngagement'
 	$property1 = 'SubscribedContent-310093Enabled'
 	$property2 = 'ScoobeSystemSettingEnabled'
 	$value = 0
+
+	Test-PropertyPath $path2 $property2 "DWord"
 
 	# Change value option
 	Set-OptionValue $path1 $property1 $value
@@ -1220,6 +1266,11 @@ function Disable_TypingPersonalization {
 }
 
 function Disable_DiagnosticData {
+	$path = 'HKCU:\Software\Microsoft\Siuf'
+	$item = 'Rules'
+
+	Test-ItemPath $path $item "Directory"
+
 	$pathTelemetry1 = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection'
 	$pathTelemetry2 = 'HKLM:\Software\Policies\Microsoft\Windows\DataCollection'
 	$pathTelemetry3 = 'HKCU:\Software\Microsoft\Siuf\Rules'
@@ -1336,6 +1387,16 @@ function Disable_LocationTracking {
 	Set-OptionValue $path_4 $property4 $value4
 }
 
+function Disable_RemoteAssistance {
+	$remoteAssPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\Remote Assistance'
+	$property1 = 'fAllowFullControl'
+	$property2 = 'fAllowToGetHelp'
+	$value = 0
+
+	Set-OptionValue $remoteAssPath $property1 $value
+	Set-OptionValue $remoteAssPath $property2 $value
+}
+
 $privacyList = @(
 	@{ ShowInGUI = "Desactivar Windows Spotlight"; IsXamlId = "Spotlight"; IsOperation = "Disable_Spotlight" }
 	@{ ShowInGUI = "Desactivar Experiencia de Bienvenida"; IsXamlId = "AdditionalSettings"; IsOperation = "Disable_AdditionalSettings" }
@@ -1349,6 +1410,7 @@ $privacyList = @(
 	@{ ShowInGUI = "Desactivar Resultados Web"; IsXamlId = "WebResults"; IsOperation = "Disable_WebResults" }
 	@{ ShowInGUI = "Desactivar Resultados Locales"; IsXamlId = "LocalResults"; IsOperation = "Disable_LocalResults" }
 	@{ ShowInGUI = "Desactivar Seguimiento de Ubicacion"; IsXamlId = "LocationTracking"; IsOperation = "Disable_LocationTracking" }
+	@{ ShowInGUI = "Desactivar Asistencia Remota"; IsXamlId = "RemoteAssistance"; IsOperation = "Disable_RemoteAssistance" }
 )
 
 # Modification #: Configure Update behavior in Windows
@@ -1450,9 +1512,16 @@ function Set_DownloadsOtherPCs {
 }
 
 function Set_StoreAutoUpdates {
+	$path = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore'
+	$item = 'WindowsUpdate'
+
+	Test-ItemPath $path $item "Directory"
+
 	$updatesStorePath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsStore\WindowsUpdate'
 	$property = 'AutoDownload'
 	$value = 2
+
+	Test-PropertyPath $updatesStorePath $property "DWord"
 
 	# Change value option
 	Set-OptionValue $updatesStorePath $property $value
@@ -1462,7 +1531,7 @@ function Set_LimitBandwidthUpdates {
 	$path = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows'
 	$item = 'Psched'
 
-	Test-ItemPath $path $item
+	Test-ItemPath $path $item "Directory"
 
 	$bandwidthPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\$item"
 	$property = 'NonBestEffortLimit'
@@ -1483,7 +1552,7 @@ $updateList = @(
 	@{ ShowInGUI = "Habilitar Horas Activas de 06:00 a 23:00"; IsXamlId = "ActiveHours"; IsOperation = "Set_ActiveHours" }
 	@{ ShowInGUI = "Desactivar Descargas desde otros Equipos"; IsXamlId = "DownloadsOtherPCs"; IsOperation = "Set_DownloadsOtherPCs" }
 	@{ ShowInGUI = "Desactivar Actualizaciones Automaticas de la Store"; IsXamlId = "StoreAutoUpdates"; IsOperation = "Set_StoreAutoUpdates" }
-	@{ ShowInGUI = "Limitar Ancho de Banda Reservable"; IsXamlId = "LimitBandwidthUpdates"; IsOperation = "Set_LimitBandwidthUpdates" }
+	@{ ShowInGUI = "Limitar Ancho de Banda Reservable a 0%"; IsXamlId = "LimitBandwidthUpdates"; IsOperation = "Set_LimitBandwidthUpdates" }
 )
 
 # Modification #: Configure performance in Windows
@@ -1513,6 +1582,15 @@ function Config_AutoSample {
 	else {
 		Write-Host "Value [$property] remains Changed."
 	}
+}
+
+function Config_MemoryIntegrity {
+	$path = 'HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity'
+	$property = 'Enabled'
+	$value = 0
+
+	# Change value option
+	Set-OptionValue $path $property $value
 }
 
 function Config_MemoryCompression {
@@ -1658,6 +1736,15 @@ function Set_CustomAppearance {
 	Drop_Shadows
 }
 
+function Set_PowerMode {
+	$path = ''
+	$property = ''
+	$value = 0
+
+	# Change value option
+	Set-OptionValue $path $property $value
+}
+
 function Set_GroupProcesses {
 	$svchostPath = "HKLM:\SYSTEM\CurrentControlSet\Control"
 	$property = "SvcHostSplitThresholdInKB"  # $ram = 3670016 | value default in 8GB RAM
@@ -1668,13 +1755,15 @@ function Set_GroupProcesses {
 }
 
 $performanceList = @(
-	@{ ShowInGUI = "Reducir la Carga de CPU al Escanear"; IsXamlId = "ScanCpuLoad"; IsOperation = "Config_ScanCpuLoad" }
+	@{ ShowInGUI = "Limitar Carga de CPU al Escanear a 1%"; IsXamlId = "ScanCpuLoad"; IsOperation = "Config_ScanCpuLoad" }
 	@{ ShowInGUI = "Desactivar Muestra Automática"; IsXamlId = "AutoSample"; IsOperation = "Config_AutoSample" }
+	@{ ShowInGUI = "Desactivar Integridad de Memoria"; IsXamlId = "MemoryIntegrity"; IsOperation = "Config_MemoryIntegrity" }
 	@{ ShowInGUI = "Activar Compresion de Memoria"; IsXamlId = "MemoryCompression"; IsOperation = "Config_MemoryCompression" }
 	@{ ShowInGUI = "Activar TRIM para SSD"; IsXamlId = "TrimSSD"; IsOperation = "Config_TrimSSD" }
 	@{ ShowInGUI = "Desactivar Aplicaciones en Segundo Plano"; IsXamlId = "BackgroundApp"; IsOperation = "Disable_BackgroundApp" }
-	@{ ShowInGUI = "Desactivar Efectos de Transperencia"; IsXamlId = "TransparencyEffects"; IsOperation = "Disable_TransparencyEffects" }
+	@{ ShowInGUI = "Desactivar Efectos de Transparencia"; IsXamlId = "TransparencyEffects"; IsOperation = "Disable_TransparencyEffects" }
 	@{ ShowInGUI = "Aplicar Efectos Visuales Minimos"; IsXamlId = "CustomAppearance"; IsOperation = "Set_CustomAppearance" }
+	# @{ ShowInGUI = "Aplicar Modo de Mejor Rendimiento"; IsXamlId = "PowerMode"; IsOperation = "Set_PowerMode" }
 	@{ ShowInGUI = "Agrupar Procesos Svchost"; IsXamlId = "GroupProcesses"; IsOperation = "Set_GroupProcesses" }
 )
 
@@ -1736,18 +1825,15 @@ function Test-ModuleDism {
 # Get-WindowsCapability -Online | Sort-Object Name | Format-Table -Property Name, State
 # Get-WindowsCapability -Online | Sort-Object State, Name | Format-Table -GroupBy State -Property Name, State
 function RemoveCapabilityApp ($appName) {
-	$appc = Get-WindowsCapability -Online | Where-Object { $_.Name -like "*$appName*" }
+	# $appc = Get-WindowsCapability -Online | Where-Object { $_.Name -like "*$appName*" }
 
+	Write-Host "Removing Capability List: $appName"
 	if ( ($null -ne $appc) -and ($appc.State -like "Installed") ) {
 
-		Write-Host "Capability [$appName] found, Removing..."
-		$null = Remove-WindowsCapability -Name "$($appc.Name)" -Online
-	} 
-	elseif ( ($null -ne $appc) -and ($appc.State -like "NotPresent") ) {
-		Write-Host "ERROR: Removing Capability [$appName], App not present."
-	} 
-	else {
-		Write-Host "ERROR: Removing Capability [$appName], App not found."
+		# $null = Remove-WindowsCapability -Name "$($appc.Name)" -Online
+		Get-WindowsCapability -Online | 
+		Where-Object { $appName -contains ($_.Name -split '~')[0] } | 
+		Remove-WindowsCapability -Online
 	}
 }
 
@@ -1761,10 +1847,12 @@ $capabilityList = @(
 	@{ ShowInGUI = "Windows Media Player"; IsXamlId = "WindowsMediaPlayer"; IsOperation = "Media.WindowsMediaPlayer" }
 	@{ ShowInGUI = "Wallpapers Extended"; IsXamlId = "WallpapersExtended"; IsOperation = "Microsoft.Wallpapers.Extended" }
 	@{ ShowInGUI = "MSPaint (OLD)"; IsXamlId = "WindowsMSPaint"; IsOperation = "Microsoft.Windows.MSPaint" }
-	@{ ShowInGUI = "Notepad (OLD)"; IsXamlId = "WindowsNotepad"; IsOperation = "Microsoft.Windows.Notepad.System" }
+	@{ ShowInGUI = "Notepad (OLD)"; IsXamlId = "WindowsNotepad"; IsOperation = "Microsoft.Windows.Notepad" }
+	@{ ShowInGUI = "SnippingTool (OLD)"; IsXamlId = "SnippingTool"; IsOperation = "Microsoft.Windows.SnippingTool" }
 	@{ ShowInGUI = "PowerShell ISE"; IsXamlId = "PowerShellISE"; IsOperation = "Microsoft.Windows.PowerShell.ISE" }
 	@{ ShowInGUI = "WordPad"; IsXamlId = "WindowsWordPad"; IsOperation = "Microsoft.Windows.WordPad" }
 	@{ ShowInGUI = "Print Fax"; IsXamlId = "PrintFax"; IsOperation = "Print.Fax.Scan" }
+	@{ ShowInGUI = "VBScript"; IsXamlId = "VBSCRIPT"; IsOperation = "VBSCRIPT" }
 	@{ ShowInGUI = "WMIC Command"; IsXamlId = "WMIC"; IsOperation = "WMIC" }
 	@{ ShowInGUI = "XPS Viewer"; IsXamlId = "XPSViewer"; IsOperation = "XPS.Viewer" }
 )
@@ -1773,15 +1861,15 @@ $capabilityList = @(
 # Get-AppxPackage | Where-Object { $_.NonRemovable -like "False" } | Sort-Object Name | Format-Table -Property Name, PackageFullName, NonRemovable
 function RemovePackageAppx ($appxName) {
 	# $appx = Get-AppxPackage | Where-Object { ($_.NonRemovable -like "False") -and ($_.PackageFullName -like "*$appxName*") }
-	$appx = Get-AppxPackage -Name "*$appxName*"
+	# $appx = Get-AppxPackage -Name "*$appxName*"
 
+	Write-Host "Removing Package List: $appxName"
 	if ( $null -ne $appx ) {
 		
-		Write-Host "Package [$appxName] found, Removing..."
-		$null = Remove-AppxPackage -Package "$($appx.PackageFullName)"
-	} 
-	else {
-		Write-Host "ERROR: Removing Package [$appxName], Appx not found."
+		# $null = Remove-AppxPackage -Package "$($appx.PackageFullName)"
+		Get-AppxPackage | 
+		Where-Object { $appxName -contains ($_.Name -split '_')[0] } | 
+		Remove-AppxPackage
 	}
 }
 
@@ -1865,15 +1953,15 @@ function Get-PackageFullName ($packageName){
 # Modification #: Configure Remove ProvisionedAppxPackage in Windows
 # Get-AppxProvisionedPackage -Online | Sort-Object DisplayName | Format-Table -Property DisplayName, PackageName
 function RemoveProvisionedAppx ($appxName) {
-	$appx = Get-AppxProvisionedPackage -Online | Where-Object { $_.PackageName -like "*$appxName*" }
+	# $appx = Get-AppxProvisionedPackage -Online | Where-Object { $_.PackageName -like "*$appxName*" }
 
+	Write-Host "Removing Provisioned List: $appxName"
 	if ( $null -ne $appx ) {
 		
-		Write-Host "Provisioned [$appxName] found, Removing..."
-		$null = Remove-AppxProvisionedPackage -PackageName "$($appx.PackageName)" -Online
-	} 
-	else {
-		Write-Host "ERROR: Removing Provisioned [$appxName], Appx not found."
+		# $null = Remove-AppxProvisionedPackage -PackageName "$($appx.PackageName)" -Online
+		Get-AppxProvisionedPackage -Online | 
+		Where-Object { $appxName -contains ($_.DisplayName -split '_')[0] } | 
+		Remove-AppxProvisionedPackage -Online
 	}
 }
 
@@ -1947,24 +2035,32 @@ function Remove_Capability_Package_Provisioned () {
 	$window.FindName("ActionButton").Add_Click({
 
 		Write-Host "==  SELECTED OPERATIONS  =="
+		$CapabilityRmList = @()
 		foreach ($listKey in $capabilityList) {
 			$checkBox1 = $window.FindName($listKey.IsXamlId)
 			if ( $checkBox1 -and $checkBox1.IsChecked ) {
-				RemoveCapabilityApp $listKey.IsOperation
+				$CapabilityRmList += $listKey.IsOperation
 			}
 		}
+		RemoveCapabilityApp $CapabilityRmList
+
+		$PackageRmList = @()
 		foreach ($listKey in $packageList) {
 			$checkBox2 = $window.FindName($listKey.IsXamlId)
 			if ( $checkBox2 -and $checkBox2.IsChecked ) {
-				RemovePackageAppx $listKey.IsOperation
+				$PackageRmList += $listKey.IsOperation
 			}
 		}
+		RemovePackageAppx $PackageRmList
+
+		$ProvisionedRmList = @()
 		foreach ($listKey in $provisionedList) {
 			$checkBox3 = $window.FindName($listKey.IsXamlId)
 			if ( $checkBox3 -and $checkBox3.IsChecked ) {
-				RemoveProvisionedAppx $listKey.IsOperation
+				$ProvisionedRmList += $listKey.IsOperation
 			}
 		}
+		RemoveProvisionedAppx $ProvisionedRmList
 		Write-Host "=========================="
 		Write-Host "  Operation are Finished  "
 		Write-Host "=========================="
@@ -1978,20 +2074,17 @@ function Remove_Capability_Package_Provisioned () {
 # winget list
 # winget upgrade --include-unknown
 function InstallApp ($appId, $sourceType) {
-	$package = Invoke-Expression "$sourceType list $appId" -ErrorAction SilentlyContinue
-	$condition = ($package -match [regex]::escape($appId))
+	# $package = Invoke-Expression "$sourceType list --exact $appId" -ErrorAction SilentlyContinue
+	# $condition = ($package -match [regex]::escape($appId))
 	
-	Write-Host "Installing the following package: $appId"
+	Write-Host "Installing Package List: $appId"
 	if ( (-not $condition) -and ($sourceType -like "winget") ) {
 
-		Start-Process -FilePath $sourceType -ArgumentList "install $appId --accept-source-agreements --accept-package-agreements" -NoNewWindow -Wait
+		Start-Process -FilePath $sourceType -ArgumentList "install $appId --exact --no-upgrade --accept-source-agreements --accept-package-agreements" -NoNewWindow -Wait
 	} 
 	elseif ( (-not $condition) -and ($sourceType -like "choco") ) {
 		
-		Start-Process -FilePath $sourceType -ArgumentList "install $appId --confirm" -NoNewWindow -Wait
-	} 
-	else {
-		Write-Host "$appId already installed." -ForegroundColor Yellow
+		Start-Process -FilePath $sourceType -ArgumentList "install $appId --limit-output --confirm" -NoNewWindow -Wait
 	}
 }
 
@@ -2035,6 +2128,7 @@ $appPkgList = @(
 	@{ ShowInGUI = "Epic Games Launcher"; IsXamlId = "EpicLauncher"; IsOperation = "EpicGames.EpicGamesLauncher" }
 	@{ ShowInGUI = "Ubisoft Connect"; IsXamlId = "UbisoftConnet"; IsOperation = "Ubisoft.Connect" }
 	@{ ShowInGUI = "GOG Galaxy"; IsXamlId = "GOGGalaxy"; IsOperation = "GOG.Galaxy" }
+	@{ ShowInGUI = "Google Play Games (Beta)"; IsXamlId = "PlayGamesBetaId"; IsOperation = "Google.PlayGames.Beta" }
 	@{ ShowInGUI = "BlueStacks"; IsXamlId = "BlueStacksId"; IsOperation = "BlueStack.BlueStacks" }
 	@{ ShowInGUI = "PPSSPP"; IsXamlId = "PPSSPPId"; IsOperation = "PPSSPPTeam.PPSSPP" }
 	@{ ShowInGUI = "PCSX2"; IsXamlId = "PCSX2Id"; IsOperation = "PCSX2Team.PCSX2" }
@@ -2058,6 +2152,7 @@ $appdevList = @(
 	@{ ShowInGUI = "RustDesk"; IsXamlId = "RustDeskId"; IsOperation = "RustDesk.RustDesk" }
 	@{ ShowInGUI = "TeamViewer"; IsXamlId = "TeamViewerId"; IsOperation = "TeamViewer.TeamViewer" }
 	@{ ShowInGUI = "Oracle VM VirtualBox"; IsXamlId = "VirtualBox"; IsOperation = "Oracle.VirtualBox" }
+    @{ ShowInGui = "QEMU"; IsXamlId = "QemuId"; IsOperation = "SoftwareFreedomConservancy.QEMU" }
 	# @{ ShowInGUI = "VMware Workstation Pro"; IsXamlId = "VMware"; IsOperation = "VMware.IDDDDDDD" }
 
 	@{ ShowInGUI = "FxSound"; IsXamlId = "FxSoundId"; IsOperation = "FxSoundLLC.FxSound" }
@@ -2069,7 +2164,9 @@ $appdevList = @(
 	# @{ ShowInGUI = "NVCleanstall"; IsXamlId = "NVCleanstallId"; IsOperation = "TechPowerUp.NVCleanstall" }
 	# @{ ShowInGUI = "MiniTool Partition Wizard"; IsXamlId = "PartitionWizard"; IsOperation = "MiniTool.PartitionWizard.Free" }
 	
-	@{ ShowInGUI = "Windows Terminal"; IsXamlId = "WindowsTerminal"; IsOperation = "Microsoft.WindowsTerminal" }
+	@{ ShowInGUI = "UniGetUI"; IsXamlId = "UniGetUIId"; IsOperation = "MartiCliment.UniGetUI" }
+	@{ ShowInGUI = "fastfetch"; IsXamlId = "FastfetchId"; IsOperation = "Fastfetch-cli.Fastfetch" }
+	@{ ShowInGUI = "cpufetch"; IsXamlId = "CpufetchId"; IsOperation = "Dr-Noob.cpufetch" }
 	@{ ShowInGUI = "Oh My Posh"; IsXamlId = "OhmyposhId"; IsOperation = "JanDeDobbeleer.OhMyPosh" }
 	@{ ShowInGUI = "starship"; IsXamlId = "StarshipId"; IsOperation = "Starship.Starship" }
 	@{ ShowInGUI = "Neovim"; IsXamlId = "NeovimId"; IsOperation = "Neovim.Neovim" }
@@ -2120,7 +2217,7 @@ $toolList = @(
 
 function Install_AppPkg_AppDev_Tool () {
 
-	$window = GenerateWinGUITriple "SELECCIONE LAS APLICACIONES, APP-DEV, HERRAMIENTAS" "Instalar"
+	$window = GenerateWinGUITriple "SELECCIONE LAS APLICACIONES, APPS DE DESARROLLO Y HERRAMIENTAS" "Instalar"
 	
 	Add-GenerateTextBlock "APLICACIONES" $window "TextBlock1"
 	$checkBox1 = GenerateCheckBoxList $appPkgList $window "ListContainer1"
@@ -2134,26 +2231,32 @@ function Install_AppPkg_AppDev_Tool () {
 	$window.FindName("ActionButton").Add_Click({
 		
 		Write-Host "==  SELECTED APP  =="
+		$PackageWin1List = @()
 		foreach ($listKey in $appPkgList) {
 			$checkBox1 = $window.FindName($listKey.IsXamlId)
 			if ( $checkBox1 -and $checkBox1.IsChecked ) {
-				InstallApp $listKey.IsOperation winget
+				$PackageWin1List += $listKey.IsOperation
 			}
 		}
+		InstallApp $PackageWin1List winget
 	
+		$PackageWin2List = @()
 		foreach ($listKey in $appdevList) {
 			$checkBox2 = $window.FindName($listKey.IsXamlId)
 			if ( $checkBox2 -and $checkBox2.IsChecked ) {
-				InstallApp $listKey.IsOperation winget
+				$PackageWin2List += $listKey.IsOperation
 			}
 		}
+		InstallApp $PackageWin2List winget
 
+		$PackageChocoList = @()
 		foreach ($listKey in $toolList) {
 			$checkBox3 = $window.FindName($listKey.IsXamlId)
 			if ( $checkBox3 -and $checkBox3.IsChecked ) {
-				InstallApp $listKey.IsOperation choco
+				$PackageChocoList += $listKey.IsOperation
 			}
 		}
+		InstallApp $PackageChocoList choco
 		Write-Host "=========================="
 		Write-Host "  Operation are Finished  "
 		Write-Host "=========================="
@@ -2217,25 +2320,30 @@ function Install_PromptT {
 	
 	Write-Host "`n##  PROMPT CUSTOM"
 	# Definir la ruta del archivo temporal
-	$tempFile = [System.IO.Path]::GetTempFileName()
 	
 	Write-Host "Initializing the following prompt: OH-MY-POSH"
+	# Start-Process -FilePath "oh-my-posh" -ArgumentList "init pwsh --config `"$env:POSH_THEMES_PATH\$themeName.omp.json`"" -NoNewWindow -Wait
+	
+	# $resultPrompt = Invoke-Expression $initPrompt
+	# $loadFile = $initPrompt + ' > "' + $tempFile + '"'
+	
 	# Iniciar Oh-My-Posh en la nueva terminal y guardar la salida en un archivo temporal
-	$initPrompt = 'oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH\' + $themeName + '.omp.json"'
-	$resultPrompt = Invoke-Expression $initPrompt
-	$loadFile = $initPrompt + ' > "' + $tempFile + '"'
-	
-	$messageIO = "##  INITIALIZING OPERATION`n" + 
-	"Create temporary file...`n$tempFile`n" + 
-	"`nSave the output file...`n$initPrompt`n" +
-	"`nShow the output file...`n$resultPrompt`n"
+	$tempFile = [System.IO.Path]::GetTempFileName()
+	$initPrompt = 'init pwsh --config "$env:POSH_THEMES_PATH\' + $themeName + '.omp.json"'
+	$promptOMP = "$env:LOCALAPPDATA\Programs\oh-my-posh\bin\oh-my-posh.exe"
 
-	Start-Process -FilePath "pwsh" -ArgumentList "-Command Write-Host '$messageIO'; $loadFile; pause"
-	Start-Sleep -Seconds 5
+	Write-Host "TempFile ==> $tempFile" -ForegroundColor Cyan
+	Write-Host "AddInput ==> oh-my-posh $initPrompt" -ForegroundColor Cyan
+	# "`nShow the output file...`n$resultPrompt`n"
+
+	Start-Process -FilePath "pwsh" -ArgumentList "-Command `"$promptOMP`" $initPrompt" -RedirectStandardOutput "$tempFile" -NoNewWindow -Wait
+	# Start-Process -FilePath "pwsh" -ArgumentList "-Command Write-Host '$messageIO' -ForegroundColor Cyan; $loadFile" -NoNewWindow -Wait
+	# Start-Sleep -Seconds 5
 	
-	Write-Host "Activating the following config of prompt: OH-MY-POSH`n"
+	Write-Host "Activating the following config of prompt: OH-MY-POSH"
 	# Leer el contenido del archivo temporal
 	$activatePrompt = Get-Content -Path $tempFile
+	Write-Host "ShOutput ==> $activatePrompt`n" -ForegroundColor Cyan
 	
 	<#
 	Write-Host "`nARCHIVO TEMPORAL:"
@@ -2426,6 +2534,7 @@ function Custom_Shell_Pwsh () {
 
 	# Show File
 	Get-ChildItem $PROFILE_PATH_1 | Format-Table
+	Write-Host $PROFILE_PATH_1 -ForegroundColor Cyan
 
 	# Add Content
 	Write-Host "Adding content the following file: `$PROFILE"
@@ -2435,7 +2544,7 @@ function Custom_Shell_Pwsh () {
 	Test-FileContent $PROFILE_PATH_1 $predictionComand $predictionComand
 
 	# Show Content
-	Write-Host "`n$(Get-Content -Path $PROFILE_PATH_1 -Raw)" -ForegroundColor Cyan -NoNewline
+	Write-Host "$(Get-Content -Path $PROFILE_PATH_1 -Raw)`n" -ForegroundColor Cyan -NoNewline
 }
 
 function Custom_Shell_Powershell () {
@@ -2464,6 +2573,7 @@ function Custom_Shell_Powershell () {
 
 	# Show File
 	Get-ChildItem $PROFILE_PATH_2 | Format-Table
+	Write-Host $PROFILE_PATH_2 -ForegroundColor Cyan
 
 	# Add Content
 	Write-Host "Adding content the following file: `$PROFILE"
@@ -2471,7 +2581,7 @@ function Custom_Shell_Powershell () {
 	Test-FileContent $PROFILE_PATH_2 $stringReduce $activatePrompt
 
 	# Show Content
-	Write-Host "`n$(Get-Content -Path $PROFILE_PATH_2 -Raw)" -ForegroundColor Cyan -NoNewline
+	Write-Host "$(Get-Content -Path $PROFILE_PATH_2 -Raw)`n" -ForegroundColor Cyan -NoNewline
 }
 
 function Set-ClinkLogoMessage {
@@ -2545,6 +2655,7 @@ function Custom_Shell_Cmd () {
 
 	# Show File
 	Get-ChildItem $CONFIG_PATH_3 | Format-Table
+	Write-Host $CONFIG_PATH_3 -ForegroundColor Cyan
 	
 	# Add Content
 	Write-Host "Adding content the following file: `$CONFIG"
@@ -2552,7 +2663,7 @@ function Custom_Shell_Cmd () {
 	Test-FileContent $CONFIG_PATH_3 $loadPrompt $loadPrompt
 
 	# Show Content
-	Write-Host "`n$(Get-Content -Path $CONFIG_PATH_3 -Raw)" -ForegroundColor Cyan -NoNewline
+	Write-Host "$(Get-Content -Path $CONFIG_PATH_3 -Raw)`n" -ForegroundColor Cyan -NoNewline
 }
 
 function Custom_Pwsh_Powershell_Cmd () {
@@ -2790,9 +2901,10 @@ function Test-CurrentRol {
 
 		$scriptPath = $PSCommandPath
 		$command = Get-CommandType $scriptPath
+		$shellV7 = "$env:ProgramFiles\PowerShell\7\pwsh.exe"
 		# Write-Host " -Type Argument -> {$command}"
 		
-		Start-Process -FilePath "wt.exe" -ArgumentList "pwsh $command" -Verb RunAs
+		Start-Process -FilePath "wt.exe" -ArgumentList "`"$shellV7`" $command" -Verb RunAs
 		Start-Sleep -Milliseconds 3000
 		exit
 	}
@@ -2858,6 +2970,8 @@ function Test-PwshVersion {
 
 		if ( -not $pwshCondition ) {
 
+			$null = Invoke-Expression "winget upgrade --accept-source-agreements --accept-package-agreements"
+			
 			Write-Host " -Installing the shell PowerShell Core" -ForegroundColor Yellow
 			InstallApp "Microsoft.PowerShell" winget
 		}
@@ -2868,7 +2982,7 @@ function Test-TerminalVersion {
 	try {
 
 		$packagePath = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe"
-		$wtCondition = Invoke-Expression "Get-ChildItem -Path $packagePath"
+		$wtCondition = Get-Item -Path $packagePath -ErrorAction Stop
 	}
 	catch {
 
@@ -2912,4 +3026,4 @@ Start-Sleep -Milliseconds 3000
 
 # Policy Execution Restart
 #Set-ExecutionPolicy -ExecutionPolicy "Undefined" -Scope "CurrentUser" -Force
-#Set-ExecutionPolicy -ExecutionPolicy "Undefined" -Scope "Process" -Force
+#Set-ExecutionPolicy -ExecutionPolicy "Undefined" -Scope "LocalMachine" -Force
