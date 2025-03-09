@@ -1,14 +1,14 @@
 ## Informacion de Script.
-Ejecucion sin restricciones, para la Sesión actual de PowerShell.
-
-   ```
-   Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process
-   ```
-
 Ejecucion sin restricciones, para el Usuario actual.
 
    ```
-   Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser
+   Set-ExecutionPolicy -ExecutionPolicy "Unrestricted" -Scope "CurrentUser" -Force
+   ```
+
+Ejecucion sin restricciones, para la Maquina local.
+
+   ```
+   Set-ExecutionPolicy -ExecutionPolicy "Unrestricted" -Scope "LocalMachine" -Force
    ```
 
 Ejecutar el script de manera remota en Powershell:
