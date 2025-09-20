@@ -11,8 +11,8 @@
 $global:WPAuthor = "D_E_M_O_N"
 $global:WPName = "WinCustom"
 $global:WPVersion = "v0.19.10"
-$WPRepository = "https://raw.githubusercontent.com/DiegoEli/test-script/temp/testScript.ps1"
-# $WPRepository = "https://raw.githubusercontent.com/DiegoEli/WinPerf/main/Win11Perfect.ps1"
+$WPRepository = "https://raw.githubusercontent.com/DiegoEli/test-script/refs/heads/temp/testScript.ps1"
+# $WPRepository = "https://raw.githubusercontent.com/DiegoEli/WinPerf/refs/heads/main/Win11Perfect.ps1"
 
 <#
 .NOTES
