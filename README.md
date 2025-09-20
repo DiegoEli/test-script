@@ -2,17 +2,17 @@
 Ejecucion sin restricciones, para la Sesión actual de PowerShell.
 
    ```
-   Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
    ```
 
-Ejecucion sin restricciones, para el Usuario actual.
+Ejecucion sin restricciones, para el Usuario actual.*
 
    ```
-   Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
    ```
 
 Ejecutar el script de manera remota en Powershell:
 
    ```
-   irm https://raw.githubusercontent.com/DiegoEli/test-script/main/testScript.ps1 | iex
+   irm https://raw.githubusercontent.com/DiegoEli/test-script/temp/testScript.ps1 | iex
    ```
