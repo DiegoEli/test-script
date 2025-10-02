@@ -11,14 +11,14 @@
 $global:WPAuthor = "D_E_M_O_N"
 $global:WPName = "WinCustom"
 $global:WPVersion = "v0.19.10"
-$WPRepository = "https://raw.githubusercontent.com/DiegoEli/test-script/refs/heads/temp/testScript.ps1"
-# $WPRepository = "https://raw.githubusercontent.com/DiegoEli/WinPerf/refs/heads/main/Win11Perfect.ps1"
+$WPRepository = "https://raw.githubusercontent.com/DiegoEli/test-script/refs/heads/testing/testScript.ps1"
+# $WPRepository = "https://raw.githubusercontent.com/DiegoEli/WinCustom/refs/heads/main/WinCustom.ps1"
 
 <#
 .NOTES
 	Author  : Diego Mendoza(JuanPerez)
 	Github  : https://github.com/DiegoEli
-	Name    : WinPerf
+	Name    : WinCust
 	Version : v0.19.10
 
 .PARAMETER [Aliases]
@@ -26,9 +26,9 @@ $WPRepository = "https://raw.githubusercontent.com/DiegoEli/test-script/refs/hea
 	iex = Invoke-Expression
 
 .EXAMPLE
-	::Run the script from the repository.
-
-	Command : irm https://raw.githubusercontent.com/DiegoEli/test-script/main/WinPerf.ps1 | iex
+	::Run the script from the repository remote.
+	
+	irm "https://raw.githubusercontent.com/DiegoEli/test-script/refs/heads/temp/testScript.ps1" | iex
 
 .FUNCTIONALITY
 	::Customizar Folder in FileExplorer
@@ -161,7 +161,7 @@ function GenerateWinGUIMenu {
 		
 			<!-- Menú lateral sin Padding -->
 			<StackPanel Grid.Column="0" Background="#202020" Orientation="Vertical">
-				<TextBlock Text="Deamon by Diego" Margin="10" FontFamily="Segoe UI" FontSize="16" FontWeight="Bold"/>
+				<TextBlock Text="WinCustom by Diego" Margin="10" FontFamily="Segoe UI" FontSize="16" FontWeight="Bold"/>
 				<Button Name="BtnChaPreference" Content="Cambiar Preferencias" Margin="10" Height="35" Background="#3A3A3D" Foreground="White"/>
 				<Button Name="BtnEsseTweaks" Content="Ajsutes Esenciales" Margin="10" Height="35" Background="#3A3A3D" Foreground="White"/>
 				<Button Name="BtnRemBloatware" Content="Remover Bloatware" Margin="10" Height="35" Background="#3A3A3D" Foreground="White"/>
@@ -924,90 +924,27 @@ function ConfigTask ($taskPath, $taskName, $stateType) {
 }
 
 $disableTList = @(
-	@{ 
-		Path = "\"
-		Name = "MicrosoftEdgeUpdateTaskMachineCore"
-	}
-	@{ 
-		Path = "\"
-		Name = "MicrosoftEdgeUpdateTaskMachineUA"
-	}
-	@{
-		Path = "\Microsoft\Windows\Application Experience\"
-		Name = "MareBackup"
-	}
-	@{ 
-		Path = "\Microsoft\Windows\Application Experience\"
-		Name = "Microsoft Compatibility Appraiser"
-	}
-	@{
-		Path = "\Microsoft\Windows\Application Experience\"
-		Name = "PcaPatchDbTask"
-	}
-	@{ 
-		Path = "\Microsoft\Windows\Application Experience\"
-		Name = "StartupAppTask"
-	}
-	@{
-		Path = "\Microsoft\Windows\Autochk\"
-		Name = "Proxy"
-	}
-	@{ 
-		Path = "\Microsoft\Windows\Customer Experience Improvement Program\"
-		Name = "Consolidator"
-	}
-	@{ 
-		Path = "\Microsoft\Windows\Customer Experience Improvement Program\"
-		Name = "UsbCeip"
-	}
-	@{
-		Path = "\Microsoft\Windows\DiskDiagnostic\"
-		Name = "Microsoft-Windows-DiskDiagnosticDataCollector"
-	}
-	@{
-		Path = "\Microsoft\Windows\Feedback\Siuf\"
-		Name = "DmClient"
-	}
-	@{
-		Path = "\Microsoft\Windows\Feedback\Siuf\"
-		Name = "DmClientOnScenarioDownload"
-	}
-	@{ 
-		Path = "\Microsoft\Windows\Maps\"
-		Name = "MapsUpdateTask"
-	}
-	@{ 
-		Path = "\Microsoft\Windows\Windows Defender\"
-		Name = "Windows Defender Verification"
-	}
-	@{
-		Path = "\Microsoft\Windows\Windows Error Reporting\"
-		Name = "QueueReporting"
-	}
-	@{ 
-		Path = "\Microsoft\Windows\WindowsUpdate\"
-		Name = "Scheduled Start"
-	}
-	@{ 
-		Path = "\Microsoft\XblGameSave\"
-		Name = "XblGameSaveTask"
-	}
-	@{
-		Path = "\Microsoft\Office\"
-		Name = "Office Performance Monitor"
-	}
-	@{
-		Path = "\Microsoft\Office\"
-		Name = "Office Feature Updates Logon"
-	}
-	@{
-		Path = "\Microsoft\Office\"
-		Name = "Office Feature Updates"
-	}
-	@{
-		Path = "\Microsoft\Office\"
-		Name = "Office Automatic Updates 2.0"
-	}
+	@{ Path = "\"; Name = "MicrosoftEdgeUpdateTaskMachineCore" }
+	@{ Path = "\"; Name = "MicrosoftEdgeUpdateTaskMachineUA" }
+	@{ Path = "\Microsoft\Windows\Application Experience\"; Name = "MareBackup" }
+	@{ Path = "\Microsoft\Windows\Application Experience\"; Name = "Microsoft Compatibility Appraiser" }
+	@{ Path = "\Microsoft\Windows\Application Experience\"; Name = "PcaPatchDbTask" }
+	@{ Path = "\Microsoft\Windows\Application Experience\"; Name = "StartupAppTask" }
+	@{ Path = "\Microsoft\Windows\Autochk\"; Name = "Proxy" }
+	@{ Path = "\Microsoft\Windows\Customer Experience Improvement Program\"; Name = "Consolidator" }
+	@{ Path = "\Microsoft\Windows\Customer Experience Improvement Program\"; Name = "UsbCeip" }
+	@{ Path = "\Microsoft\Windows\DiskDiagnostic\"; Name = "Microsoft-Windows-DiskDiagnosticDataCollector" }
+	@{ Path = "\Microsoft\Windows\Feedback\Siuf\"; Name = "DmClient" }
+	@{ Path = "\Microsoft\Windows\Feedback\Siuf\"; Name = "DmClientOnScenarioDownload" }
+	@{ Path = "\Microsoft\Windows\Maps\"; Name = "MapsUpdateTask" }
+	@{ Path = "\Microsoft\Windows\Windows Defender\"; Name = "Windows Defender Verification" }
+	@{ Path = "\Microsoft\Windows\Windows Error Reporting\"; Name = "QueueReporting" }
+	@{ Path = "\Microsoft\Windows\WindowsUpdate\"; Name = "Scheduled Start" }
+	@{ Path = "\Microsoft\XblGameSave\"; Name = "XblGameSaveTask" }
+	@{ Path = "\Microsoft\Office\"; Name = "Office Performance Monitor" }
+	@{ Path = "\Microsoft\Office\"; Name = "Office Feature Updates Logon" }
+	@{ Path = "\Microsoft\Office\"; Name = "Office Feature Updates" }
+	@{ Path = "\Microsoft\Office\"; Name = "Office Automatic Updates 2.0" }
 )
 
 function Set_Scheduled_Task () {
@@ -2056,7 +1993,7 @@ $appPkgList = @(
 	@{ ShowInGUI = "ZoomIt"; IsXamlId = "MSZoomIt"; IsOperation = "Microsoft.Sysinternals.ZoomIt" }
 	@{ ShowInGUI = "Twinkle Tray"; IsXamlId = "TwinkleTray"; IsOperation = "xanderfrangos.twinkletray" }
 	@{ ShowInGUI = "Energy Star X"; IsXamlId = "StoreEnergyStarX"; IsOperation = "9NF7JTB3B17P" }
-	@{ ShowInGUI = "Battery Tracker"; IsXamlId = "StoreBatteryTracker"; IsOperation = "9P1FBSLRNM43" }
+	# @{ ShowInGUI = "Battery Tracker"; IsXamlId = "StoreBatteryTracker"; IsOperation = "9P1FBSLRNM43" }
 	@{ ShowInGUI = "Microsoft PC Manager"; IsXamlId = "StorePCManager"; IsOperation = "9PM860492SZD" }
 	@{ ShowInGUI = "AutoHotkey"; IsXamlId = "AutoHotkeyId"; IsOperation = "AutoHotkey.AutoHotkey" }
 	@{ ShowInGUI = "Everything (x64)"; IsXamlId = "Everything"; IsOperation = "voidtools.Everything" }
@@ -2069,23 +2006,23 @@ $appPkgList = @(
 	@{ ShowInGUI = "KDE Connect"; IsXamlId = "KDEConnect"; IsOperation = "KDE.KDEConnect" }
 	@{ ShowInGUI = "7-Zip"; IsXamlId = "SevenZip"; IsOperation = "7zip.7zip" }
 	@{ ShowInGUI = "WinRAR"; IsXamlId = "WinRARId"; IsOperation = "RARLab.WinRAR" }
-	@{ ShowInGUI = "Dropbox"; IsXamlId = "Dropbox"; IsOperation = "Dropbox.Dropbox" }
-	@{ ShowInGUI = "Google Drive"; IsXamlId = "GoogleDrive"; IsOperation = "Google.GoogleDrive" }
-	@{ ShowInGUI = "MEGA Drive"; IsXamlId = "MEGA"; IsOperation = "Mega.MEGASync" }
 	@{ ShowInGUI = "TeraBox Desktop"; IsXamlId = "TeraBox"; IsOperation = "Baidu.TeraBox" }
+	@{ ShowInGUI = "MEGA Drive"; IsXamlId = "MEGA"; IsOperation = "Mega.MEGASync" }
+	@{ ShowInGUI = "Google Drive"; IsXamlId = "GoogleDrive"; IsOperation = "Google.GoogleDrive" }
+	@{ ShowInGUI = "Dropbox Drive"; IsXamlId = "Dropbox"; IsOperation = "Dropbox.Dropbox" }
 	@{ ShowInGUI = "Notepad++"; IsXamlId = "Notepadplusplus"; IsOperation = "Notepad++.Notepad++" }
 	@{ ShowInGUI = "IrfanView (x64)"; IsXamlId = "IrfanView"; IsOperation = "IrfanSkiljan.IrfanView" }
+	# @{ ShowInGUI = "AIMP Music Player"; IsXamlId = "Aimp"; IsOperation = "empresa.nombreApp" }
 	@{ ShowInGUI = "VLC Media Player"; IsXamlId = "VLCMediaPlayer"; IsOperation = "VideoLAN.VLC" }
 	@{ ShowInGUI = "SumatraPDF"; IsXamlId = "SumatraPDFId"; IsOperation = "SumatraPDF.SumatraPDF" }
-	@{ ShowInGUI = "Joplin"; IsXamlId = "Joplin"; IsOperation = "Joplin.Joplin" }
-	@{ ShowInGUI = "Standard Notes"; IsXamlId = "StandardNotes"; IsOperation = "StandardNotes.StandardNotes" }
+	@{ ShowInGUI = "KDE Okular"; IsXamlId = "KDEOkularId"; IsOperation = "KDE.Okular" }
 	@{ ShowInGUI = "Simplenote"; IsXamlId = "Simplenote"; IsOperation = "Automattic.Simplenote" }
+	@{ ShowInGUI = "Joplin"; IsXamlId = "Joplin"; IsOperation = "Joplin.Joplin" }
 	@{ ShowInGUI = "GIMP"; IsXamlId = "GimpId"; IsOperation = "GIMP.GIMP.3" }
 	@{ ShowInGUI = "Audacity"; IsXamlId = "AudacityId"; IsOperation = "Audacity.Audacity" }
 	@{ ShowInGUI = "Kdenlive"; IsXamlId = "KdenliveId"; IsOperation = "KDE.Kdenlive" }
-	@{ ShowInGUI = "PDFgear"; IsXamlId = "PDFgearId"; IsOperation = "PDFgear.PDFgear" }
 	@{ ShowInGUI = "PDF24 Creator"; IsXamlId = "PDF24CreatorId"; IsOperation = "geeksoftwareGmbH.PDF24Creator" }
-	@{ ShowInGUI = "KDE Okular"; IsXamlId = "KDEOkularId"; IsOperation = "KDE.Okular" }
+	@{ ShowInGUI = "PDFgear"; IsXamlId = "PDFgearId"; IsOperation = "PDFgear.PDFgear" }
 	@{ ShowInGUI = "Scribus"; IsXamlId = "ScribusId"; IsOperation = "Scribus.Scribus" }
 	@{ ShowInGUI = "Microsoft 365 Apps"; IsXamlId = "MSOffice"; IsOperation = "Microsoft.Office" }
 	@{ ShowInGUI = "OnlyOffice"; IsXamlId = "OnlyOfficeId"; IsOperation = "ONLYOFFICE.DesktopEditors" }
@@ -2167,8 +2104,8 @@ $appdevList = @(
 	@{ ShowInGUI = "UniGetUI"; IsXamlId = "UniGetUIId"; IsOperation = "MartiCliment.UniGetUI" }
 	@{ ShowInGUI = "fastfetch"; IsXamlId = "FastfetchId"; IsOperation = "Fastfetch-cli.Fastfetch" }
 	@{ ShowInGUI = "cpufetch"; IsXamlId = "CpufetchId"; IsOperation = "Dr-Noob.cpufetch" }
-	@{ ShowInGUI = "Oh My Posh"; IsXamlId = "OhmyposhId"; IsOperation = "JanDeDobbeleer.OhMyPosh" }
-	@{ ShowInGUI = "starship"; IsXamlId = "StarshipId"; IsOperation = "Starship.Starship" }
+	# @{ ShowInGUI = "Oh My Posh"; IsXamlId = "OhmyposhId"; IsOperation = "JanDeDobbeleer.OhMyPosh" }
+	# @{ ShowInGUI = "starship"; IsXamlId = "StarshipId"; IsOperation = "Starship.Starship" }
 	@{ ShowInGUI = "Flow Launcher"; IsXamlId = "FlowLauncher"; IsOperation = "Flow-Launcher.Flow-Launcher" }
 	@{ ShowInGUI = "PowerToys (Preview)"; IsXamlId = "PowerToys"; IsOperation = "Microsoft.PowerToys" }
 	@{ ShowInGUI = "Windhawk"; IsXamlId = "Windhawk"; IsOperation = "RamenSoftware.Windhawk" }
@@ -2179,10 +2116,10 @@ $appdevList = @(
 	@{ ShowInGUI = "Java SDK"; IsXamlId = "JavaSDK"; IsOperation = "Oracle.JDK.22" }
 	@{ ShowInGUI = "Python 3.12"; IsXamlId = "Python"; IsOperation = "Python.Python.3.12" }
 	@{ ShowInGUI = "Rustup: toolchain"; IsXamlId = "Rustlang"; IsOperation = "Rustlang.Rustup" }
-	@{ ShowInGUI = "Rust (MSVC)"; IsXamlId = "Rustlang"; IsOperation = "Rustlang.Rust.MSVC" }
+	# @{ ShowInGUI = "Rust (MSVC)"; IsXamlId = "Rustlang"; IsOperation = "Rustlang.Rust.MSVC" }
 	@{ ShowInGUI = "Node.js (LTS)"; IsXamlId = "NodeJS"; IsOperation = "OpenJS.NodeJS.LTS" }
-	@{ ShowInGUI = "HTTPie"; IsXamlId = "HTTPieId"; IsOperation = "HTTPie.HTTPie" }
 	@{ ShowInGUI = "Hoppscotch"; IsXamlId = "HoppscotchId"; IsOperation = "hoppscotch.Hoppscotch" }
+	@{ ShowInGUI = "HTTPie"; IsXamlId = "HTTPieId"; IsOperation = "HTTPie.HTTPie" }
 	@{ ShowInGUI = "Postman"; IsXamlId = "PostmanId"; IsOperation = "Postman.Postman" }
 	@{ ShowInGUI = "GitHub Desktop"; IsXamlId = "GitHubId"; IsOperation = "GitHub.GitHubDesktop" }
 	@{ ShowInGUI = "Visual Studio Community"; IsXamlId = "VSCommunity"; IsOperation = "Microsoft.VisualStudio.2022.Community" }
@@ -2336,7 +2273,7 @@ function Install_PromptT {
 	
 	# Cargar Oh-My-Posh en el perfil de la terminal
 	$activatePrompt = 'oh-my-posh init pwsh --config "$env:POSH_THEMES_PATH\' + $themeName + '.omp.json" | Invoke-Expression'
-	Write-Host "SetConfig ==> $activatePrompt" -ForegroundColor Cyan
+	Write-Host "Config ==> $activatePrompt" -ForegroundColor Cyan
 	
 	return $activatePrompt
 }
@@ -2595,7 +2532,7 @@ function Install_PromptC {
 	
 	# Cargar Starship en la config de la terminal
 	$loadPrompt = "load(io.popen('$promptName init cmd'):read(`"*a`"))()"
-	Write-Host "SetConfig ==> $loadPrompt" -ForegroundColor Cyan
+	Write-Host "Config ==> $loadPrompt" -ForegroundColor Cyan
 
 	return $loadPrompt
 }
@@ -2819,25 +2756,6 @@ function Test-CurrentRolScript {
 	}
 }
 
-function Test-CurrentRolTest {
-	$userCurrent = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent())
-	$roleCurrent = ([Security.Principal.WindowsBuiltInRole] "Administrator")
-	
-	$adminCondition = $userCurrent.IsInRole($roleCurrent)
-	if ( -not $adminCondition ) {
-
-		Write-Host "Checking if Rol is Administrator..."
-		Write-Host " -The TEST requires to run as Administrator" -ForegroundColor Yellow
-
-		$scriptPath = $PSCommandPath
-		$command = Get-CommandType $scriptPath
-		
-		Start-Process -FilePath "powershell.exe" -ArgumentList "$command" -Verb RunAs
-		Start-Sleep -Milliseconds 3000
-		exit
-	}
-}
-
 # Test Winget
 function Test-WingetVersion {
 	try {
@@ -2950,8 +2868,6 @@ function Test-TerminalVersion {
 
 Clear-Host
 $Host.UI.RawUI.WindowTitle = "DeamonScript 💀"
-
-# Test-CurrentRolTest  # Checking if Rol is Administrator for Test
 
 Test-WingetVersion  # Checking if Winget is installed
 Test-ChocoVersion  # Checking if Chocolatey is installed
