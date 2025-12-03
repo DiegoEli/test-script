@@ -10,7 +10,7 @@
 # Show script info
 $global:WPAuthor = "D_E_M_O_N"
 $global:WPName = "WinCustom"
-$global:WPVersion = "v0.19.10"
+$global:WPVersion = "v0.22.00"
 $WPRepository = "https://raw.githubusercontent.com/DiegoEli/test-script/refs/heads/testing/testScript.ps1"
 # $WPRepository = "https://raw.githubusercontent.com/DiegoEli/WinCustom/refs/heads/main/WinCustom.ps1"
 
@@ -18,7 +18,7 @@ $WPRepository = "https://raw.githubusercontent.com/DiegoEli/test-script/refs/hea
 .NOTES
 	Author  : Diego Mendoza(JuanPerez)
 	Github  : https://github.com/DiegoEli
-	Name    : WinCust
+	Name    : WinCustom
 	Version : v0.19.10
 
 .PARAMETER [Aliases]
@@ -1983,17 +1983,15 @@ function InstallPkgWinget ($appIdPkg, $sourceType) {
 $appPkgList = @(
 	@{ ShowInGUI = "Bitwarden"; IsXamlId = "BitwardenId"; IsOperation = "Bitwarden.Bitwarden" }
 	@{ ShowInGUI = "Raindrop.io"; IsXamlId = "RaindropId"; IsOperation = "RustemMussabekov.Raindrop" }
+	@{ ShowInGUI = "Google Chrome"; IsXamlId = "ChromeBrow"; IsOperation = "Google.Chrome" }
 	@{ ShowInGUI = "Mozilla Firefox"; IsXamlId = "FirefoxBrow"; IsOperation = "Mozilla.Firefox" }
 	@{ ShowInGUI = "LibreWolf Browser"; IsXamlId = "LibreWolfBrow"; IsOperation = "LibreWolf.LibreWolf" }
 	@{ ShowInGUI = "Vivaldi Browser"; IsXamlId = "VivaldiBrow"; IsOperation = "Vivaldi.Vivaldi" }
-	@{ ShowInGUI = "OperaGX Browser"; IsXamlId = "OperaGXBrow"; IsOperation = "Opera.OperaGX" }
+	@{ ShowInGUI = "Brave Browser"; IsXamlId = "BraveBrow"; IsOperation = "Brave.Brave" }
 	@{ ShowInGUI = "FreeTube"; IsXamlId = "FreeTube"; IsOperation = "PrestonN.FreeTube" }
 	@{ ShowInGUI = "YouTube Music (OSS)"; IsXamlId = "YouTubeMusic"; IsOperation = "th-ch.YouTubeMusic" }
-	# @{ ShowInGUI = "Microsoft Edge"; IsXamlId = "MSEdgeBrow"; IsOperation = "Microsoft.Edge" }
 	@{ ShowInGUI = "ZoomIt"; IsXamlId = "MSZoomIt"; IsOperation = "Microsoft.Sysinternals.ZoomIt" }
-	@{ ShowInGUI = "Twinkle Tray"; IsXamlId = "TwinkleTray"; IsOperation = "xanderfrangos.twinkletray" }
 	@{ ShowInGUI = "Energy Star X"; IsXamlId = "StoreEnergyStarX"; IsOperation = "9NF7JTB3B17P" }
-	# @{ ShowInGUI = "Battery Tracker"; IsXamlId = "StoreBatteryTracker"; IsOperation = "9P1FBSLRNM43" }
 	@{ ShowInGUI = "Microsoft PC Manager"; IsXamlId = "StorePCManager"; IsOperation = "9PM860492SZD" }
 	@{ ShowInGUI = "AutoHotkey"; IsXamlId = "AutoHotkeyId"; IsOperation = "AutoHotkey.AutoHotkey" }
 	@{ ShowInGUI = "Everything (x64)"; IsXamlId = "Everything"; IsOperation = "voidtools.Everything" }
@@ -2001,7 +1999,6 @@ $appPkgList = @(
 	@{ ShowInGUI = "Lightshot"; IsXamlId = "LightshotId"; IsOperation = "Skillbrains.Lightshot" }
 	@{ ShowInGUI = "ChatGPT"; IsXamlId = "ChatGPTId"; IsOperation = "9NT1R1C2HH7J" }
 	@{ ShowInGUI = "Perplexity"; IsXamlId = "PerplexityId"; IsOperation = "XP8JNQFBQH6PVF" }
-	@{ ShowInGUI = "Quick Share Google"; IsXamlId = "QuickShare"; IsOperation = "Google.QuickShare" }
 	@{ ShowInGUI = "LocalSend"; IsXamlId = "LocalSend"; IsOperation = "LocalSend.LocalSend" }
 	@{ ShowInGUI = "KDE Connect"; IsXamlId = "KDEConnect"; IsOperation = "KDE.KDEConnect" }
 	@{ ShowInGUI = "7-Zip"; IsXamlId = "SevenZip"; IsOperation = "7zip.7zip" }
@@ -2012,18 +2009,16 @@ $appPkgList = @(
 	@{ ShowInGUI = "Dropbox Drive"; IsXamlId = "Dropbox"; IsOperation = "Dropbox.Dropbox" }
 	@{ ShowInGUI = "Notepad++"; IsXamlId = "Notepadplusplus"; IsOperation = "Notepad++.Notepad++" }
 	@{ ShowInGUI = "IrfanView (x64)"; IsXamlId = "IrfanView"; IsOperation = "IrfanSkiljan.IrfanView" }
-	# @{ ShowInGUI = "AIMP Music Player"; IsXamlId = "Aimp"; IsOperation = "empresa.nombreApp" }
 	@{ ShowInGUI = "VLC Media Player"; IsXamlId = "VLCMediaPlayer"; IsOperation = "VideoLAN.VLC" }
 	@{ ShowInGUI = "SumatraPDF"; IsXamlId = "SumatraPDFId"; IsOperation = "SumatraPDF.SumatraPDF" }
 	@{ ShowInGUI = "KDE Okular"; IsXamlId = "KDEOkularId"; IsOperation = "KDE.Okular" }
 	@{ ShowInGUI = "Simplenote"; IsXamlId = "Simplenote"; IsOperation = "Automattic.Simplenote" }
-	@{ ShowInGUI = "Joplin"; IsXamlId = "Joplin"; IsOperation = "Joplin.Joplin" }
 	@{ ShowInGUI = "GIMP"; IsXamlId = "GimpId"; IsOperation = "GIMP.GIMP.3" }
 	@{ ShowInGUI = "Audacity"; IsXamlId = "AudacityId"; IsOperation = "Audacity.Audacity" }
 	@{ ShowInGUI = "Kdenlive"; IsXamlId = "KdenliveId"; IsOperation = "KDE.Kdenlive" }
 	@{ ShowInGUI = "PDF24 Creator"; IsXamlId = "PDF24CreatorId"; IsOperation = "geeksoftwareGmbH.PDF24Creator" }
 	@{ ShowInGUI = "PDFgear"; IsXamlId = "PDFgearId"; IsOperation = "PDFgear.PDFgear" }
-	@{ ShowInGUI = "Scribus"; IsXamlId = "ScribusId"; IsOperation = "Scribus.Scribus" }
+	# @{ ShowInGUI = "Scribus"; IsXamlId = "ScribusId"; IsOperation = "Scribus.Scribus" }
 	@{ ShowInGUI = "Microsoft 365 Apps"; IsXamlId = "MSOffice"; IsOperation = "Microsoft.Office" }
 	@{ ShowInGUI = "OnlyOffice"; IsXamlId = "OnlyOfficeId"; IsOperation = "ONLYOFFICE.DesktopEditors" }
 	@{ ShowInGUI = "LibreOffice"; IsXamlId = "LibreOffice"; IsOperation = "TheDocumentFoundation.LibreOffice" }
@@ -2050,9 +2045,11 @@ $appPkgList = @(
 	@{ ShowInGUI = "Wino Mail"; IsXamlId = "WinoMail"; IsOperation = "9NCRCVJC50WL" }
 	@{ ShowInGUI = "Mozilla Thunderbird"; IsXamlId = "Thunderbird"; IsOperation = "Mozilla.Thunderbird" }
 	@{ ShowInGUI = "scrcpy"; IsXamlId = "scrcpyId"; IsOperation = "Genymobile.scrcpy" }
+	@{ ShowInGUI = "Scrcpy GUI"; IsXamlId = "ScrcpyGUIId"; IsOperation = "pizi.scrcpygui" }
+	@{ ShowInGUI = "Stoat Chat"; IsXamlId = "StoatId"; IsOperation = "Revolt.RevoltDesktop" }
 	@{ ShowInGUI = "Discord"; IsXamlId = "DiscordId"; IsOperation = "Discord.Discord" }
 	@{ ShowInGUI = "Zoom Workplace"; IsXamlId = "ZoomId"; IsOperation = "Zoom.Zoom" }
-	@{ ShowInGUI = "Microsoft Teams (New)"; IsXamlId = "MSTeams"; IsOperation = "Microsoft.Teams" }
+	@{ ShowInGUI = "Microsoft Teams"; IsXamlId = "MSTeams"; IsOperation = "Microsoft.Teams" }
 	@{ ShowInGUI = "Slack"; IsXamlId = "SlackId"; IsOperation = "SlackTechnologies.Slack" }
 	@{ ShowInGUI = "OBS Studio"; IsXamlId = "OBSStudio"; IsOperation = "OBSProject.OBSStudio" }
 )
@@ -2080,8 +2077,7 @@ $appdevList = @(
 	@{ ShowInGUI = "Figma"; IsXamlId = "Figma"; IsOperation = "Figma.Figma" }
 	@{ ShowInGUI = "Inkscape"; IsXamlId = "Inkscape"; IsOperation = "Inkscape.Inkscape" }
 	@{ ShowInGUI = "Krita"; IsXamlId = "KritaId"; IsOperation = "KDE.Krita" }
-	@{ ShowInGUI = "blender"; IsXamlId = "Blenderd"; IsOperation = "BlenderFoundation.Blender" }
-	@{ ShowInGUI = "blender LTS"; IsXamlId = "BlenderdLTS"; IsOperation = "BlenderFoundation.Blender.LTS.3.6" }
+	@{ ShowInGUI = "blender (LTS)"; IsXamlId = "BlenderdLTS"; IsOperation = "BlenderFoundation.Blender.LTS.3.6" }
 	@{ ShowInGUI = "PuTTY"; IsXamlId = "PuTTYId"; IsOperation = "PuTTY.PuTTY" }
 	@{ ShowInGUI = "WinSCP"; IsXamlId = "WinSCPId"; IsOperation = "WinSCP.WinSCP" }
 	@{ ShowInGUI = "RustDesk"; IsXamlId = "RustDeskId"; IsOperation = "RustDesk.RustDesk" }
@@ -2106,9 +2102,10 @@ $appdevList = @(
 	@{ ShowInGUI = "cpufetch"; IsXamlId = "CpufetchId"; IsOperation = "Dr-Noob.cpufetch" }
 	# @{ ShowInGUI = "Oh My Posh"; IsXamlId = "OhmyposhId"; IsOperation = "JanDeDobbeleer.OhMyPosh" }
 	# @{ ShowInGUI = "starship"; IsXamlId = "StarshipId"; IsOperation = "Starship.Starship" }
-	@{ ShowInGUI = "Flow Launcher"; IsXamlId = "FlowLauncher"; IsOperation = "Flow-Launcher.Flow-Launcher" }
 	@{ ShowInGUI = "PowerToys (Preview)"; IsXamlId = "PowerToys"; IsOperation = "Microsoft.PowerToys" }
 	@{ ShowInGUI = "Windhawk"; IsXamlId = "Windhawk"; IsOperation = "RamenSoftware.Windhawk" }
+	@{ ShowInGUI = "micro"; IsXamlId = "microId"; IsOperation = "zyedidia.micro" }
+	@{ ShowInGUI = "Helix"; IsXamlId = "helixId"; IsOperation = "Helix.Helix" }
 	@{ ShowInGUI = "Neovim"; IsXamlId = "NeovimId"; IsOperation = "Neovim.Neovim" }
 	@{ ShowInGUI = "VSCodium"; IsXamlId = "VSCodium"; IsOperation = "VSCodium.VSCodium" }
 	@{ ShowInGUI = "Visual Studio Code"; IsXamlId = "VSCode"; IsOperation = "Microsoft.VisualStudioCode" }
@@ -2116,13 +2113,11 @@ $appdevList = @(
 	@{ ShowInGUI = "Java SDK"; IsXamlId = "JavaSDK"; IsOperation = "Oracle.JDK.22" }
 	@{ ShowInGUI = "Python 3.12"; IsXamlId = "Python"; IsOperation = "Python.Python.3.12" }
 	@{ ShowInGUI = "Rustup: toolchain"; IsXamlId = "Rustlang"; IsOperation = "Rustlang.Rustup" }
-	# @{ ShowInGUI = "Rust (MSVC)"; IsXamlId = "Rustlang"; IsOperation = "Rustlang.Rust.MSVC" }
 	@{ ShowInGUI = "Node.js (LTS)"; IsXamlId = "NodeJS"; IsOperation = "OpenJS.NodeJS.LTS" }
-	@{ ShowInGUI = "Hoppscotch"; IsXamlId = "HoppscotchId"; IsOperation = "hoppscotch.Hoppscotch" }
 	@{ ShowInGUI = "HTTPie"; IsXamlId = "HTTPieId"; IsOperation = "HTTPie.HTTPie" }
-	@{ ShowInGUI = "Postman"; IsXamlId = "PostmanId"; IsOperation = "Postman.Postman" }
+	@{ ShowInGUI = "Hoppscotch"; IsXamlId = "HoppscotchId"; IsOperation = "hoppscotch.Hoppscotch" }
 	@{ ShowInGUI = "GitHub Desktop"; IsXamlId = "GitHubId"; IsOperation = "GitHub.GitHubDesktop" }
-	@{ ShowInGUI = "Visual Studio Community"; IsXamlId = "VSCommunity"; IsOperation = "Microsoft.VisualStudio.2022.Community" }
+	@{ ShowInGUI = "Visual Studio Community"; IsXamlId = "VSCommunity"; IsOperation = "Microsoft.VisualStudio.Community" }
 	@{ ShowInGUI = "Apache NetBeans IDE"; IsXamlId = "NetBeans"; IsOperation = "Apache.NetBeans" }
 	@{ ShowInGUI = "Android Studio"; IsXamlId = "AndroidStudio"; IsOperation = "Google.AndroidStudio" }
 	@{ ShowInGUI = "MySQL"; IsXamlId = "MySQLId"; IsOperation = "Oracle.MySQL" }
@@ -2130,7 +2125,10 @@ $appdevList = @(
 	@{ ShowInGUI = "PostgreSQL 17"; IsXamlId = "PostgreSQL"; IsOperation = "PostgreSQL.PostgreSQL.17" }
 	# @{ ShowInGUI = "SQLServer Express"; IsXamlId = "SQLServer"; IsOperation = "Microsoft.SQLServer.2022.Express" }
 	@{ ShowInGUI = "SQLServer Management Studio"; IsXamlId = "SQLServerMS"; IsOperation = "Microsoft.SQLServerManagementStudio" }
-	@{ ShowInGUI = "Docker Desktop"; IsXamlId = "Docker"; IsOperation = "Docker.DockerDesktop" }
+	@{ ShowInGUI = "Podman"; IsXamlId = "Podman"; IsOperation = "RedHat.Podman" }
+	@{ ShowInGUI = "Podman Desktop"; IsXamlId = "PodmanDesk"; IsOperation = "RedHat.Podman-Desktop" }
+	@{ ShowInGUI = "Docker"; IsXamlId = "Docker"; IsOperation = "Docker.DockerCLI" }
+	@{ ShowInGUI = "Docker Desktop"; IsXamlId = "DockerDesk"; IsOperation = "Docker.DockerDesktop" }
 )
 
 function InstallPkgChoco ($appIdPkg, $sourceType) {
@@ -2156,7 +2154,7 @@ $toolList = @(
 	@{ ShowInGUI = "TCPView"; IsXamlId = "TcpviewId"; IsOperation = "tcpview" }
 	@{ ShowInGUI = "Fing Network Scanner"; IsXamlId = "FingId"; IsOperation = "fing" }
 	@{ ShowInGUI = "Ventoy"; IsXamlId = "VentoyId"; IsOperation = "ventoy" }
-	@{ ShowInGUI = "balenaEtcher"; IsXamlId = "EtcherId"; IsOperation = "etcher" }
+	# @{ ShowInGUI = "balenaEtcher"; IsXamlId = "EtcherId"; IsOperation = "etcher" }
 	@{ ShowInGUI = "Rufus (portable)"; IsXamlId = "RufusId"; IsOperation = "rufus.portable" }
 	@{ ShowInGUI = "CPU-Z (portable)"; IsXamlId = "Cpu_zId"; IsOperation = "cpu-z.portable" }
 	@{ ShowInGUI = "GPU-Z (portable)"; IsXamlId = "Gpu_zId"; IsOperation = "gpu-z" }
