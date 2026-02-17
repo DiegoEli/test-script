@@ -10,7 +10,7 @@
 # Show script info
 $global:WPAuthor = "D_E_M_O_N"
 $global:WPName = "WinCustom"
-$global:WPVersion = "v0.22.00"
+$global:WPVersion = "v0.29.03"
 $WPRepository = "https://raw.githubusercontent.com/DiegoEli/test-script/refs/heads/testing/testScript.ps1"
 # $WPRepository = "https://raw.githubusercontent.com/DiegoEli/WinCustom/refs/heads/main/WinCustom.ps1"
 
@@ -19,7 +19,7 @@ $WPRepository = "https://raw.githubusercontent.com/DiegoEli/test-script/refs/hea
 	Author  : Diego Mendoza(JuanPerez)
 	Github  : https://github.com/DiegoEli
 	Name    : WinCustom
-	Version : v0.19.10
+	Version : v0.29.03
 
 .PARAMETER [Aliases]
 	irm = Invoke-RestMethod
@@ -815,7 +815,13 @@ $optionList = @(
 
 # Modification #: Configure service in Windows
 # Get-Service | Sort-Object Status, DisplayName | Format-Table -GroupBy Status -Property Status, Name, DisplayName
-function ConfigService ($serviceId, $startupType) {
+function ConfigService {
+	param (
+		[string]$serviceId,
+		[ValidateSet("Disabled", "Manual")]
+		[string]$startupType
+	)
+
 	$service = Get-Service -Name $serviceId -ErrorAction SilentlyContinue
 	
 	if ( $null -ne $service ) {
@@ -834,7 +840,7 @@ $disableList = @(
 	"MapsBroker",             #Administrador de mapas descargados
 	"SEMgrSvc",               #Administrador de pagos y NFC/SE
 	"lmhosts",                #Aplicación auxiliar de NetBIOS sobre TCP/IP
-	"iphlpsvc",               #Aplicación auxiliar IP(Error: Tiene servicios que dependen de el)
+	"iphlpsvc",               #Aplicación auxiliar IP(Error: Tiene servicios que dependen de el)___*
 	"NaturalAuthentication",  #Autenticación natural
 	"tzautoupdate",           #Auto Time Zone Updater
 	"SNMPTRAP",               #Captura de SNMP
@@ -842,13 +848,14 @@ $disableList = @(
 	"Spooler",                #Cola de impresión
 	"WpcMonSvc",              #Control parental
 	"diagsvc",                #Diagnostic Execution Service
+	"DsSvc",                  #Data Sharing Service___*
 	"SCPolicySvc",            #Directiva de extracción de tarjetas inteligentes
 	"DiagTrack",              #Experiencias del usuario y telemetría asociadas
 	"PrintNotify",            #Extensiones y notificaciones de impresora
 	"W32Time",                #Hora de Windows
 	"WdiSystemHost",          #Host de sistema de diagnóstico
 	"WdiServiceHost",         #Host del servicio de diagnóstico
-	"uhssvc",                 #Microsoft Update Health Service
+	"uhssvc",                 #Microsoft Update Health Service___*
 	"Netlogon",               #Net Logon
 	"XblGameSave",            #Partida guardada en Xbox Live
 	"wercplsupport",          #Problem Reports Control Panel Support
@@ -875,48 +882,62 @@ $disableList = @(
 	"MixedRealityOpenXRSvc",  #Windows Mixed Reality OpenXR Service
 	"WSearch",                #Windows Search
 	"XboxGipSvc"              #Xbox Accessory Management Service
-	"ssh-agent"               #OpenSSH Authentication Agent
+	# "ssh-agent"               #OpenSSH Authentication Agent
 )
 
 $manualList = @(
-	"lfsvc",                          #Servicio de geolocalización
-	"vmickvpexchange",                #Hyper-V Data Exchange Service
-	"vmicguestinterface",             #Hyper-V Guest Service Interface
-	"vmicshutdown",                   #Hyper-V Guest Shutdown Service
-	"vmicheartbeat",                  #Hyper-V Heartbeat Service
-	"vmicvmsession",                  #Hyper-V PowerShell Direct Service
-	"vmicrdv",                        #Hyper-V Remote Desktop Virtualization Service
-	"vmictimesync",                   #Hyper-V Time Synchronization Service
-	"vmicvss",                        #Hyper-V Volume Shadow Copy Requestor
-	"MicrosoftEdgeElevationService",  #Microsoft Edge Elevation Service (MicrosoftEdgeElevationService)
-	"edgeupdate",                     #Microsoft Edge Update Service (edgeupdate)
-	"edgeupdatem",                    #Microsoft Edge Update Service (edgeupdatem)
-	"StorSvc",                        #Storage Service
-	"SysMain",                        #SysMain
-	"wuauserv"                        #Windows Update
+	# "BraveElevationService",             #Brave Elevation Service (BraveElevationService)
+	# "brave",                             #Brave Update Service (brave)
+	# "bravem",                            #Brave Update Service (bravem)
+	"DropboxElevationService",           #Dropbox Elevation Service (DropboxElevationService)
+	"GoogleChromeElevationService",      #Google Chrome Elevation Service (GoogleChromeElevationService)
+	# "GoogleUpdaterService",            #Google ChromeUpdate Service (GoogleUpdaterService144.0.7547.0)
+	# "GoogleUpdaterInternalService",    #Google ChromeUpdate Service (GoogleUpdaterInternalService144.0.7547.0)
+	"vmickvpexchange",                   #Hyper-V Data Exchange Service
+	"vmicguestinterface",                #Hyper-V Guest Service Interface
+	"vmicshutdown",                      #Hyper-V Guest Shutdown Service
+	"vmicheartbeat",                     #Hyper-V Heartbeat Service
+	"vmicvmsession",                     #Hyper-V PowerShell Direct Service
+	"vmicrdv",                           #Hyper-V Remote Desktop Virtualization Service
+	"vmictimesync",                      #Hyper-V Time Synchronization Service
+	"vmicvss",                           #Hyper-V Volume Shadow Copy Requestor
+	"MicrosoftEdgeElevationService",     #Microsoft Edge Elevation Service (MicrosoftEdgeElevationService)
+	"edgeupdate",                        #Microsoft Edge Update Service (edgeupdate)
+	"edgeupdatem",                       #Microsoft Edge Update Service (edgeupdatem)
+	"lfsvc",                             #Servicio de geolocalización
+	"StorSvc",                           #Storage Service
+	"SysMain",                           #SysMain
+	"wuauserv"                           #Windows Update
 )
 
 function Set_Service_Startup () {
 	
 	foreach ($serviceId in $disableList) {
-		ConfigService $serviceId Disabled
+		ConfigService -serviceId $serviceId -startupType Disabled
 	}
 	
 	foreach ($serviceId in $manualList) {
-		ConfigService $serviceId Manual
+		ConfigService -serviceId $serviceId -startupType Manual
 	}
 }
 
 # Modification #: Configure Task Sheduler in Windows
 # Get-ScheduledTask | Sort-Object State, TaskPath, TaskName | Format-Table -GroupBy State -Property TaskPath, TaskName, State
-function ConfigTask ($taskPath, $taskName, $stateType) {
-	$task = Get-ScheduledTask -TaskPath $taskPath -TaskName $taskName -ErrorAction SilentlyContinue
+function ConfigTask {
+	param (
+		[string]$taskPath,
+		[string]$taskName,
+		[ValidateSet("Disable", "Enable")]
+		[string]$stateType
+	)
 	
-	$newState = $stateType.Substring(0, $stateType.Length - 1)
+	$task = Get-ScheduledTask -TaskPath $taskPath -ErrorAction SilentlyContinue | 
+	Where-Object { $_.TaskName -like $taskName }
+	
 	if ( $null -ne $task ) {
 		
 		Write-Host "Setting task [$_esc[1;36m$taskName$_esc[0m] to $stateType."
-		$null = Invoke-Expression "$newState-ScheduledTask -TaskPath `"$taskPath`" -TaskName `"$taskName`""
+		$null = Invoke-Expression "$stateType-ScheduledTask -TaskPath `"$taskPath`" -TaskName `"$taskName`""
 	}
 	else {
 		Write-Warning "Setting task [$taskName] to $stateType, Task not found."
@@ -924,20 +945,30 @@ function ConfigTask ($taskPath, $taskName, $stateType) {
 }
 
 $disableTList = @(
+	@{ Path = "\"; Name = "BraveSoftwareUpdateTaskUserS*" }
 	@{ Path = "\"; Name = "MicrosoftEdgeUpdateTaskMachineCore" }
 	@{ Path = "\"; Name = "MicrosoftEdgeUpdateTaskMachineUA" }
+	@{ Path = "\Microsoft\VisualStudio\Updates\"; Name = "BackgroundDownload" }
+	@{ Path = "\Microsoft\Windows\ApplicationData\"; Name = "CleanupTemporaryState" }
+	@{ Path = "\Microsoft\Windows\ApplicationData\"; Name = "DsSvcCleanup" }
 	@{ Path = "\Microsoft\Windows\Application Experience\"; Name = "MareBackup" }
 	@{ Path = "\Microsoft\Windows\Application Experience\"; Name = "Microsoft Compatibility Appraiser" }
 	@{ Path = "\Microsoft\Windows\Application Experience\"; Name = "PcaPatchDbTask" }
 	@{ Path = "\Microsoft\Windows\Application Experience\"; Name = "StartupAppTask" }
 	@{ Path = "\Microsoft\Windows\Autochk\"; Name = "Proxy" }
+	@{ Path = "\Microsoft\Windows\CloudExperienceHost\"; Name = "CreateObjectTask" }
 	@{ Path = "\Microsoft\Windows\Customer Experience Improvement Program\"; Name = "Consolidator" }
 	@{ Path = "\Microsoft\Windows\Customer Experience Improvement Program\"; Name = "UsbCeip" }
+	@{ Path = "\Microsoft\Windows\Diagnosis\"; Name = "RecommendedTroubleshootingScanner" }
+	@{ Path = "\Microsoft\Windows\Diagnosis\"; Name = "Scheduled" }
 	@{ Path = "\Microsoft\Windows\DiskDiagnostic\"; Name = "Microsoft-Windows-DiskDiagnosticDataCollector" }
+	@{ Path = "\Microsoft\Windows\DiskFootprint\"; Name = "StorageSense" }
 	@{ Path = "\Microsoft\Windows\Feedback\Siuf\"; Name = "DmClient" }
 	@{ Path = "\Microsoft\Windows\Feedback\Siuf\"; Name = "DmClientOnScenarioDownload" }
+	@{ Path = "\Microsoft\Windows\Maps\"; Name = "MapsToastTask" }
 	@{ Path = "\Microsoft\Windows\Maps\"; Name = "MapsUpdateTask" }
-	@{ Path = "\Microsoft\Windows\Windows Defender\"; Name = "Windows Defender Verification" }
+	@{ Path = "\Microsoft\Windows\Shell\"; Name = "CreateObjectTask" }
+	# @{ Path = "\Microsoft\Windows\Windows Defender\"; Name = "Windows Defender Verification" }
 	@{ Path = "\Microsoft\Windows\Windows Error Reporting\"; Name = "QueueReporting" }
 	@{ Path = "\Microsoft\Windows\WindowsUpdate\"; Name = "Scheduled Start" }
 	@{ Path = "\Microsoft\XblGameSave\"; Name = "XblGameSaveTask" }
@@ -945,12 +976,13 @@ $disableTList = @(
 	@{ Path = "\Microsoft\Office\"; Name = "Office Feature Updates Logon" }
 	@{ Path = "\Microsoft\Office\"; Name = "Office Feature Updates" }
 	@{ Path = "\Microsoft\Office\"; Name = "Office Automatic Updates 2.0" }
+	@{ Path = "\Mozilla\"; Name = "Firefox Default Browser Agent*" }
 )
 
 function Set_Scheduled_Task () {
 	
 	foreach ($task in $disableTList) {
-		ConfigTask $task.Path $task.Name Disabled
+		ConfigTask -taskPath $task.Path -taskName $task.Name -stateType Disable
 	}
 }
 
@@ -1752,7 +1784,7 @@ $capabilityList = @(
 	@{ ShowInGUI = "Steps Recorder"; IsXamlId = "StepsRecorder"; IsOperation = "App.StepsRecorder" }
 	@{ ShowInGUI = "Quick Assist"; IsXamlId = "QuickAssist"; IsOperation = "App.Support.QuickAssist" }
 	@{ ShowInGUI = "Internet Explorer"; IsXamlId = "InternetExplorer"; IsOperation = "Browser.InternetExplorer" }
-	@{ ShowInGUI = "Hello Face"; IsXamlId = "HelloFace"; IsOperation = "Hello.Face.20134" }
+	@{ ShowInGUI = "Hello Face"; IsXamlId = "HelloFace"; IsOperation = "Hello.Face" }
 	@{ ShowInGUI = "Math Recognizer"; IsXamlId = "MathRecognizer"; IsOperation = "MathRecognizer" }
 	@{ ShowInGUI = "Windows Media Player"; IsXamlId = "WindowsMediaPlayer"; IsOperation = "Media.WindowsMediaPlayer" }
 	@{ ShowInGUI = "Wallpapers Extended"; IsXamlId = "WallpapersExtended"; IsOperation = "Microsoft.Wallpapers.Extended" }
@@ -1791,13 +1823,14 @@ $packageList = @(
 	@{ ShowInGUI = "Microsoft News"; IsXamlId = "MSBingNews"; IsOperation = "Microsoft.BingNews" }
 	@{ ShowInGUI = "Microsoft Bing (Edge)"; IsXamlId = "MSBingSearch"; IsOperation = "Microsoft.BingSearch" }
 	@{ ShowInGUI = "MSN Weather"; IsXamlId = "MSBingWeather"; IsOperation = "Microsoft.BingWeather" }
-	# @{ ShowInGUI = "Copilot"; IsXamlId = "MSCopilot"; IsOperation = "Microsoft.Copilot" }
+	@{ ShowInGUI = "Copilot"; IsXamlId = "MSCopilot"; IsOperation = "Microsoft.Copilot" }
 	@{ ShowInGUI = "Game Assist"; IsXamlId = "MSGameAssist"; IsOperation = "Microsoft.Edge.GameAssist" }
 	@{ ShowInGUI = "Xbox App"; IsXamlId = "MSGamingApp"; IsOperation = "Microsoft.GamingApp" }
 	@{ ShowInGUI = "Get Help"; IsXamlId = "MSGetHelp"; IsOperation = "Microsoft.GetHelp" }
 	@{ ShowInGUI = "Get Started"; IsXamlId = "MSGetstarted"; IsOperation = "Microsoft.Getstarted" }
 	@{ ShowInGUI = "HEIF Image Extension"; IsXamlId = "MSHEIFImageExtension"; IsOperation = "Microsoft.HEIFImageExtension" }
 	@{ ShowInGUI = "HEVC Video Extension"; IsXamlId = "MSHEVCVideoExtension"; IsOperation = "Microsoft.HEVCVideoExtension" }
+	@{ ShowInGUI = "Microsoft 365 companion apps"; IsXamlId = "MSMicrosoft365Companions"; IsOperation = "Microsoft.M365Companions" }
 	@{ ShowInGUI = "Paint 3D"; IsXamlId = "MSMicrosoft3DViewer"; IsOperation = "Microsoft.Microsoft3DViewer" }
 	# @{ ShowInGUI = "Microsoft Edge"; IsXamlId = "MSEdge"; IsOperation = "Microsoft.MicrosoftEdge.Stable" }
 	@{ ShowInGUI = "Microsoft 365 (PWA)"; IsXamlId = "MSOfficeHub"; IsOperation = "Microsoft.MicrosoftOfficeHub" }
@@ -1806,6 +1839,7 @@ $packageList = @(
 	@{ ShowInGUI = "Mixed Reality Portal"; IsXamlId = "MSMixedReality"; IsOperation = "Microsoft.MixedReality.Portal" }
 	@{ ShowInGUI = "MPEG-2 Video Extension"; IsXamlId = "MSMPEG2VideoExtension"; IsOperation = "Microsoft.MPEG2VideoExtension" }
 	@{ ShowInGUI = "Paint (OLD)"; IsXamlId = "MSPaint"; IsOperation = "Microsoft.MSPaint" }
+	# @{ ShowInGUI = "Microsoft ActionsServer"; IsXamlId = "MSOfficeActions"; IsOperation = "Microsoft.Office.ActionsServer" }
 	@{ ShowInGUI = "OneNote"; IsXamlId = "MSOneNote"; IsOperation = "Microsoft.Office.OneNote" }
 	@{ ShowInGUI = "Outlook (new)"; IsXamlId = "MSOutlookForWindows"; IsOperation = "Microsoft.OutlookForWindows" }
 	@{ ShowInGUI = "Microsoft People"; IsXamlId = "MSPeople"; IsOperation = "Microsoft.People" }
@@ -1867,13 +1901,14 @@ $provisionedList = @(
 	@{ ShowInGUI = "Microsoft News"; IsXamlId = "PMSBingNews"; IsOperation = "Microsoft.BingNews" }
 	@{ ShowInGUI = "Microsoft Bing (Edge)"; IsXamlId = "PMSBingSearch"; IsOperation = "Microsoft.BingSearch" }
 	@{ ShowInGUI = "MSN Weather"; IsXamlId = "PMSBingWeather"; IsOperation = "Microsoft.BingWeather" }
-	# @{ ShowInGUI = "Copilot"; IsXamlId = "PMSCopilot"; IsOperation = "Microsoft.Copilot" }
+	@{ ShowInGUI = "Copilot"; IsXamlId = "PMSCopilot"; IsOperation = "Microsoft.Copilot" }
 	@{ ShowInGUI = "Game Assist"; IsXamlId = "PMSGameAssist"; IsOperation = "Microsoft.Edge.GameAssist" }
 	@{ ShowInGUI = "Xbox App"; IsXamlId = "PMSGamingApp"; IsOperation = "Microsoft.GamingApp" }
 	@{ ShowInGUI = "Get Help"; IsXamlId = "PMSGetHelp"; IsOperation = "Microsoft.GetHelp" }
 	@{ ShowInGUI = "Get Started"; IsXamlId = "PMSGetstarted"; IsOperation = "Microsoft.Getstarted" }
 	@{ ShowInGUI = "HEIF Image Extension"; IsXamlId = "PMSHEIFImageExtension"; IsOperation = "Microsoft.HEIFImageExtension" }
 	@{ ShowInGUI = "HEVC Video Extension"; IsXamlId = "PMSHEVCVideoExtension"; IsOperation = "Microsoft.HEVCVideoExtension" }
+	@{ ShowInGUI = "Microsoft 365 companion apps"; IsXamlId = "PMSMicrosoft365Companions"; IsOperation = "Microsoft.M365Companions" }
 	@{ ShowInGUI = "Paint 3D"; IsXamlId = "PMSMicrosoft3DViewer"; IsOperation = "Microsoft.Microsoft3DViewer" }
 	# @{ ShowInGUI = "Microsoft Edge"; IsXamlId = "PMSEdge"; IsOperation = "Microsoft.MicrosoftEdge.Stable" }
 	@{ ShowInGUI = "Microsoft 365 (PWA)"; IsXamlId = "PMSOfficeHub"; IsOperation = "Microsoft.MicrosoftOfficeHub" }
@@ -1882,6 +1917,7 @@ $provisionedList = @(
 	@{ ShowInGUI = "Mixed Reality Portal"; IsXamlId = "PMSMixedReality"; IsOperation = "Microsoft.MixedReality.Portal" }
 	@{ ShowInGUI = "MPEG-2 Video Extension"; IsXamlId = "PMSMPEG2VideoExtension"; IsOperation = "Microsoft.MPEG2VideoExtension" }
 	@{ ShowInGUI = "Paint (OLD)"; IsXamlId = "PMSPaint"; IsOperation = "Microsoft.MSPaint" }
+	# @{ ShowInGUI = "Microsoft ActionsServer"; IsXamlId = "PMSOfficeActions"; IsOperation = "Microsoft.Office.ActionsServer" }
 	@{ ShowInGUI = "OneNote"; IsXamlId = "PMSOneNote"; IsOperation = "Microsoft.Office.OneNote" }
 	@{ ShowInGUI = "Outlook (new)"; IsXamlId = "PMSOutlookForWindows"; IsOperation = "Microsoft.OutlookForWindows" }
 	@{ ShowInGUI = "Microsoft People"; IsXamlId = "PMSPeople"; IsOperation = "Microsoft.People" }
@@ -1971,6 +2007,7 @@ function Remove_Capability_Package_Provisioned ($mainContent) {
 # Modification #: Configure Install App
 # winget list  |  winget upgrade --include-unknown  |  winget upgrade --all --include-unknown
 # choco list   |  choco outdated                    |  choco upgrade all --confirm
+# scoop list   |  scoop status                      |  scoop update --all
 function InstallPkgWinget ($appIdPkg, $sourceType) {
 
 	Write-Host "Installing Winget: $appIdPkg"
@@ -1995,6 +2032,7 @@ $appPkgList = @(
 	@{ ShowInGUI = "Microsoft PC Manager"; IsXamlId = "StorePCManager"; IsOperation = "9PM860492SZD" }
 	@{ ShowInGUI = "AutoHotkey"; IsXamlId = "AutoHotkeyId"; IsOperation = "AutoHotkey.AutoHotkey" }
 	@{ ShowInGUI = "Everything (x64)"; IsXamlId = "Everything"; IsOperation = "voidtools.Everything" }
+	@{ ShowInGUI = "KDE Dolphin"; IsXamlId = "KDEDolphinId"; IsOperation = "KDE.Dolphin" }
 	@{ ShowInGUI = "QuickLook"; IsXamlId = "QuickLookId"; IsOperation = "QL-Win.QuickLook" }
 	@{ ShowInGUI = "Lightshot"; IsXamlId = "LightshotId"; IsOperation = "Skillbrains.Lightshot" }
 	@{ ShowInGUI = "ChatGPT"; IsXamlId = "ChatGPTId"; IsOperation = "9NT1R1C2HH7J" }
@@ -2003,10 +2041,10 @@ $appPkgList = @(
 	@{ ShowInGUI = "KDE Connect"; IsXamlId = "KDEConnect"; IsOperation = "KDE.KDEConnect" }
 	@{ ShowInGUI = "7-Zip"; IsXamlId = "SevenZip"; IsOperation = "7zip.7zip" }
 	@{ ShowInGUI = "WinRAR"; IsXamlId = "WinRARId"; IsOperation = "RARLab.WinRAR" }
-	@{ ShowInGUI = "TeraBox Desktop"; IsXamlId = "TeraBox"; IsOperation = "Baidu.TeraBox" }
 	@{ ShowInGUI = "MEGA Drive"; IsXamlId = "MEGA"; IsOperation = "Mega.MEGASync" }
-	@{ ShowInGUI = "Google Drive"; IsXamlId = "GoogleDrive"; IsOperation = "Google.GoogleDrive" }
 	@{ ShowInGUI = "Dropbox Drive"; IsXamlId = "Dropbox"; IsOperation = "Dropbox.Dropbox" }
+	@{ ShowInGUI = "Google Drive"; IsXamlId = "GoogleDrive"; IsOperation = "Google.GoogleDrive" }
+	@{ ShowInGUI = "TeraBox Desktop"; IsXamlId = "TeraBox"; IsOperation = "Baidu.TeraBox" }
 	@{ ShowInGUI = "Notepad++"; IsXamlId = "Notepadplusplus"; IsOperation = "Notepad++.Notepad++" }
 	@{ ShowInGUI = "IrfanView (x64)"; IsXamlId = "IrfanView"; IsOperation = "IrfanSkiljan.IrfanView" }
 	@{ ShowInGUI = "VLC Media Player"; IsXamlId = "VLCMediaPlayer"; IsOperation = "VideoLAN.VLC" }
@@ -2018,35 +2056,36 @@ $appPkgList = @(
 	@{ ShowInGUI = "Kdenlive"; IsXamlId = "KdenliveId"; IsOperation = "KDE.Kdenlive" }
 	@{ ShowInGUI = "PDF24 Creator"; IsXamlId = "PDF24CreatorId"; IsOperation = "geeksoftwareGmbH.PDF24Creator" }
 	@{ ShowInGUI = "PDFgear"; IsXamlId = "PDFgearId"; IsOperation = "PDFgear.PDFgear" }
-	# @{ ShowInGUI = "Scribus"; IsXamlId = "ScribusId"; IsOperation = "Scribus.Scribus" }
 	@{ ShowInGUI = "Microsoft 365 Apps"; IsXamlId = "MSOffice"; IsOperation = "Microsoft.Office" }
 	@{ ShowInGUI = "OnlyOffice"; IsXamlId = "OnlyOfficeId"; IsOperation = "ONLYOFFICE.DesktopEditors" }
 	@{ ShowInGUI = "LibreOffice"; IsXamlId = "LibreOffice"; IsOperation = "TheDocumentFoundation.LibreOffice" }
+	@{ ShowInGUI = "Zotero Reference Manager"; IsXamlId = "ScholarZotero"; IsOperation = "DigitalScholar.Zotero" }
 	@{ ShowInGUI = "Mendeley Reference Manager"; IsXamlId = "MenRefManager"; IsOperation = "Elsevier.MendeleyReferenceManager" }
 	
-	@{ ShowInGUI = "Steam Launcher"; IsXamlId = "SteamLauncher"; IsOperation = "Valve.Steam" }
-	@{ ShowInGUI = "Epic Games Launcher"; IsXamlId = "EpicLauncher"; IsOperation = "EpicGames.EpicGamesLauncher" }
-	@{ ShowInGUI = "EA App Launcher"; IsXamlId = "EALauncher"; IsOperation = "ElectronicArts.EADesktop" }
-	@{ ShowInGUI = "Ubisoft Connect"; IsXamlId = "UbisoftConnet"; IsOperation = "Ubisoft.Connect" }
-	@{ ShowInGUI = "Bethesda.net Launcher"; IsXamlId = "Bethesda"; IsOperation = "Bethesda.Launcher" }
-	@{ ShowInGUI = "Battle.net Launcher"; IsXamlId = "BattleNet"; IsOperation = "Blizzard.BattleNet" }
 	@{ ShowInGUI = "Heroic Games Launcher"; IsXamlId = "HeroicGamesLauncher"; IsOperation = "HeroicGamesLauncher.HeroicGamesLauncher" }
+	@{ ShowInGUI = "itch.io Launcher"; IsXamlId = "ItchIoLauncher"; IsOperation = "ItchIo.Itch" }
+	@{ ShowInGUI = "Steam Launcher"; IsXamlId = "SteamLauncher"; IsOperation = "Valve.Steam" }
+	@{ ShowInGUI = "Battle.net Launcher"; IsXamlId = "BattleNet"; IsOperation = "Blizzard.BattleNet" }
 	@{ ShowInGUI = "GOG GALAXY"; IsXamlId = "GOGGalaxy"; IsOperation = "GOG.Galaxy" }
-	@{ ShowInGUI = "Google Play Games (Beta)"; IsXamlId = "PlayGamesBetaId"; IsOperation = "Google.PlayGames.Beta" }
+	@{ ShowInGUI = "Ubisoft Connect"; IsXamlId = "UbisoftConnet"; IsOperation = "Ubisoft.Connect" }
+	@{ ShowInGUI = "EA App Launcher"; IsXamlId = "EALauncher"; IsOperation = "ElectronicArts.EADesktop" }
+	@{ ShowInGUI = "Epic Games Launcher"; IsXamlId = "EpicLauncher"; IsOperation = "EpicGames.EpicGamesLauncher" }
+	@{ ShowInGUI = "Google Play Games"; IsXamlId = "PlayGamesBetaId"; IsOperation = "Google.PlayGames" }
 	@{ ShowInGUI = "BlueStacks"; IsXamlId = "BlueStacksId"; IsOperation = "BlueStack.BlueStacks" }
-	@{ ShowInGUI = "PPSSPP Emulator"; IsXamlId = "PPSSPPId"; IsOperation = "PPSSPPTeam.PPSSPP" }
-	@{ ShowInGUI = "DOLPHIN Emulator"; IsXamlId = "DolphinId"; IsOperation = "DolphinEmulator.Dolphin" }
 	@{ ShowInGUI = "PCSX2 Emulator"; IsXamlId = "PCSX2Id"; IsOperation = "PCSX2Team.PCSX2" }
-	@{ ShowInGUI = "XENIA Emulator"; IsXamlId = "XeniaId"; IsOperation = "Xenia.Xenia" }
+	@{ ShowInGUI = "DOLPHIN Emulator"; IsXamlId = "DolphinId"; IsOperation = "DolphinEmulator.Dolphin" }
+	@{ ShowInGUI = "XEMU Emulator"; IsXamlId = "XemuId"; IsOperation = "xemu-project.xemu" }
+	@{ ShowInGUI = "PPSSPP Emulator"; IsXamlId = "PPSSPPId"; IsOperation = "PPSSPPTeam.PPSSPP" }
+	@{ ShowInGUI = "GameSir Connect"; IsXamlId = "GameSirId"; IsOperation = "GameSir.GameSirConnect" }
 
 	@{ ShowInGUI = "qBittorrent"; IsXamlId = "qBittorrentId"; IsOperation = "qBittorrent.qBittorrent" }
-	@{ ShowInGUI = "WhatsApp Desktop"; IsXamlId = "WhatsApp"; IsOperation = "9NKSQGP7F2NH" }
 	@{ ShowInGUI = "Telegram Desktop"; IsXamlId = "Telegram"; IsOperation = "Telegram.TelegramDesktop" }
+	@{ ShowInGUI = "WhatsApp Desktop"; IsXamlId = "WhatsApp"; IsOperation = "9NKSQGP7F2NH" }
 	@{ ShowInGUI = "Wino Mail"; IsXamlId = "WinoMail"; IsOperation = "9NCRCVJC50WL" }
 	@{ ShowInGUI = "Mozilla Thunderbird"; IsXamlId = "Thunderbird"; IsOperation = "Mozilla.Thunderbird" }
 	@{ ShowInGUI = "scrcpy"; IsXamlId = "scrcpyId"; IsOperation = "Genymobile.scrcpy" }
 	@{ ShowInGUI = "Scrcpy GUI"; IsXamlId = "ScrcpyGUIId"; IsOperation = "pizi.scrcpygui" }
-	@{ ShowInGUI = "Stoat Chat"; IsXamlId = "StoatId"; IsOperation = "Revolt.RevoltDesktop" }
+	# @{ ShowInGUI = "Stoat Chat"; IsXamlId = "StoatId"; IsOperation = "Revolt.RevoltDesktop" }
 	@{ ShowInGUI = "Discord"; IsXamlId = "DiscordId"; IsOperation = "Discord.Discord" }
 	@{ ShowInGUI = "Zoom Workplace"; IsXamlId = "ZoomId"; IsOperation = "Zoom.Zoom" }
 	@{ ShowInGUI = "Microsoft Teams"; IsXamlId = "MSTeams"; IsOperation = "Microsoft.Teams" }
@@ -2090,6 +2129,7 @@ $appdevList = @(
 	@{ ShowInGUI = "MSI Afterburner"; IsXamlId = "Afterburner"; IsOperation = "Guru3D.Afterburner" }
 	@{ ShowInGUI = "Lenovo Legion Toolkit"; IsXamlId = "LenovoLegionToolkit"; IsOperation = "BartoszCichecki.LenovoLegionToolkit" }
 	@{ ShowInGUI = "Wireshark"; IsXamlId = "Wireshark"; IsOperation = "WiresharkFoundation.Wireshark" }
+	@{ ShowInGUI = "ValiDrive"; IsXamlId = "ValiDrive"; IsOperation = "GibsonResearchCorporation.ValiDrive" }
 	@{ ShowInGUI = "WizTree"; IsXamlId = "WizTreeId"; IsOperation = "AntibodySoftware.WizTree" }
 	@{ ShowInGUI = "WinDirStat"; IsXamlId = "WinDirStatId"; IsOperation = "WinDirStat.WinDirStat" }
 	@{ ShowInGUI = "Recuva"; IsXamlId = "RecuvaId"; IsOperation = "Piriform.Recuva" }
@@ -2107,23 +2147,29 @@ $appdevList = @(
 	@{ ShowInGUI = "micro"; IsXamlId = "microId"; IsOperation = "zyedidia.micro" }
 	@{ ShowInGUI = "Helix"; IsXamlId = "helixId"; IsOperation = "Helix.Helix" }
 	@{ ShowInGUI = "Neovim"; IsXamlId = "NeovimId"; IsOperation = "Neovim.Neovim" }
+	@{ ShowInGUI = "Zed"; IsXamlId = "ZedId"; IsOperation = "ZedIndustries.Zed" }
 	@{ ShowInGUI = "VSCodium"; IsXamlId = "VSCodium"; IsOperation = "VSCodium.VSCodium" }
 	@{ ShowInGUI = "Visual Studio Code"; IsXamlId = "VSCode"; IsOperation = "Microsoft.VisualStudioCode" }
 	@{ ShowInGUI = "Git"; IsXamlId = "GitId"; IsOperation = "Git.Git" }
-	@{ ShowInGUI = "Java SDK"; IsXamlId = "JavaSDK"; IsOperation = "Oracle.JDK.22" }
-	@{ ShowInGUI = "Python 3.12"; IsXamlId = "Python"; IsOperation = "Python.Python.3.12" }
+	@{ ShowInGUI = "Java SDK"; IsXamlId = "JavaSDK"; IsOperation = "Oracle.JDK.25" }
+	@{ ShowInGUI = "Python 3.14"; IsXamlId = "Python"; IsOperation = "Python.Python.3.14" }
 	@{ ShowInGUI = "Rustup: toolchain"; IsXamlId = "Rustlang"; IsOperation = "Rustlang.Rustup" }
+	@{ ShowInGUI = "PHP 8.5"; IsXamlId = "PHPId"; IsOperation = "PHP.PHP.8.5" }
 	@{ ShowInGUI = "Node.js (LTS)"; IsXamlId = "NodeJS"; IsOperation = "OpenJS.NodeJS.LTS" }
-	@{ ShowInGUI = "HTTPie"; IsXamlId = "HTTPieId"; IsOperation = "HTTPie.HTTPie" }
-	@{ ShowInGUI = "Hoppscotch"; IsXamlId = "HoppscotchId"; IsOperation = "hoppscotch.Hoppscotch" }
+	@{ ShowInGUI = "HTTPie Client"; IsXamlId = "HTTPieId"; IsOperation = "HTTPie.HTTPie" }
+	@{ ShowInGUI = "Hoppscotch Client"; IsXamlId = "HoppscotchId"; IsOperation = "hoppscotch.Hoppscotch" }
 	@{ ShowInGUI = "GitHub Desktop"; IsXamlId = "GitHubId"; IsOperation = "GitHub.GitHubDesktop" }
 	@{ ShowInGUI = "Visual Studio Community"; IsXamlId = "VSCommunity"; IsOperation = "Microsoft.VisualStudio.Community" }
 	@{ ShowInGUI = "Apache NetBeans IDE"; IsXamlId = "NetBeans"; IsOperation = "Apache.NetBeans" }
 	@{ ShowInGUI = "Android Studio"; IsXamlId = "AndroidStudio"; IsOperation = "Google.AndroidStudio" }
-	@{ ShowInGUI = "MySQL"; IsXamlId = "MySQLId"; IsOperation = "Oracle.MySQL" }
+	@{ ShowInGUI = "SQLite"; IsXamlId = "SQLiteId"; IsOperation = "SQLite.SQLite" }
+	@{ ShowInGUI = "DB Browser For SQLite"; IsXamlId = "DBBrowserId"; IsOperation = "DBBrowserForSQLite.DBBrowserForSQLite" }
 	@{ ShowInGUI = "MariaDB"; IsXamlId = "MariaDBId"; IsOperation = "MariaDB.Server" }
-	@{ ShowInGUI = "PostgreSQL 17"; IsXamlId = "PostgreSQL"; IsOperation = "PostgreSQL.PostgreSQL.17" }
-	# @{ ShowInGUI = "SQLServer Express"; IsXamlId = "SQLServer"; IsOperation = "Microsoft.SQLServer.2022.Express" }
+	@{ ShowInGUI = "HeidiSQL for DB"; IsXamlId = "HeidiSQLId"; IsOperation = "HeidiSQL.HeidiSQL" }
+	@{ ShowInGUI = "MySQL"; IsXamlId = "MySQLId"; IsOperation = "Oracle.MySQL" }
+	@{ ShowInGUI = "MySQL Workbench"; IsXamlId = "MySQLWorkbenchId"; IsOperation = "Oracle.MySQLWorkbench" }
+	@{ ShowInGUI = "PostgreSQL 18"; IsXamlId = "PostgreSQL"; IsOperation = "PostgreSQL.PostgreSQL.18" }
+	@{ ShowInGUI = "SQLServer Express"; IsXamlId = "SQLServer"; IsOperation = "Microsoft.SQLServer.2025.Express" }
 	@{ ShowInGUI = "SQLServer Management Studio"; IsXamlId = "SQLServerMS"; IsOperation = "Microsoft.SQLServerManagementStudio" }
 	@{ ShowInGUI = "Podman"; IsXamlId = "Podman"; IsOperation = "RedHat.Podman" }
 	@{ ShowInGUI = "Podman Desktop"; IsXamlId = "PodmanDesk"; IsOperation = "RedHat.Podman-Desktop" }
@@ -2154,11 +2200,11 @@ $toolList = @(
 	@{ ShowInGUI = "TCPView"; IsXamlId = "TcpviewId"; IsOperation = "tcpview" }
 	@{ ShowInGUI = "Fing Network Scanner"; IsXamlId = "FingId"; IsOperation = "fing" }
 	@{ ShowInGUI = "Ventoy"; IsXamlId = "VentoyId"; IsOperation = "ventoy" }
-	# @{ ShowInGUI = "balenaEtcher"; IsXamlId = "EtcherId"; IsOperation = "etcher" }
 	@{ ShowInGUI = "Rufus (portable)"; IsXamlId = "RufusId"; IsOperation = "rufus.portable" }
 	@{ ShowInGUI = "CPU-Z (portable)"; IsXamlId = "Cpu_zId"; IsOperation = "cpu-z.portable" }
 	@{ ShowInGUI = "GPU-Z (portable)"; IsXamlId = "Gpu_zId"; IsOperation = "gpu-z" }
-	@{ ShowInGUI = "HWMonitor"; IsXamlId = "HwmonitorId"; IsOperation = "hwmonitor" }
+	@{ ShowInGUI = "Core Temp"; IsXamlId = "CoreTempId"; IsOperation = "coretemp" }
+	@{ ShowInGUI = "HWMonitor (portable)"; IsXamlId = "HwmonitorId"; IsOperation = "hwmonitor.portable" }
 	@{ ShowInGUI = "HWINFO (portable)"; IsXamlId = "HwinfoId"; IsOperation = "hwinfo.portable" }
 	@{ ShowInGUI = "Hard Disk Sentinel"; IsXamlId = "HdsentinelId"; IsOperation = "hdsentinel" }
 	@{ ShowInGUI = "CrystalDiskInfo (portable)"; IsXamlId = "CrystaldiskinfoId"; IsOperation = "crystaldiskinfo.portable" }
@@ -2170,6 +2216,15 @@ $toolList = @(
 	@{ ShowInGUI = "Bulk Crap Uninstaller"; IsXamlId = "BulkcrapId"; IsOperation = "bulk-crap-uninstaller" }
 	@{ ShowInGUI = "Display Driver Uninstaller (DDU)"; IsXamlId = "DduId"; IsOperation = "ddu" }
 	@{ ShowInGUI = "Android SDK Platform Tools (ADB)"; IsXamlId = "AdbId"; IsOperation = "adb" }
+	<#
+	
+	APPS SCOPP
+	@{ ShowInGUI = "composer"; IsXamlId = "composerId"; IsOperation = "composer" }
+	@{ ShowInGUI = "Cartero Client"; IsXamlId = "carteroId"; IsOperation = "cartero" }
+	@{ ShowInGUI = "LDPlayer"; IsXamlId = "ldplayerId"; IsOperation = "ldplayer" }
+	@{ ShowInGUI = "RPCS3 Emulator"; IsXamlId = "rpcs3Id"; IsOperation = "rpcs3" }
+	
+	#>
 )
 
 function Install_AppPkg_AppDev_Tool ($mainContent) {
